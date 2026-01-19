@@ -39,6 +39,8 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  FolderTree,
+  Tags,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -254,10 +256,20 @@ export default function AdminDashboard() {
                 Admin Dashboard
               </h1>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/categories')}>
+                <FolderTree className="w-4 h-4 mr-2" />
+                Categories
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/tags')}>
+                <Tags className="w-4 h-4 mr-2" />
+                Tags
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>

@@ -33,6 +33,7 @@ import {
   LogOut,
   LayoutDashboard,
   FolderTree,
+  Tags,
   Plus,
   Pencil,
   Trash2,
@@ -276,6 +277,10 @@ export default function AdminCategories() {
               <Button variant="outline" size="sm" onClick={() => navigate('/admin/dashboard')}>
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 Dashboard
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/tags')}>
+                <Tags className="w-4 h-4 mr-2" />
+                Tags
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />

@@ -63,6 +63,7 @@ export interface Tag {
   id: number
   name: string
   created_at: string
+  item_count?: number
 }
 
 export interface Category {
@@ -164,6 +165,12 @@ export const api = {
 
   createTag: (data: { name: string }) =>
     apiClient.post<APIResponse<Tag>>('/api/tags', data),
+
+  updateTag: (id: number, data: { name: string }) =>
+    apiClient.put<APIResponse<Tag>>(`/api/tags/${id}`, data),
+
+  deleteTag: (id: number) =>
+    apiClient.delete<APIResponse<null>>(`/api/tags/${id}`),
 
   // Auth
   validateToken: (token: string) =>

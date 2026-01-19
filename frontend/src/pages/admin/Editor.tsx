@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -301,7 +302,7 @@ export default function AdminEditor() {
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => updateField('description', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateField('description', e.target.value)}
               placeholder="Provide a brief description of this item"
               rows={3}
               className={cn(errors.description && 'border-destructive')}

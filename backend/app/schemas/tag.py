@@ -8,6 +8,12 @@ class TagCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
 
 
+class TagUpdate(BaseModel):
+    """Schema for updating a tag."""
+
+    name: str = Field(..., min_length=1, max_length=50)
+
+
 class TagResponse(BaseModel):
     """Tag response schema."""
 
@@ -16,3 +22,9 @@ class TagResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class TagWithItemCount(TagResponse):
+    """Tag response with item count."""
+
+    item_count: int
