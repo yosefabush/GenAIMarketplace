@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -12,9 +11,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TagInput } from '@/components/TagInput'
+import { MarkdownEditor } from '@/components/MarkdownEditor'
+import { clearMarkdownDraft } from '@/lib/markdown-draft'
 import { api, type Category, type Item } from '@/lib/api'
 import { useToast } from '@/hooks/useToast'
-import { ArrowLeft, LayoutDashboard, Loader2, Save } from 'lucide-react'
+import { ArrowLeft, LayoutDashboard, Loader2, Save, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Content types
@@ -54,6 +55,11 @@ export default function AdminEditor() {
 
   const itemId = parseItemId(id)
   const isEditing = itemId !== null
+
+  // Generate a unique draft key based on item ID or "new"
+  const draftKey = useMemo(() => {
+    return isEditing ? `editor-${itemId}` : 'editor-new'
+  }, [isEditing, itemId])
 
   // Form state
   const [formData, setFormData] = useState<FormData>({
@@ -205,6 +211,9 @@ export default function AdminEditor() {
           description: 'Item created successfully.',
         })
       }
+
+      // Clear the draft on successful save
+      clearMarkdownDraft(draftKey)
 
       navigate('/admin/dashboard')
     } catch (err) {
@@ -360,19 +369,20 @@ export default function AdminEditor() {
             onTagsChange={(tagIds) => updateField('tag_ids', tagIds)}
           />
 
-          {/* Content - Basic textarea for now (US-020 will add markdown editor) */}
+          {/* Content - Markdown editor with split-pane preview */}
           <div className="space-y-2">
-            <Label htmlFor="content">Content (Markdown)</Label>
-            <Textarea
-              id="content"
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <Label>Content (Markdown)</Label>
+            </div>
+            <MarkdownEditor
               value={formData.content}
-              onChange={(e) => updateField('content', e.target.value)}
-              placeholder="Write your content using Markdown..."
-              rows={10}
-              className="font-mono text-sm"
+              onChange={(content) => updateField('content', content)}
+              draftKey={draftKey}
+              className="min-h-[500px]"
             />
             <p className="text-xs text-muted-foreground">
-              Supports Markdown formatting. Full editor with preview coming soon.
+              Use the toolbar to format text. Toggle between edit, split, and preview modes. Drafts auto-save every 30 seconds.
             </p>
           </div>
 
