@@ -318,3 +318,38 @@
   - Use cancelled flag pattern in useEffect cleanup to prevent setState on unmounted components
   - Pagination ellipsis logic: show first, last, and pages around current; use "ellipsis" sentinel value for rendering
   - Tag overflow pattern: show first N tags plus "+X" indicator for remaining
+
+---
+
+## 2026-01-20 - US-012: Search filters and sorting
+
+- What was implemented:
+  - TypeFilterCheckboxes component with checkboxes for agent/prompt/mcp/workflow/docs types
+  - CategoryDropdown component that fetches categories from API and allows single selection
+  - TagMultiSelect component with expandable tag list, checkboxes, and clear button
+  - SortDropdown component with Relevance/Newest/Most Viewed options
+  - FilterSidebar combining all filters with "Clear all" button when filters are active
+  - Updated Search page with sidebar layout (desktop: left sidebar, mobile: slide-out panel with overlay)
+  - Active filter pills showing current filters with X button to remove
+  - URL params for all filters: q, type (comma-separated), category, tags (comma-separated), sort, page
+  - Filters apply immediately when changed and reset to page 1
+  - Mobile-responsive design with filter toggle button showing active filter count
+
+- Files changed:
+  - frontend/src/components/ui/checkbox.tsx - Radix checkbox component
+  - frontend/src/components/ui/label.tsx - Radix label component
+  - frontend/src/components/ui/select.tsx - Radix select/dropdown component
+  - frontend/src/components/TypeFilterCheckboxes.tsx - Type filter with checkboxes
+  - frontend/src/components/CategoryDropdown.tsx - Category dropdown with API integration
+  - frontend/src/components/TagMultiSelect.tsx - Tag multi-select with expandable list
+  - frontend/src/components/SortDropdown.tsx - Sort options dropdown
+  - frontend/src/components/FilterSidebar.tsx - Combined filter sidebar component
+  - frontend/src/pages/Search.tsx - Integrated filters, sidebar layout, URL state management
+  - frontend/package.json - Added @radix-ui/react-checkbox, @radix-ui/react-select, @radix-ui/react-label
+
+- Learnings for future iterations:
+  - Radix Select doesn't support multi-select natively; use checkboxes for multi-select functionality
+  - Parse and build URL params with dedicated functions for cleaner code
+  - Use conditional undefined check (params.category !== undefined) when null is a valid value to distinguish from "not provided"
+  - Mobile slide-out sidebar pattern: fixed position, translate-x transform, overlay div for click-to-close
+  - Active filter pills improve UX by showing what filters are applied and allowing quick removal

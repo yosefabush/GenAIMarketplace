@@ -205,8 +205,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "FilterSidebar with TypeFilterCheckboxes, CategoryDropdown (loads from API), TagMultiSelect (with expand/collapse). SortDropdown with relevance/date/views options. URL params include q, type, category, tags, sort, page for shareable URLs. Mobile sidebar with slide-out panel and overlay. Active filters shown as removable pills."
     },
     {
       "id": "US-013",
