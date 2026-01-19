@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound"
 import AdminLogin from "./pages/admin/Login"
 import AdminDashboard from "./pages/admin/Dashboard"
 import AdminEditor from "./pages/admin/Editor"
+import AdminCategories from "./pages/admin/Categories"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 export const router = createBrowserRouter([
@@ -46,6 +47,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AdminEditor />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/categories",
+    element: (
+      <ProtectedRoute>
+        <AdminCategories />
       </ProtectedRoute>
     ),
   },

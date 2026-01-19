@@ -72,6 +72,7 @@ export interface Category {
   parent_id: number | null
   created_at: string
   updated_at: string
+  item_count?: number
 }
 
 export interface Item {
@@ -152,8 +153,14 @@ export const api = {
   deleteItem: (id: number) =>
     apiClient.delete<APIResponse<null>>(`/api/items/${id}`),
 
-  createCategory: (data: { name: string; slug: string; parent_id?: number }) =>
+  createCategory: (data: { name: string; slug: string; parent_id?: number | null }) =>
     apiClient.post<APIResponse<Category>>('/api/categories', data),
+
+  updateCategory: (id: number, data: { name?: string; slug?: string; parent_id?: number | null }) =>
+    apiClient.put<APIResponse<Category>>(`/api/categories/${id}`, data),
+
+  deleteCategory: (id: number) =>
+    apiClient.delete<APIResponse<null>>(`/api/categories/${id}`),
 
   createTag: (data: { name: string }) =>
     apiClient.post<APIResponse<Tag>>('/api/tags', data),
