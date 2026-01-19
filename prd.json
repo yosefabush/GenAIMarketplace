@@ -106,8 +106,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Search router at /api/search with FTS5 relevance ranking, type/category/tag filters, pagination (page-based), and sort options. Fixed tag filtering to use proper SQLAlchemy or_() with ilike()."
     },
     {
       "id": "US-007",

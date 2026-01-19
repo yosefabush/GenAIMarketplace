@@ -149,3 +149,27 @@
   - Quote each search term to treat as literal and escape FTS5 special characters (" * ^ : ( ) { } -)
   - When reloading an ORM object after commit, use a new variable name to satisfy mypy strict mode
   - Python location on this Windows system: C:\Users\Yosefg\AppData\Local\Programs\Python\Python311\python.exe
+
+---
+
+## 2026-01-19 - US-006: Search API endpoint
+
+- What was implemented:
+  - GET /api/search endpoint with query parameter 'q' for full-text search
+  - Type filtering: ?type=agent,prompt (comma-separated values)
+  - Category filtering: ?category=1,2 (comma-separated category IDs)
+  - Tag filtering: ?tags=python,testing (comma-separated tag names with case-insensitive matching)
+  - Sort options: relevance (default, uses FTS5 BM25), date, views
+  - Page-based pagination: ?page=1&limit=20 (default limit=20, max=100)
+  - SearchResponse schema with total count, page, and limit metadata
+  - Empty query returns all items sorted by date descending
+  - Fixed bug: replaced non-existent ilike_any() with proper or_() + ilike() pattern
+
+- Files changed:
+  - backend/app/routers/search.py - Fixed tag filtering SQLAlchemy query
+
+- Learnings for future iterations:
+  - SQLAlchemy does NOT have an ilike_any() method - use or_(*[col.ilike(pattern) for pattern in patterns])
+  - Import or_ from sqlalchemy for combining multiple conditions
+  - Always test that methods actually exist before using them in code
+  - Run typecheck (mypy) to verify code compiles - it may not catch runtime method errors on dynamic ORM objects
