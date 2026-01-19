@@ -237,3 +237,31 @@
   - React Router v6 uses createBrowserRouter() with RouterProvider component
   - Shadcn/ui works with Tailwind v4 but needs manual component setup (no shadcn add command for v4 yet)
   - Always install @radix-ui/react-slot for Button asChild prop support
+
+---
+
+## 2026-01-19 - US-009: Home page layout and search bar
+
+- What was implemented:
+  - Homepage with centered hero section and prominent search bar
+  - SearchBar component with search icon, large input, and Enter key support
+  - TypeFilterChips component with quick filter buttons (All, Agents, Prompts, MCPs, Workflows, Docs)
+  - Input UI component following shadcn/ui patterns
+  - Search page with sticky header and URL-based state management
+  - Responsive layout using Tailwind breakpoints (sm/md) for mobile, tablet, desktop
+  - Navigation from home to search page with query parameters
+
+- Files changed:
+  - frontend/src/components/SearchBar.tsx - Search input with icon and placeholder
+  - frontend/src/components/TypeFilterChips.tsx - Filter chip buttons with toggle states
+  - frontend/src/components/ui/input.tsx - Base Input component for forms
+  - frontend/src/pages/Home.tsx - Updated homepage with hero section, search bar, type chips
+  - frontend/src/pages/Search.tsx - New search page with URL state management
+  - frontend/src/router.tsx - Added /search route
+
+- Learnings for future iterations:
+  - Use key prop pattern to reset component state when URL params change (avoids useEffect setState anti-pattern)
+  - ESLint react-hooks/set-state-in-effect rule prevents calling setState in useEffect - use key-based remount instead
+  - Empty interface extends triggers @typescript-eslint/no-empty-object-type - use type alias instead
+  - Tailwind v4 responsive classes work same as v3 (sm:, md:, lg: prefixes)
+  - URLSearchParams.toString() returns empty string when no params, good for conditional navigation
