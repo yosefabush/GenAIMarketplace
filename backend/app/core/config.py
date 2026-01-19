@@ -4,7 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
-    DATABASE_URL: str = "sqlite:///./marketplace.db"
+    #DATABASE_URL: str = "sqlite:///./marketplace.db"
+    DATABASE_URL: str = "sqlite:///./data/marketplace.db"
+
     ADMIN_TOKEN: str = "changeme"
     PORT: int = 8000
 

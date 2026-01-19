@@ -106,8 +106,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Search router at /api/search with FTS5 relevance ranking, type/category/tag filters, pagination (page-based), and sort options. Fixed tag filtering to use proper SQLAlchemy or_() with ilike()."
     },
     {
       "id": "US-007",
@@ -121,8 +121,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SearchLoggingService uses background threads for async logging. All search paths (success and failure) log queries with result counts."
     },
     {
       "id": "US-008",
@@ -139,8 +139,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "React 18 + TypeScript with Vite, Tailwind v4 with @tailwindcss/vite plugin, shadcn/ui components with components.json, React Router v6 with RouterProvider, Axios API client with env var VITE_API_BASE_URL"
     },
     {
       "id": "US-009",
@@ -156,8 +156,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Homepage with centered search bar, SearchBar and TypeFilterChips components, responsive layout using Tailwind breakpoints (sm/md), Search page with URL-based state management"
     },
     {
       "id": "US-010",
@@ -172,8 +172,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RecentAdditions component fetches 5 most recent items via GET /api/items. FeaturedItems component fetches popular items via search API sorted by views. ItemCard shows title, type badge, and description preview. Items link to /items/:id route."
     },
     {
       "id": "US-011",
@@ -189,8 +189,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SearchResultCard component with title, type badge, description, category, tags (up to 3 with +N overflow), and view count. Pagination component with page numbers, ellipsis for large page ranges, and prev/next buttons. Search page fetches from /api/search with loading spinner, error state, and empty state. URL params include page for shareable pagination."
     },
     {
       "id": "US-012",
