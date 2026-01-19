@@ -2,6 +2,8 @@ import { useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { SearchBar } from "@/components/SearchBar"
 import { TypeFilterChips, type ContentType } from "@/components/TypeFilterChips"
+import { RecentAdditions } from "@/components/RecentAdditions"
+import { FeaturedItems } from "@/components/FeaturedItems"
 import { Sparkles } from "lucide-react"
 
 export default function Home() {
@@ -76,45 +78,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Stats or Quick Info Section */}
-      <div className="border-t border-border bg-secondary/30 py-8 sm:py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-4 sm:gap-8">
-            <div>
-              <div className="text-2xl font-bold text-foreground sm:text-3xl">
-                200+
-              </div>
-              <div className="text-sm text-muted-foreground sm:text-base">
-                Developers
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-foreground sm:text-3xl">
-                Agents
-              </div>
-              <div className="text-sm text-muted-foreground sm:text-base">
-                AI Assistants
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-foreground sm:text-3xl">
-                Prompts
-              </div>
-              <div className="text-sm text-muted-foreground sm:text-base">
-                Templates
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-foreground sm:text-3xl">
-                MCPs
-              </div>
-              <div className="text-sm text-muted-foreground sm:text-base">
-                Integrations
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Featured Items Section */}
+      <FeaturedItems />
+
+      {/* Recent Additions Section */}
+      <RecentAdditions />
     </div>
   )
 }
