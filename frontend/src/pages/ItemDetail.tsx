@@ -2,8 +2,10 @@ import { useState, useEffect } from "react"
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Eye, Calendar, Tag, Folder, Clock } from "lucide-react"
 import ReactMarkdown from "react-markdown"
+import type { Components } from "react-markdown"
 import { api, type Item } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { CodeBlock, InlineCode } from "@/components/CodeBlock"
 
 const typeColors: Record<string, string> = {
   agent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -41,6 +43,28 @@ function parseItemId(id: string | undefined): number | null {
   if (!id) return null
   const parsed = parseInt(id, 10)
   return isNaN(parsed) ? null : parsed
+}
+
+// Custom components for ReactMarkdown with syntax highlighting
+const markdownComponents: Components = {
+  code({ className, children, ...props }) {
+    // Check if this is a code block (has language class) or inline code
+    const match = /language-(\w+)/.exec(className || "")
+    const isCodeBlock = match || (typeof children === "string" && children.includes("\n"))
+
+    if (isCodeBlock) {
+      const language = match ? match[1] : undefined
+      const codeString = String(children).replace(/\n$/, "")
+      return <CodeBlock language={language}>{codeString}</CodeBlock>
+    }
+
+    // Inline code
+    return <InlineCode {...props}>{children}</InlineCode>
+  },
+  pre({ children }) {
+    // Render pre content directly (CodeBlock handles its own styling)
+    return <>{children}</>
+  },
 }
 
 function NotFoundPage() {
@@ -261,8 +285,10 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
 
           {/* Markdown Content */}
           <div className="p-6">
-            <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-muted prose-pre:border prose-pre:border-border">
-              <ReactMarkdown>{item.content}</ReactMarkdown>
+            <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
+              <ReactMarkdown components={markdownComponents}>
+                {item.content}
+              </ReactMarkdown>
             </div>
           </div>
         </article>
