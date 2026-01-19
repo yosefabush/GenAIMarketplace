@@ -3,7 +3,7 @@
 from typing import Literal
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import case
+from sqlalchemy import case, or_
 
 from app.core.database import get_db
 from app.models import Item, Tag
@@ -95,12 +95,9 @@ def search(
             query = query.filter(Item.category_id.in_(category_filters))
 
         if tag_filters:
-            # Find tag IDs by name (case-insensitive)
-            tag_objs = (
-                db.query(Tag)
-                .filter(Tag.name.ilike_any([f"%{t}%" for t in tag_filters]))
-                .all()
-            )
+            # Find tag IDs by name (case-insensitive using OR with ILIKE)
+            tag_conditions = [Tag.name.ilike(f"%{t}%") for t in tag_filters]
+            tag_objs = db.query(Tag).filter(or_(*tag_conditions)).all()
             if tag_objs:
                 tag_ids = [t.id for t in tag_objs]
                 query = query.filter(Item.tags.any(Tag.id.in_(tag_ids)))
