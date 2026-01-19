@@ -19,8 +19,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented with SQLAlchemy 2.0 ORM using Mapped type annotations"
     },
     {
       "id": "US-002",
@@ -37,8 +37,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented with FastAPI routers, Pydantic schemas for consistent JSON responses, and pagination support"
     },
     {
       "id": "US-003",

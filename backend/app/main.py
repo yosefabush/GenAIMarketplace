@@ -2,12 +2,18 @@ from fastapi import FastAPI
 from app.core.config import settings
 from app.core.database import engine
 from app.models.base import Base
+from app.routers import items_router, categories_router, tags_router
 
 app = FastAPI(
     title="GenAI Marketplace",
     description="Internal AI capabilities platform for developers",
     version="0.1.0",
 )
+
+# Register routers
+app.include_router(items_router)
+app.include_router(categories_router)
+app.include_router(tags_router)
 
 
 @app.on_event("startup")
