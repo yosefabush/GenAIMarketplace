@@ -495,3 +495,36 @@
   - Tag overflow pattern: show first N items plus "+M" count for remaining
   - Create placeholder pages early to ensure navigation links work before full implementation
   - formatDate helper for consistent date formatting across the app
+
+---
+
+## 2026-01-20 - US-018: Admin dashboard search and delete
+
+- What was implemented:
+  - Search input that filters table by item title (client-side filtering with useMemo)
+  - Type filter dropdown using Radix Select with All/Agent/Prompt/MCP/Workflow/Docs options
+  - Sortable columns with clickable headers for Title, Type, Views, and Updated
+  - Sort icons showing current state (ArrowUp/ArrowDown/ArrowUpDown from lucide-react)
+  - Delete button on each row with Trash2 icon and destructive styling
+  - Radix Dialog confirmation modal before deletion with Cancel/Delete buttons
+  - Radix Toast notifications for success/error feedback with success/destructive variants
+  - Toaster provider component added to main.tsx for global toast rendering
+  - useToast hook for toast state management across the app
+  - Client-side filtering/sorting with pagination for responsive UX
+
+- Files changed:
+  - frontend/src/components/ui/dialog.tsx - New Radix Dialog component with shadcn/ui styling
+  - frontend/src/components/ui/toast.tsx - New Radix Toast component with variants
+  - frontend/src/components/ui/toaster.tsx - Toaster provider component
+  - frontend/src/hooks/useToast.ts - Toast state management hook
+  - frontend/src/pages/admin/Dashboard.tsx - Updated with search, filter, sort, delete functionality
+  - frontend/src/main.tsx - Added Toaster provider
+  - frontend/package.json - Added @radix-ui/react-dialog and @radix-ui/react-toast
+
+- Learnings for future iterations:
+  - Client-side filtering with useMemo provides instant feedback vs server roundtrips
+  - Radix Dialog needs DialogPortal for proper z-index stacking
+  - Toast state management uses a reducer pattern with global listeners array
+  - ESLint complains about const objects only used as types - inline the type definition instead
+  - Sort toggle pattern: same field toggles direction, new field uses sensible default (asc for text, desc for dates/numbers)
+  - Delete confirmation should show item name and be clear about irreversibility
