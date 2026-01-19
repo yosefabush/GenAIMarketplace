@@ -382,8 +382,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 22,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Tags management page at /admin/tags with full CRUD operations. Backend: PUT/DELETE endpoints added to tags router with item_count in list response. Frontend: Tags.tsx with table view, inline add form for creating tags, confirmation modal with warning when tag has items."
     },
     {
       "id": "US-023",

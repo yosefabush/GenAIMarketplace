@@ -618,3 +618,32 @@
   - Filter out current category from parent dropdown to prevent self-reference
   - Use inline form pattern (show/hide) instead of separate page for simpler CRUD operations
   - Pydantic pattern for updating fields: check if field is not None before assigning to allow partial updates
+
+---
+
+## 2026-01-20 - US-022: Tag management page
+
+- What was implemented:
+  - Tags management page at /admin/tags protected route
+  - Table view showing name, item count, created date, and delete action
+  - Inline form for adding new tags with name field (unique, max 50 characters)
+  - Confirmation modal before deletion with warning if tag is used by items
+  - PUT /api/tags/{id} endpoint for updating tags (admin only)
+  - DELETE /api/tags/{id} endpoint for deleting tags (admin only)
+  - TagWithItemCount schema returns item_count in list response
+  - TagUpdate schema for update operations
+  - Navigation links between dashboard, categories, and tags pages
+  - Toast notifications for success/error feedback
+
+- Files changed:
+  - backend/app/routers/tags.py - Added PUT and DELETE endpoints, TagWithItemCount in list response
+  - backend/app/schemas/tag.py - Added TagUpdate and TagWithItemCount schemas
+  - frontend/src/lib/api.ts - Added updateTag() and deleteTag() API methods, item_count to Tag interface
+  - frontend/src/pages/admin/Tags.tsx - New tag management page with create/delete functionality
+  - frontend/src/router.tsx - Added /admin/tags protected route
+
+- Learnings for future iterations:
+  - Tags are simpler than categories (no slug, no hierarchy) so edit functionality was omitted per acceptance criteria
+  - Reuse the same patterns from Categories page: inline form, confirmation modal, toast notifications
+  - Use consistent UI between management pages for better admin UX
+  - item_count in list response enables warning when deleting tags that are in use
