@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.core.config import settings
 from app.core.database import engine
 from app.models.base import Base
-from app.routers import items_router, categories_router, tags_router, search_router
+from app.routers import items_router, categories_router, tags_router, search_router, auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -16,6 +16,7 @@ app.include_router(items_router)
 app.include_router(categories_router)
 app.include_router(tags_router)
 app.include_router(search_router)
+app.include_router(auth_router)
 
 app.add_middleware(
     CORSMiddleware,

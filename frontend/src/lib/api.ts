@@ -157,6 +157,10 @@ export const api = {
 
   createTag: (data: { name: string }) =>
     apiClient.post<APIResponse<Tag>>('/api/tags', data),
+
+  // Auth
+  validateToken: (token: string) =>
+    apiClient.post<{ success: boolean; valid: boolean; message: string }>('/api/auth/validate', { token }),
 }
 
 export default apiClient

@@ -3,6 +3,9 @@ import Home from "./pages/Home"
 import Search from "./pages/Search"
 import ItemDetail from "./pages/ItemDetail"
 import NotFound from "./pages/NotFound"
+import AdminLogin from "./pages/admin/Login"
+import AdminDashboard from "./pages/admin/Dashboard"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +19,18 @@ export const router = createBrowserRouter([
   {
     path: "/items/:id",
     element: <ItemDetail />,
+  },
+  {
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
+  {
+    path: "/admin/dashboard",
+    element: (
+      <ProtectedRoute>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "*",
