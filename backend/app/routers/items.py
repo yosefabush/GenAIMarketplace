@@ -95,16 +95,17 @@ def create_item(
     db.refresh(item)
 
     # Reload with relationships
-    item = (
+    reloaded_item = (
         db.query(Item)
         .options(joinedload(Item.category), joinedload(Item.tags))
         .filter(Item.id == item.id)
         .first()
     )
+    assert reloaded_item is not None  # Item was just created
 
     return APIResponse(
         success=True,
-        data=ItemResponse.model_validate(item),
+        data=ItemResponse.model_validate(reloaded_item),
     )
 
 
@@ -142,16 +143,17 @@ def update_item(
     db.refresh(item)
 
     # Reload with relationships
-    item = (
+    reloaded_item = (
         db.query(Item)
         .options(joinedload(Item.category), joinedload(Item.tags))
         .filter(Item.id == item.id)
         .first()
     )
+    assert reloaded_item is not None  # Item was just updated
 
     return APIResponse(
         success=True,
-        data=ItemResponse.model_validate(item),
+        data=ItemResponse.model_validate(reloaded_item),
     )
 
 
