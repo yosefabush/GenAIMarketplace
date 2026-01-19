@@ -409,3 +409,28 @@
   - Custom pre component should just render children to avoid double wrapper
   - Use not-prose class on CodeBlock wrapper to prevent Tailwind typography prose styles from affecting code
   - navigator.clipboard.writeText() is async and requires try/catch for error handling
+
+---
+
+## 2026-01-20 - US-015: Related items and view tracking
+
+- What was implemented:
+  - POST /api/items/{id}/view endpoint to increment view_count for an item
+  - GET /api/items/{id}/related endpoint that finds items with same category_id OR shared tags
+  - Related items sorted by view_count (popularity) and limited to 5 by default
+  - RelatedItems component that fetches and displays related items as clickable cards
+  - View count increment in ItemDetail page using useRef to ensure single increment per mount
+  - Navigation state preserved when clicking related items (for back button context)
+
+- Files changed:
+  - backend/app/routers/items.py - Added view increment and related items endpoints
+  - frontend/src/lib/api.ts - Added incrementViewCount() and getRelatedItems() API methods
+  - frontend/src/components/RelatedItems.tsx - New component for related items section
+  - frontend/src/pages/ItemDetail.tsx - Integrated view tracking and RelatedItems component
+
+- Learnings for future iterations:
+  - Use useRef to track one-time operations (like view increment) that shouldn't repeat on re-render
+  - SQLAlchemy or_(*conditions) for combining multiple filter conditions with OR logic
+  - item_tags join table can be queried directly with db.query(item_tags.c.item_id).filter()
+  - Silent failures for non-critical operations (view count, related items) improve UX
+  - Pass currentPath to RelatedItems so navigation state preserves back context

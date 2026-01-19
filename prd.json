@@ -254,8 +254,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "POST /api/items/{id}/view increments view_count. GET /api/items/{id}/related returns items with same category_id or shared tags, sorted by view_count. RelatedItems component shows up to 5 items with title, type badge, and description. View increment uses useRef to track single increment per itemId mount."
     },
     {
       "id": "US-016",
