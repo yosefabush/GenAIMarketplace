@@ -222,8 +222,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ItemDetail page with ReactMarkdown rendering, complete metadata display (type badge, category, tags with search links, view count, created/updated dates), smart back navigation (uses location.state.from or falls back to home), NotFoundPage component for 404 handling, loading/error states with skeleton UI."
     },
     {
       "id": "US-014",

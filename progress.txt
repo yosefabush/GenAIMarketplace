@@ -353,3 +353,31 @@
   - Use conditional undefined check (params.category !== undefined) when null is a valid value to distinguish from "not provided"
   - Mobile slide-out sidebar pattern: fixed position, translate-x transform, overlay div for click-to-close
   - Active filter pills improve UX by showing what filters are applied and allowing quick removal
+
+---
+
+## 2026-01-20 - US-013: Item detail page with markdown
+
+- What was implemented:
+  - ItemDetail page at /items/:id route with full item display
+  - ReactMarkdown rendering for item.content field with prose styling
+  - Complete metadata display in header: type badge (color-coded), category name, view count, created date, last updated timestamp
+  - Tags displayed as clickable links to search page with tag filter applied
+  - Smart back navigation using location.state.from (preserves search context) with fallback to home
+  - NotFoundPage component for invalid/missing item IDs (404 handling)
+  - LoadingPage with skeleton UI animation during fetch
+  - ErrorPage for generic API errors
+  - parseItemId helper function for safe ID parsing with null fallback
+  - Refactored button.tsx to separate buttonVariants into button-variants.ts to fix react-refresh/only-export-components lint error
+
+- Files changed:
+  - frontend/src/pages/ItemDetail.tsx - Full item detail page with markdown, metadata, navigation, 404
+  - frontend/src/components/ui/button.tsx - Removed buttonVariants re-export
+  - frontend/src/components/ui/button-variants.ts - New file with buttonVariants cva definition
+
+- Learnings for future iterations:
+  - React Refresh requires files to only export components; extract non-component exports (like cva variants) to separate .ts files
+  - Use location.state.from pattern for contextual back navigation (preserves query params from referring page)
+  - Cancelled flag pattern in useEffect for async requests prevents setState on unmounted components
+  - Tailwind @tailwindcss/typography plugin provides prose classes for rendered markdown content
+  - parseItemId helper with parseInt validation and null fallback handles invalid route params gracefully
