@@ -5,6 +5,7 @@ import ItemDetail from "./pages/ItemDetail"
 import NotFound from "./pages/NotFound"
 import AdminLogin from "./pages/admin/Login"
 import AdminDashboard from "./pages/admin/Dashboard"
+import AdminEditor from "./pages/admin/Editor"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 export const router = createBrowserRouter([
@@ -29,6 +30,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AdminDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/editor",
+    element: (
+      <ProtectedRoute>
+        <AdminEditor />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/editor/:id",
+    element: (
+      <ProtectedRoute>
+        <AdminEditor />
       </ProtectedRoute>
     ),
   },
