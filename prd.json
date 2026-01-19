@@ -172,8 +172,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RecentAdditions component fetches 5 most recent items via GET /api/items. FeaturedItems component fetches popular items via search API sorted by views. ItemCard shows title, type badge, and description preview. Items link to /items/:id route."
     },
     {
       "id": "US-011",

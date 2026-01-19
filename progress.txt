@@ -265,3 +265,30 @@
   - Empty interface extends triggers @typescript-eslint/no-empty-object-type - use type alias instead
   - Tailwind v4 responsive classes work same as v3 (sm:, md:, lg: prefixes)
   - URLSearchParams.toString() returns empty string when no params, good for conditional navigation
+
+---
+
+## 2026-01-19 - US-010: Home page recent and featured sections
+
+- What was implemented:
+  - ItemCard reusable component with title, type badge (color-coded by type), and truncated description
+  - RecentAdditions section fetching 5 most recent items via GET /api/items (sorted by created_at desc)
+  - FeaturedItems section fetching popular items via search API sorted by views
+  - Loading states with skeleton placeholders and error handling
+  - Items link to /items/:id route for navigation to detail page
+  - Placeholder ItemDetail page created for route (full implementation in US-013)
+  - Responsive grid layout (1 col mobile, 2 col sm, 3 col lg, 5 col xl)
+
+- Files changed:
+  - frontend/src/components/ItemCard.tsx - Reusable card component for item previews
+  - frontend/src/components/RecentAdditions.tsx - Recent items section with API integration
+  - frontend/src/components/FeaturedItems.tsx - Featured/popular items section
+  - frontend/src/pages/Home.tsx - Integrated RecentAdditions and FeaturedItems sections
+  - frontend/src/pages/ItemDetail.tsx - Placeholder detail page for /items/:id route
+  - frontend/src/router.tsx - Added /items/:id route
+
+- Learnings for future iterations:
+  - Type badges can use a Record<string, string> for type-to-color mapping with fallback
+  - Tailwind's line-clamp-N utility works well for truncating text with ellipsis
+  - Featured items can use search API with sort=views as proxy for popularity when no dedicated "featured" field exists
+  - Create placeholder pages for routes early to avoid broken links
