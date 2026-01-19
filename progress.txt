@@ -588,3 +588,33 @@
   - Toolbar button actions should return both new text AND cursor position for seamless editing
   - Line numbers need matching line-height with textarea (leading-6 = 1.5rem = 24px)
   - requestAnimationFrame for setting cursor position after onChange to ensure DOM is updated
+
+---
+
+## 2026-01-20 - US-021: Category management page
+
+- What was implemented:
+  - Categories management page at /admin/categories protected route
+  - Table view showing name, slug, parent category, item count, updated date, and actions (edit/delete)
+  - Inline form for adding new categories and editing existing ones
+  - Auto-generated slug from name (lowercase, alphanumeric with hyphens)
+  - Parent category dropdown for creating hierarchical categories
+  - Confirmation modal before deletion with warning if category has items
+  - PUT /api/categories/{id} endpoint for updating categories (admin only)
+  - DELETE /api/categories/{id} endpoint for deleting categories (admin only)
+  - CategoryWithItemCount schema to return item_count in list response
+  - Navigation links between dashboard and categories page
+  - Toast notifications for success/error feedback
+
+- Files changed:
+  - backend/app/routers/categories.py - Added CategoryUpdate and CategoryWithItemCount schemas, PUT and DELETE endpoints, item_count in list response
+  - frontend/src/lib/api.ts - Added updateCategory() and deleteCategory() API methods, item_count to Category interface
+  - frontend/src/pages/admin/Categories.tsx - New category management page with full CRUD functionality
+  - frontend/src/router.tsx - Added /admin/categories protected route
+
+- Learnings for future iterations:
+  - Include item_count in category list response for UI warning when deleting categories with items
+  - Auto-generate slug from name but allow manual editing for flexibility
+  - Filter out current category from parent dropdown to prevent self-reference
+  - Use inline form pattern (show/hide) instead of separate page for simpler CRUD operations
+  - Pydantic pattern for updating fields: check if field is not None before assigning to allow partial updates

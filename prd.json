@@ -365,8 +365,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 21,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Categories management page at /admin/categories with full CRUD operations. Backend: PUT/DELETE endpoints added to categories router with item_count in list response. Frontend: Categories.tsx with table view, inline add/edit form with auto-generated slug, confirmation modal with warning when category has items."
     },
     {
       "id": "US-022",
