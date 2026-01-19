@@ -291,8 +291,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Table component with shadcn/ui styling. Fetches items via GET /api/items with pagination. Type badges color-coded. Tags show first 3 with +N overflow. Edit and Add New buttons navigate to /admin/editor routes. Placeholder Editor page for US-019."
     },
     {
       "id": "US-018",

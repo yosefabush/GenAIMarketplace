@@ -468,3 +468,30 @@
   - ESLint react-refresh/only-export-components requires React contexts to be in separate .ts files from provider components
   - Split AuthContext (context + type) into auth-context.ts, AuthProvider into AuthContext.tsx, useAuth into useAuth.ts
   - Token validation endpoint allows frontend to verify token before storing it locally
+
+---
+
+## 2026-01-20 - US-017: Admin dashboard table view
+
+- What was implemented:
+  - Admin dashboard table view at /admin/dashboard displaying all content items
+  - Shadcn/ui-style Table component (Table, TableHeader, TableBody, TableHead, TableRow, TableCell)
+  - Columns: Title, Type (color-coded badge), Category, Tags (with +N overflow), Views, Updated date, Actions
+  - Pagination component reused from search for large item lists
+  - "Add New Item" button navigating to /admin/editor
+  - Edit icon (Pencil) on each row navigating to /admin/editor/:id
+  - Loading state with spinner, error state with retry button, empty state message
+  - Placeholder Editor page for navigation targets (full implementation in US-019)
+
+- Files changed:
+  - frontend/src/components/ui/table.tsx - New Table UI component following shadcn/ui patterns
+  - frontend/src/pages/admin/Dashboard.tsx - Updated with table view, pagination, and navigation
+  - frontend/src/pages/admin/Editor.tsx - New placeholder editor page
+  - frontend/src/router.tsx - Added /admin/editor and /admin/editor/:id protected routes
+
+- Learnings for future iterations:
+  - Reuse existing Pagination component from search page for admin table pagination
+  - Type badge color mapping pattern (Record<string, string>) with fallback color for unknown types
+  - Tag overflow pattern: show first N items plus "+M" count for remaining
+  - Create placeholder pages early to ensure navigation links work before full implementation
+  - formatDate helper for consistent date formatting across the app
