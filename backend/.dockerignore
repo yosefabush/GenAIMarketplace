@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+
+# Database files (use volume instead)
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Type checking
+.mypy_cache/
+
+# Documentation (build docs separately if needed)
+docs/_build/
+
+# Git
+.git/
+.gitignore
+
+# Docker (don't need to copy these into the image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Development files
+*.md
+!README.md

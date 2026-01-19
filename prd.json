@@ -19,8 +19,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented with SQLAlchemy 2.0 ORM using Mapped type annotations"
     },
     {
       "id": "US-002",
@@ -37,8 +37,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented with FastAPI routers, Pydantic schemas for consistent JSON responses, and pagination support"
     },
     {
       "id": "US-003",
@@ -55,8 +55,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented HTTPBearer admin token validation, all CRUD endpoints for items/categories/tags with proper error handling"
     },
     {
       "id": "US-004",
@@ -72,8 +72,8 @@
         "Documentation for building and running container"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Multi-stage Dockerfile with python:3.11-slim, docker-compose.yml for easy deployment, SQLite volume persistence, health check, and DOCKER.md documentation"
     },
     {
       "id": "US-005",
@@ -87,8 +87,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "FTS5 virtual table (items_fts) with content table and triggers for INSERT/UPDATE/DELETE sync. SearchService with BM25 ranking in backend/app/services/search.py"
     },
     {
       "id": "US-006",

@@ -1,0 +1,151 @@
+## 2025-01-19 - US-001: Database schema and models
+
+- What was implemented:
+  - SQLite database configuration with SQLAlchemy 2.0 ORM
+  - Categories table with id, name, slug, parent_id (self-referential for hierarchy), created_at, updated_at
+  - Tags table with id, name (unique), created_at
+  - Items table with id, title, description, content (markdown), type, category_id, view_count, created_at, updated_at
+  - item_tags join table with item_id, tag_id (many-to-many relationship)
+  - search_logs table with id, query, result_count, source, created_at
+  - Alembic migration setup with initial schema migration
+  - FastAPI app structure with main.py and health endpoint
+
+- Files changed:
+  - backend/app/models/base.py - SQLAlchemy declarative base
+  - backend/app/models/category.py - Category model
+  - backend/app/models/tag.py - Tag model
+  - backend/app/models/item.py - Item model and item_tags join table
+  - backend/app/models/search_log.py - SearchLog model
+  - backend/app/models/__init__.py - Model exports
+  - backend/app/core/config.py - Pydantic settings
+  - backend/app/core/database.py - Database session management
+  - backend/app/main.py - FastAPI application
+  - backend/alembic/* - Alembic migration configuration
+  - backend/alembic/versions/001_initial_schema.py - Initial migration
+  - backend/pyproject.toml - Project configuration with mypy settings
+  - backend/requirements.txt - Python dependencies
+
+- Learnings for future iterations:
+  - Use SQLAlchemy 2.0 Mapped[] type annotations for full type safety
+  - Use TYPE_CHECKING imports to avoid circular dependencies between models
+  - Pydantic v2 uses model_config = SettingsConfigDict() instead of class Config
+  - SQLite requires check_same_thread=False for multi-threaded FastAPI access
+
+---
+
+## 2026-01-19 - US-002: Core API endpoints
+
+- What was implemented:
+  - Pydantic schemas for API responses (TagResponse, CategoryResponse, ItemResponse, ItemListResponse)
+  - Base response schemas (APIResponse, PaginatedResponse) with generic type support
+  - Items router with GET /api/items (paginated list) and GET /api/items/{id} (single item)
+  - Categories router with GET /api/categories (list all categories)
+  - Tags router with GET /api/tags (list all tags)
+  - All endpoints return consistent JSON format with success/data structure
+  - Router registration in main.py
+  - API documentation available at /docs
+
+- Files changed:
+  - backend/app/schemas/base.py - APIResponse and PaginatedResponse schemas
+  - backend/app/schemas/tag.py - TagResponse schema
+  - backend/app/schemas/category.py - CategoryResponse schema
+  - backend/app/schemas/item.py - ItemResponse and ItemListResponse schemas
+  - backend/app/schemas/__init__.py - Schema exports
+  - backend/app/routers/items.py - Items API router
+  - backend/app/routers/categories.py - Categories API router
+  - backend/app/routers/tags.py - Tags API router
+  - backend/app/routers/__init__.py - Router exports
+  - backend/app/main.py - Router registration
+  - backend/pyproject.toml - Updated mypy settings for third-party library compatibility
+
+- Learnings for future iterations:
+  - Pydantic v2 uses model_config = {"from_attributes": True} instead of orm_mode
+  - Use joinedload() from sqlalchemy.orm for eager loading relationships
+  - mypy strict mode with ignore_missing_imports still complains about subclassing third-party classes - need disallow_subclassing_any = false
+  - FastAPI decorators trigger untyped-decorator errors in strict mode - need disallow_untyped_decorators = false
+
+---
+
+## 2026-01-19 - US-003: Admin CRUD endpoints
+
+- What was implemented:
+  - Admin token validation middleware using HTTPBearer from fastapi.security
+  - POST /api/items - Create new item with title, description, content, type, category_id, tag_ids
+  - PUT /api/items/{id} - Update existing item (partial updates supported)
+  - DELETE /api/items/{id} - Delete item by ID
+  - POST /api/categories - Create category with name, slug, parent_id (optional)
+  - POST /api/tags - Create tag with unique name
+  - All admin endpoints return 401 Unauthorized without valid ADMIN_TOKEN in Bearer header
+  - Pydantic schemas for create/update operations (ItemCreate, ItemUpdate, CategoryCreate, TagCreate)
+  - Proper error handling for duplicate entries (IntegrityError) and invalid foreign keys
+
+- Files changed:
+  - backend/app/core/auth.py - Admin token verification using HTTPBearer
+  - backend/app/routers/items.py - Added POST, PUT, DELETE endpoints with admin auth
+  - backend/app/routers/categories.py - Added POST endpoint with admin auth
+  - backend/app/routers/tags.py - Added POST endpoint with admin auth
+  - backend/app/schemas/item.py - Added ItemCreate and ItemUpdate schemas
+  - backend/app/schemas/category.py - Added CategoryCreate schema
+  - backend/app/schemas/tag.py - Added TagCreate schema
+  - backend/app/schemas/__init__.py - Exported new schemas
+
+- Learnings for future iterations:
+  - Use HTTPBearer for token-based auth in FastAPI (cleaner than manual header parsing)
+  - Return underscore-prefixed variable `_: str = Depends(verify_admin_token)` when you need the dependency but not the return value
+  - IntegrityError from sqlalchemy.exc handles unique constraint violations
+  - Reload item with joinedload after commit to get fully populated relationships in response
+
+---
+
+## 2026-01-19 - US-004: Docker configuration
+
+- What was implemented:
+  - Multi-stage Dockerfile with build stage (gcc, wheel generation) and runtime stage (python:3.11-slim)
+  - Non-root user (appuser) for security best practices
+  - docker-compose.yml with named volume for SQLite persistence
+  - Environment variable configuration (ADMIN_TOKEN, PORT, DATABASE_URL)
+  - Health check using Python urllib to poll /health endpoint
+  - .dockerignore to exclude unnecessary files from build context
+  - DOCKER.md comprehensive documentation for building, running, and configuring the container
+
+- Files changed:
+  - backend/Dockerfile - Multi-stage build with health check
+  - backend/docker-compose.yml - Compose configuration with volume
+  - backend/.dockerignore - Build context exclusions
+  - backend/DOCKER.md - Deployment documentation
+
+- Learnings for future iterations:
+  - Use multi-stage builds to reduce final image size (builder stage for wheels, runtime stage for execution)
+  - Create non-root user in Dockerfile for security
+  - Use named volumes in docker-compose for data persistence
+  - Health check can use Python's urllib as an alternative to curl/wget in slim images
+  - .dockerignore should exclude .git, venv, __pycache__, and the Docker files themselves
+
+---
+
+## 2026-01-19 - US-005: SQLite FTS5 full-text search
+
+- What was implemented:
+  - FTS5 virtual table (items_fts) using external content table pattern for title, description, content fields
+  - INSERT trigger to keep FTS index in sync when items are added
+  - UPDATE trigger that deletes old entry and inserts new entry for modified items
+  - DELETE trigger to remove entries from FTS index when items are deleted
+  - SearchService class with BM25 ranking search method
+  - Query preparation with escaping for FTS5 special characters
+  - Support for multiple keywords (implicit AND with quoted terms)
+  - rebuild_index utility method for FTS index maintenance
+  - Fixed pre-existing type errors in items router (reloaded_item assignment)
+
+- Files changed:
+  - backend/alembic/versions/002_fts5_search.py - FTS5 virtual table and triggers migration
+  - backend/app/services/__init__.py - Services module initialization
+  - backend/app/services/search.py - SearchService with FTS5 search implementation
+  - backend/app/routers/items.py - Fixed type errors for mypy strict mode
+
+- Learnings for future iterations:
+  - FTS5 external content table (content='items', content_rowid='id') stores only index, not data
+  - FTS5 UPDATE requires delete of old entry then insert of new entry (no in-place update)
+  - BM25 function returns negative values, so ORDER BY bm25() ASC for best matches first
+  - Quote each search term to treat as literal and escape FTS5 special characters (" * ^ : ( ) { } -)
+  - When reloading an ORM object after commit, use a new variable name to satisfy mypy strict mode
+  - Python location on this Windows system: C:\Users\Yosefg\AppData\Local\Programs\Python\Python311\python.exe
