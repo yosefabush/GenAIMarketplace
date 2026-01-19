@@ -434,3 +434,37 @@
   - item_tags join table can be queried directly with db.query(item_tags.c.item_id).filter()
   - Silent failures for non-critical operations (view count, related items) improve UX
   - Pass currentPath to RelatedItems so navigation state preserves back context
+
+---
+
+## 2026-01-20 - US-016: Admin authentication
+
+- What was implemented:
+  - POST /api/auth/validate endpoint to validate admin token against ADMIN_TOKEN env var
+  - AuthContext with AuthProvider component for managing auth state
+  - Lazy useState initializer to load token from localStorage without useEffect (avoids ESLint react-hooks/set-state-in-effect)
+  - useAuth hook in separate file (avoids react-refresh/only-export-components lint error)
+  - ProtectedRoute component that redirects to /admin/login if not authenticated
+  - Admin login page at /admin/login with password input, error handling, and loading state
+  - Admin dashboard placeholder at /admin/dashboard with logout button
+  - Axios interceptor for Bearer token already existed in api.ts
+
+- Files changed:
+  - backend/app/routers/auth.py - New auth router with POST /api/auth/validate
+  - backend/app/routers/__init__.py - Export auth_router
+  - backend/app/main.py - Register auth_router
+  - frontend/src/contexts/auth-context.ts - AuthContext and AuthContextType (non-component file)
+  - frontend/src/contexts/AuthContext.tsx - AuthProvider component
+  - frontend/src/hooks/useAuth.ts - useAuth hook
+  - frontend/src/components/ProtectedRoute.tsx - Protected route wrapper component
+  - frontend/src/pages/admin/Login.tsx - Admin login page
+  - frontend/src/pages/admin/Dashboard.tsx - Admin dashboard placeholder
+  - frontend/src/lib/api.ts - Added validateToken API method
+  - frontend/src/main.tsx - Wrapped app with AuthProvider
+  - frontend/src/router.tsx - Added /admin/login and /admin/dashboard routes
+
+- Learnings for future iterations:
+  - ESLint react-hooks/set-state-in-effect prohibits setState in useEffect; use lazy initializer with useState(() => value)
+  - ESLint react-refresh/only-export-components requires React contexts to be in separate .ts files from provider components
+  - Split AuthContext (context + type) into auth-context.ts, AuthProvider into AuthContext.tsx, useAuth into useAuth.ts
+  - Token validation endpoint allows frontend to verify token before storing it locally
