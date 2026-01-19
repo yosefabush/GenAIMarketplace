@@ -7,6 +7,23 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Ensure UTF-8 console output so box characters render correctly
+[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding          = [System.Text.Encoding]::UTF8
+
+function Get-CurrentTask {
+    param([string]$PrdPath)
+    try {
+        if (-not (Test-Path $PrdPath)) { return $null }
+        $prdJson = Get-Content $PrdPath -Raw | ConvertFrom-Json
+        return $prdJson.userStories | Where-Object { -not $_.passes } | Sort-Object priority | Select-Object -First 1
+    } catch {
+        Write-Host "Warning: Unable to read current task from PRD: $($_.Exception.Message)"
+        return $null
+    }
+}
+
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PRD_FILE = Join-Path $SCRIPT_DIR "prd.json"
 $PROGRESS_FILE = Join-Path $SCRIPT_DIR "progress.txt"
@@ -77,13 +94,24 @@ Started: $(Get-Date)
 "@ | Set-Content $PROGRESS_FILE
 }
 
+($initialTask = Get-CurrentTask -PrdPath $PRD_FILE) | Out-Null
+if ($initialTask) {
+    Write-Host "Current task: $($initialTask.id) - $($initialTask.title)"
+} else {
+    Write-Host "Current task: none (all stories marked as passing)"
+}
+
 Write-Host "Starting Ralph - Max iterations: $MaxIterations"
 
 for ($i = 1; $i -le $MaxIterations; $i++) {
-    Write-Host ""
-    Write-Host "═══════════════════════════════════════════════════════"
-    Write-Host "  Ralph Iteration $i of $MaxIterations"
-    Write-Host "═══════════════════════════════════════════════════════"
+    $loopTask = Get-CurrentTask -PrdPath $PRD_FILE
+    if (-not $loopTask) {
+        Write-Host "Task: none (all stories marked as passing)"
+        exit 0
+    }
+    Write-Host "============================================================================="
+    Write-Host "  Ralph Iteration $i of $MaxIterations (Task: $($loopTask.id) - $($loopTask.title))"
+    Write-Host "  Coding..."
     
     # Run Claude with the ralph prompt
     $PROMPT_FILE = Join-Path $SCRIPT_DIR "prompt.md"
@@ -91,6 +119,8 @@ for ($i = 1; $i -le $MaxIterations; $i++) {
     
     try {
         $result = & claude --dangerously-skip-permissions --output-format text -p $PROMPT_TEXT 2>&1
+        #Write-Host $result
+        #Write-Host ""
     } catch {
         $result = $_.Exception.Message
     }
@@ -103,10 +133,10 @@ for ($i = 1; $i -le $MaxIterations; $i++) {
         exit 0
     }
     
-    Write-Host "Iteration $i complete. Continuing..."
+    Write-Host "  Iteration $i complet Task: $($loopTask.id). Continuing..."
     Start-Sleep -Seconds 2
 }
-
+Write-Host "============================================================================="
 Write-Host ""
 Write-Host "Ralph reached max iterations ($MaxIterations) without completing all tasks."
 Write-Host "Check $PROGRESS_FILE for status."
