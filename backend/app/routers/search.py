@@ -10,6 +10,7 @@ from app.models import Item, Tag
 from app.schemas import ItemListResponse
 from app.schemas.search import SearchResponse
 from app.services.search import SearchService
+from app.services.search_logging import SearchLoggingService
 
 router = APIRouter(prefix="/api/search", tags=["search"])
 
@@ -72,6 +73,8 @@ def search(
         item_ids, fts_total = SearchService.search(db, q)
 
         if not item_ids:
+            # Log failed search with 0 results
+            SearchLoggingService.log_search(query=q, result_count=0, source="web")
             return SearchResponse(
                 success=True,
                 data=[],
@@ -102,7 +105,8 @@ def search(
                 tag_ids = [t.id for t in tag_objs]
                 query = query.filter(Item.tags.any(Tag.id.in_(tag_ids)))
             else:
-                # No matching tags found, return empty results
+                # No matching tags found, log and return empty results
+                SearchLoggingService.log_search(query=q, result_count=0, source="web")
                 return SearchResponse(
                     success=True,
                     data=[],
@@ -135,6 +139,8 @@ def search(
             if item_ids:
                 query = query.filter(Item.id.in_(item_ids))
             else:
+                # Log failed search with 0 results
+                SearchLoggingService.log_search(query=q, result_count=0, source="web")
                 return SearchResponse(
                     success=True,
                     data=[],
@@ -160,6 +166,10 @@ def search(
             if matching_tag_ids:
                 query = query.filter(Item.tags.any(Tag.id.in_(matching_tag_ids)))
             else:
+                # Log search with 0 results due to tag filter
+                SearchLoggingService.log_search(
+                    query=q if q else "", result_count=0, source="web"
+                )
                 return SearchResponse(
                     success=True,
                     data=[],
@@ -181,6 +191,14 @@ def search(
             query = query.order_by(Item.created_at.desc())
 
         items = query.offset(offset).limit(limit).all()
+
+    # Log the search query asynchronously
+    # Log even empty queries to track usage patterns
+    SearchLoggingService.log_search(
+        query=q if q else "",
+        result_count=total,
+        source="web",
+    )
 
     return SearchResponse(
         success=True,
