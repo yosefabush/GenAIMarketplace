@@ -348,8 +348,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "MarkdownEditor component with split-pane view (resizable), toolbar with 11 formatting buttons (bold, italic, code, h1-h3, bullet list, numbered list, link, blockquote, horizontal rule), line numbers, view mode toggle (edit/split/preview), auto-save draft to localStorage every 30 seconds, draft restoration on mount if less than 24 hours old. Uses ReactMarkdown with syntax highlighting via CodeBlock component (same as ItemDetail). Keyboard shortcuts Ctrl+B (bold), Ctrl+I (italic), Tab (indent)."
     },
     {
       "id": "US-021",

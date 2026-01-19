@@ -556,3 +556,35 @@
   - Form validation can clear errors on field change using the field name to check if it's in errors object
   - Radix Select with "none" value can represent null for optional fields like category_id
   - Lazy loading states: use separate loading flags for initial data vs. submission actions
+
+---
+
+## 2026-01-20 - US-020: Content editor markdown editor
+
+- What was implemented:
+  - MarkdownEditor component with split-pane layout (markdown source left, preview right)
+  - Resizable split panes via drag handle with min/max constraints (20-80%)
+  - View mode toggle buttons: Edit only, Split view, Preview only
+  - Markdown toolbar with 11 formatting buttons: Bold, Italic, Code, H1, H2, H3, Bullet List, Numbered List, Link, Blockquote, Horizontal Rule
+  - Line numbers in editor pane with synchronized scrolling
+  - Monospace font for editing (ui-monospace, SFMono-Regular, etc.)
+  - Auto-save draft to localStorage every 30 seconds using draftKey
+  - Draft restoration on page mount if draft is less than 24 hours old
+  - Clear draft on successful form save
+  - Keyboard shortcuts: Ctrl+B (bold), Ctrl+I (italic), Tab (2-space indent)
+  - Preview renders with same ReactMarkdown + CodeBlock components as ItemDetail page
+  - Syntax highlighting works in preview via react-syntax-highlighter (Prism)
+
+- Files changed:
+  - frontend/src/components/MarkdownEditor.tsx - New split-pane markdown editor component
+  - frontend/src/lib/markdown-draft.ts - Draft storage utilities (clearMarkdownDraft, getMarkdownDraft, saveMarkdownDraft)
+  - frontend/src/pages/admin/Editor.tsx - Integrated MarkdownEditor, added draftKey generation, clear draft on save
+
+- Learnings for future iterations:
+  - ESLint react-hooks/refs rule prohibits reading ref.current during render - use state for values needed in render
+  - ESLint react-refresh/only-export-components requires non-component exports in separate files
+  - Split utility functions (like clearMarkdownDraft) into separate .ts files to avoid lint errors
+  - useRef is fine for tracking values that don't affect render (like lastSavedValue for comparison)
+  - Toolbar button actions should return both new text AND cursor position for seamless editing
+  - Line numbers need matching line-height with textarea (leading-6 = 1.5rem = 24px)
+  - requestAnimationFrame for setting cursor position after onChange to ensure DOM is updated
