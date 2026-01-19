@@ -105,6 +105,12 @@ export const api = {
   getItem: (id: number) =>
     apiClient.get<APIResponse<Item>>(`/api/items/${id}`),
 
+  incrementViewCount: (id: number) =>
+    apiClient.post<APIResponse<number>>(`/api/items/${id}/view`),
+
+  getRelatedItems: (id: number, limit?: number) =>
+    apiClient.get<APIResponse<Item[]>>(`/api/items/${id}/related`, { params: { limit } }),
+
   // Search
   search: (params: {
     q?: string

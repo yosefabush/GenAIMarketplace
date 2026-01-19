@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Eye, Calendar, Tag, Folder, Clock } from "lucide-react"
 import ReactMarkdown from "react-markdown"
@@ -6,6 +6,7 @@ import type { Components } from "react-markdown"
 import { api, type Item } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { CodeBlock, InlineCode } from "@/components/CodeBlock"
+import { RelatedItems } from "@/components/RelatedItems"
 
 const typeColors: Record<string, string> = {
   agent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -147,6 +148,7 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const viewCountIncrementedRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -179,6 +181,23 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
     return () => {
       cancelled = true
     }
+  }, [itemId])
+
+  // Increment view count on page load (once per itemId)
+  useEffect(() => {
+    if (viewCountIncrementedRef.current) return
+
+    async function incrementView() {
+      try {
+        await api.incrementViewCount(itemId)
+        viewCountIncrementedRef.current = true
+      } catch (err) {
+        // Silently fail - view count is not critical
+        console.error("Failed to increment view count:", err)
+      }
+    }
+
+    incrementView()
   }, [itemId])
 
   const handleBack = () => {
@@ -292,6 +311,9 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
             </div>
           </div>
         </article>
+
+        {/* Related Items Section */}
+        <RelatedItems itemId={itemId} currentPath={location.pathname + location.search} />
       </div>
     </div>
   )
