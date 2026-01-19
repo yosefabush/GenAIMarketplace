@@ -121,8 +121,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SearchLoggingService uses background threads for async logging. All search paths (success and failure) log queries with result counts."
     },
     {
       "id": "US-008",

@@ -173,3 +173,28 @@
   - Import or_ from sqlalchemy for combining multiple conditions
   - Always test that methods actually exist before using them in code
   - Run typecheck (mypy) to verify code compiles - it may not catch runtime method errors on dynamic ORM objects
+
+---
+
+## 2026-01-19 - US-007: Search logging
+
+- What was implemented:
+  - SearchLoggingService class with async logging using Python threading
+  - log_search() spawns daemon thread for non-blocking database writes
+  - _log_search_sync() handles actual database insert in background thread
+  - log_search_sync() available for synchronous logging (testing/special cases)
+  - All search paths in router log queries (success and failure cases)
+  - Failed searches logged with 0 result count as required
+  - Silent failure in logging (doesn't affect search functionality)
+
+- Files changed:
+  - backend/app/services/search_logging.py - New SearchLoggingService with async logging
+  - backend/app/services/__init__.py - Export SearchLoggingService
+  - backend/app/routers/search.py - Added logging calls to all return paths
+
+- Learnings for future iterations:
+  - Use threading.Thread with daemon=True for fire-and-forget background tasks
+  - Create new database session in background thread (don't share across threads)
+  - Silent failures in logging are appropriate - logging shouldn't break primary functionality
+  - Remember to log at ALL return points, not just the final success path
+  - SessionLocal can be imported and used directly for background thread sessions
