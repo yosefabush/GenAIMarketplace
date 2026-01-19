@@ -1,0 +1,600 @@
+{
+  "project": "GenAI Marketplace",
+  "branchName": "ralph/genai-marketplace",
+  "description": "Internal AI capabilities platform for 200 developers to discover and share agents, prompts, MCPs, and workflows with keyword search, markdown rendering, and admin content management",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Database schema and models",
+      "description": "As a developer, I need a database schema to store marketplace content so data persists across sessions.",
+      "acceptanceCriteria": [
+        "SQLite database created with SQLAlchemy ORM",
+        "Items table: id, title, description, content (markdown), type, category_id, view_count, created_at, updated_at",
+        "Categories table: id, name, slug, parent_id (nullable)",
+        "Tags table: id, name (unique)",
+        "item_tags join table: item_id, tag_id",
+        "search_logs table: id, query, result_count, source, created_at",
+        "Foreign key constraints properly defined",
+        "Migrations work successfully",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Core API endpoints",
+      "description": "As a developer, I need REST API endpoints to interact with marketplace data.",
+      "acceptanceCriteria": [
+        "FastAPI project structure with routers folder",
+        "GET /api/items - list items with pagination (limit, offset)",
+        "GET /api/items/{id} - get single item by ID",
+        "GET /api/categories - list all categories",
+        "GET /api/tags - list all tags",
+        "All endpoints return consistent JSON format with success/error structure",
+        "API documentation auto-generated at /docs",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Admin CRUD endpoints",
+      "description": "As an admin, I need endpoints to create, update, and delete content.",
+      "acceptanceCriteria": [
+        "POST /api/items - create new item (admin only)",
+        "PUT /api/items/{id} - update item (admin only)",
+        "DELETE /api/items/{id} - delete item (admin only)",
+        "POST /api/categories - create category (admin only)",
+        "POST /api/tags - create tag (admin only)",
+        "Admin token validation middleware",
+        "Returns 401 Unauthorized without valid ADMIN_TOKEN",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Docker configuration",
+      "description": "As a DevOps engineer, I need a Docker container to deploy the application easily.",
+      "acceptanceCriteria": [
+        "Dockerfile builds successfully",
+        "Multi-stage build (build + runtime)",
+        "SQLite database persisted via volume mount",
+        "Environment variables for configuration (ADMIN_TOKEN, PORT)",
+        "Health check endpoint at /health",
+        "Container runs and serves API on specified port",
+        "Documentation for building and running container"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "SQLite FTS5 full-text search",
+      "description": "As a user, I need to search content by keywords so I can find relevant items quickly.",
+      "acceptanceCriteria": [
+        "FTS5 virtual table created for items (title, description, content)",
+        "Triggers to keep FTS table in sync with items table on INSERT/UPDATE/DELETE",
+        "Search supports multiple keywords",
+        "Search ranks by relevance (BM25)",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Search API endpoint",
+      "description": "As a user, I need a search endpoint that supports filtering and sorting.",
+      "acceptanceCriteria": [
+        "GET /api/search with query parameter 'q'",
+        "Filter by type: ?type=agent,prompt (comma-separated)",
+        "Filter by category: ?category=uuid1,uuid2",
+        "Filter by tags: ?tags=python,testing",
+        "Sort options: relevance (default), date, views",
+        "Pagination: ?page=1&limit=20 (default limit=20, max=100)",
+        "Response includes total count, page, limit metadata",
+        "Empty query returns all items sorted by date",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Search logging",
+      "description": "As an admin, I need to track search queries to understand usage patterns.",
+      "acceptanceCriteria": [
+        "Every search query logged to search_logs table",
+        "Log includes: query text, result count, source (web), timestamp",
+        "Logging happens asynchronously (doesn't slow search)",
+        "Failed searches are logged with 0 result count",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "React project setup",
+      "description": "As a developer, I need a React frontend to build the user interface.",
+      "acceptanceCriteria": [
+        "React 18 + TypeScript project initialized with Vite",
+        "Shadcn/ui installed and configured",
+        "Tailwind CSS configured with theme",
+        "React Router for navigation",
+        "Axios or fetch wrapper for API calls",
+        "Environment variable for API base URL",
+        "Dev server runs successfully",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Home page layout and search bar",
+      "description": "As a user, I want a home page with a prominent search bar to find AI capabilities.",
+      "acceptanceCriteria": [
+        "Homepage layout with centered search bar",
+        "Search input with placeholder: 'Search for AI capabilities...'",
+        "Quick filter chips for content types (All, Agents, Prompts, MCPs, Workflows, Docs)",
+        "Clicking type chip triggers search with filter",
+        "Responsive layout (mobile, tablet, desktop)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Home page recent and featured sections",
+      "description": "As a user, I want to see recent additions and featured content on the homepage.",
+      "acceptanceCriteria": [
+        "Recent additions section showing 5 most recent items",
+        "Featured section showing pinned/popular items",
+        "Each item shows title, type badge, and description preview",
+        "Clicking item navigates to detail page",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Search results display",
+      "description": "As a user, I want to see search results as cards with pagination.",
+      "acceptanceCriteria": [
+        "Search results display as card list",
+        "Each card shows: title, type badge, description preview, category, tags, view count",
+        "Pagination controls at bottom",
+        "Shows 'No results found' message when empty",
+        "Loading state while fetching results",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Search filters and sorting",
+      "description": "As a user, I want to filter and sort search results.",
+      "acceptanceCriteria": [
+        "Filter sidebar with: Type checkboxes, Category dropdown, Tag multi-select",
+        "Sort dropdown: Relevance, Newest, Most Viewed",
+        "URL params update with search and filters (shareable URLs)",
+        "Filters apply immediately when changed",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Item detail page with markdown",
+      "description": "As a user, I want to view full item content with markdown rendering.",
+      "acceptanceCriteria": [
+        "Item detail page at /items/{id}",
+        "Markdown content rendered with react-markdown or similar",
+        "Metadata displayed: type, category, tags, view count, last updated",
+        "Back navigation to search results",
+        "404 page for invalid item IDs",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Syntax highlighting and copy buttons",
+      "description": "As a user, I want syntax-highlighted code blocks with copy functionality.",
+      "acceptanceCriteria": [
+        "Syntax highlighting for code blocks (use Prism.js or highlight.js)",
+        "Support languages: Python, JavaScript, TypeScript, JSON, Bash, SQL, YAML, Go, Rust, Java",
+        "Copy button on every code block with visual feedback ('Copied!')",
+        "Copy button positions at top-right of code block",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Related items and view tracking",
+      "description": "As a user, I want to see related items and have views tracked.",
+      "acceptanceCriteria": [
+        "Related items section (same category or tags)",
+        "Shows 3-5 related items with title and type",
+        "Increments view_count on page load",
+        "Related items clickable to navigate",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Admin authentication",
+      "description": "As an admin, I need to authenticate to access content management features.",
+      "acceptanceCriteria": [
+        "Login page at /admin/login",
+        "Token input field (password type)",
+        "'Login' button sends token to backend for validation",
+        "Token stored in localStorage on successful login",
+        "Axios interceptor adds token to all admin API requests (Authorization: Bearer {token})",
+        "Redirect to /admin/dashboard on success",
+        "Show error message on invalid token",
+        "'Logout' clears localStorage and redirects to home",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Admin dashboard table view",
+      "description": "As an admin, I need a dashboard to view all content items.",
+      "acceptanceCriteria": [
+        "Admin dashboard at /admin/dashboard (protected route)",
+        "Table view of all items with columns: Title, Type, Category, Tags, Views, Updated",
+        "Pagination for large item lists",
+        "'Add New Item' button navigates to editor",
+        "Edit icon on each row navigates to editor",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Admin dashboard search and delete",
+      "description": "As an admin, I need to search items and delete content from the dashboard.",
+      "acceptanceCriteria": [
+        "Search box filters table by title",
+        "Filter by type dropdown",
+        "Sort columns clickable",
+        "Delete icon shows confirmation modal before deletion",
+        "Shows success/error toast notifications",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Content editor basic form",
+      "description": "As an admin, I need a form to create and edit content items.",
+      "acceptanceCriteria": [
+        "Editor page at /admin/editor (new) and /admin/editor/{id} (edit)",
+        "Form fields: Title (required), Description (textarea, required), Type (dropdown, required)",
+        "Category dropdown (populated from API)",
+        "Tags multi-select or tag input component",
+        "Form validation shows errors inline",
+        "'Save' button submits to POST /api/items or PUT /api/items/{id}",
+        "'Cancel' button navigates back to dashboard",
+        "Shows success message and redirects on save",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Content editor markdown editor",
+      "description": "As an admin, I need a markdown editor with preview to write content.",
+      "acceptanceCriteria": [
+        "Split-pane editor: markdown source on left, preview on right",
+        "Resizable panes or toggle between edit/preview modes",
+        "Markdown preview renders exactly like item detail page",
+        "Syntax highlighting works in preview",
+        "Toolbar with common markdown buttons: bold, italic, code, heading, list, link",
+        "Textarea with monospace font and line numbers",
+        "Auto-save draft to localStorage every 30 seconds",
+        "Restore draft on page reload if present",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Category management page",
+      "description": "As an admin, I need to create and manage categories.",
+      "acceptanceCriteria": [
+        "Categories management page at /admin/categories",
+        "List of categories with edit/delete buttons",
+        "'Add Category' form: name, slug (auto-generated), parent category (optional)",
+        "Confirmation modal before deleting category",
+        "Shows warning if deleting category used by items",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Tag management page",
+      "description": "As an admin, I need to create and manage tags.",
+      "acceptanceCriteria": [
+        "Tags management page at /admin/tags",
+        "List of tags with delete buttons",
+        "'Add Tag' form: name (unique)",
+        "Confirmation modal before deleting tag",
+        "Shows warning if deleting tag used by items",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Dark mode support",
+      "description": "As a user, I want to toggle between light and dark themes.",
+      "acceptanceCriteria": [
+        "Theme toggle button in header (sun/moon icon)",
+        "Dark theme colors defined in Tailwind config",
+        "Theme preference saved to localStorage",
+        "Theme loads from localStorage on page load",
+        "All pages render correctly in both themes",
+        "Code syntax highlighting works in both themes",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Keyboard shortcuts",
+      "description": "As a user, I want keyboard shortcuts for common actions.",
+      "acceptanceCriteria": [
+        "'/' or 'Ctrl+K' focuses search bar",
+        "'Esc' clears search or closes modals",
+        "Arrow keys navigate search results",
+        "'Enter' on highlighted result opens item detail",
+        "'?' shows keyboard shortcuts help modal",
+        "Shortcuts documented in help modal",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Analytics data queries",
+      "description": "As an admin, I need backend queries to provide usage analytics data.",
+      "acceptanceCriteria": [
+        "GET /api/analytics/searches endpoint with date range filters",
+        "Query: Total searches (last 7 days, last 30 days, all time)",
+        "Query: Top 10 search queries with result counts",
+        "Query: Searches by source (web)",
+        "Query: Total items by type",
+        "Query: Top 10 most viewed items",
+        "All queries optimized with proper indexes",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Analytics dashboard UI",
+      "description": "As an admin, I need to view usage analytics in a dashboard.",
+      "acceptanceCriteria": [
+        "Analytics page at /admin/analytics",
+        "Display total searches (last 7 days, last 30 days, all time)",
+        "Display top 10 search queries with result counts",
+        "Display searches by source chart (web only for v1.0)",
+        "Display total items by type (pie chart or bar chart)",
+        "Display top 10 most viewed items",
+        "Date range filter for analytics",
+        "Export analytics as CSV button",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Database performance optimization",
+      "description": "As a user, I need the database to perform efficiently.",
+      "acceptanceCriteria": [
+        "Database indexes added: items(type), items(category_id), items(created_at DESC)",
+        "API response caching headers set appropriately",
+        "Search p95 latency < 500ms (measured with 100 queries)",
+        "Query optimization for complex joins",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Frontend performance optimization",
+      "description": "As a user, I need the application to load quickly.",
+      "acceptanceCriteria": [
+        "React components use React.memo for expensive renders",
+        "Search results implement virtual scrolling or pagination",
+        "Images lazy loaded",
+        "Bundle size analyzed and optimized (code splitting for admin routes)",
+        "Lighthouse performance score > 90",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Backend API tests",
+      "description": "As a developer, I need automated tests for API endpoints.",
+      "acceptanceCriteria": [
+        "Pytest tests for all API endpoints (happy path and error cases)",
+        "Test database fixtures with sample data",
+        "Test: GET /api/items, /api/items/{id}, /api/search",
+        "Test: POST/PUT/DELETE admin endpoints with auth",
+        "Test: Admin token validation middleware",
+        "All tests pass",
+        "Test coverage > 70% for backend",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Frontend component tests",
+      "description": "As a developer, I need automated tests for critical user flows.",
+      "acceptanceCriteria": [
+        "Frontend tests for critical user flows using React Testing Library",
+        "Test: Search and view item",
+        "Test: Admin login and create item",
+        "Test: Filter and sort results",
+        "All tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Load testing",
+      "description": "As a developer, I need to verify the system handles concurrent users.",
+      "acceptanceCriteria": [
+        "Load test script simulating 50 concurrent users",
+        "Load test includes: search queries, item views, pagination",
+        "System maintains sub-second response times under load",
+        "No database errors or connection pool exhaustion",
+        "CPU and memory usage remain acceptable",
+        "Results documented in load-test-results.md"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Documentation",
+      "description": "As a new team member, I need documentation to deploy and use the platform.",
+      "acceptanceCriteria": [
+        "README.md with project overview and quick start",
+        "DEPLOYMENT.md with Docker deployment instructions",
+        "ADMIN_GUIDE.md with content management instructions",
+        "API documentation at /docs (FastAPI auto-generated)",
+        "Environment variables documented",
+        "Architecture diagram in docs/",
+        "Database schema diagram in docs/",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Initial content seeding",
+      "description": "As a user, I need sample content on launch to see platform value immediately.",
+      "acceptanceCriteria": [
+        "Seed script creates 50+ initial items",
+        "Content includes: 15 agents, 20 prompts, 10 MCPs, 5 workflows, 5 docs",
+        "At least 5 categories created",
+        "At least 20 tags created",
+        "Real-world useful examples (not just test data)",
+        "Seed script idempotent (can run multiple times)",
+        "Documentation for running seed script"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Production deployment",
+      "description": "As a DevOps engineer, I need to deploy the application to production.",
+      "acceptanceCriteria": [
+        "Docker image built and tagged",
+        "Production environment variables configured",
+        "SQLite database volume mounted persistently",
+        "Container deployed and accessible at production URL",
+        "Health check endpoint returns 200 OK",
+        "Admin token set securely (not in code)",
+        "HTTPS configured (if applicable)",
+        "Backup strategy implemented (daily SQLite backups)",
+        "Monitoring/logging configured",
+        "Smoke tests pass in production"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
