@@ -198,3 +198,42 @@
   - Silent failures in logging are appropriate - logging shouldn't break primary functionality
   - Remember to log at ALL return points, not just the final success path
   - SessionLocal can be imported and used directly for background thread sessions
+
+---
+
+## 2026-01-19 - US-008: React project setup
+
+- What was implemented:
+  - React 18 + TypeScript project initialized with Vite (via npm create vite@latest)
+  - Tailwind CSS v4 configured with @tailwindcss/vite plugin (v4 uses different config approach)
+  - Custom theme with light/dark mode CSS variables in src/index.css using @theme directive
+  - Shadcn/ui setup with components.json config, utils.ts, and Button component
+  - React Router v6 with createBrowserRouter and RouterProvider pattern
+  - Axios API client wrapper with VITE_API_BASE_URL environment variable
+  - Path alias @ configured in vite.config.ts and tsconfig.app.json
+  - Basic Home and NotFound pages as router placeholders
+
+- Files changed:
+  - frontend/ - New React frontend directory
+  - frontend/package.json - Project dependencies (React 18, react-router-dom, axios, tailwindcss, shadcn/ui deps)
+  - frontend/vite.config.ts - Vite config with React plugin, Tailwind plugin, and path alias
+  - frontend/tsconfig.app.json - TypeScript config with path alias for @/*
+  - frontend/src/index.css - Tailwind v4 with @theme directive for custom colors
+  - frontend/src/main.tsx - Entry point with RouterProvider
+  - frontend/src/router.tsx - React Router configuration
+  - frontend/src/lib/utils.ts - cn() utility function for class merging
+  - frontend/src/lib/api.ts - Axios client with interceptors for auth and error handling
+  - frontend/src/components/ui/button.tsx - Shadcn Button component with variants
+  - frontend/src/pages/Home.tsx - Placeholder home page
+  - frontend/src/pages/NotFound.tsx - 404 page with navigation
+  - frontend/components.json - Shadcn/ui configuration
+  - frontend/.env, frontend/.env.example - Environment variable templates
+
+- Learnings for future iterations:
+  - Tailwind v4 uses @import "tailwindcss" and @theme {} directive instead of tailwind.config.js
+  - Tailwind v4 requires @tailwindcss/vite plugin instead of postcss-based setup
+  - Tailwind v4 npx tailwindcss init doesn't exist - plugin handles everything
+  - Vite environment variables must be prefixed with VITE_ to be exposed to client
+  - React Router v6 uses createBrowserRouter() with RouterProvider component
+  - Shadcn/ui works with Tailwind v4 but needs manual component setup (no shadcn add command for v4 yet)
+  - Always install @radix-ui/react-slot for Button asChild prop support
