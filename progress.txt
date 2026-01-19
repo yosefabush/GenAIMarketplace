@@ -528,3 +528,31 @@
   - ESLint complains about const objects only used as types - inline the type definition instead
   - Sort toggle pattern: same field toggles direction, new field uses sensible default (asc for text, desc for dates/numbers)
   - Delete confirmation should show item name and be clear about irreversibility
+
+---
+
+## 2026-01-20 - US-019: Content editor basic form
+
+- What was implemented:
+  - Editor page at /admin/editor (new item) and /admin/editor/:id (edit existing item)
+  - Form fields: Title (required), Description (textarea, required), Type (dropdown, required)
+  - Category dropdown populated from GET /api/categories with "No category" option
+  - TagInput component with checkbox grid for multi-selecting tags by ID
+  - Inline form validation with error messages for required fields
+  - Save button submits to POST /api/items (new) or PUT /api/items/:id (edit)
+  - Cancel button navigates back to /admin/dashboard
+  - Toast notifications for success/error feedback on save
+  - Loading states for item fetch (edit mode) and form submission
+  - Content textarea with basic Markdown support (full editor in US-020)
+
+- Files changed:
+  - frontend/src/components/ui/textarea.tsx - New Textarea UI component following shadcn/ui patterns
+  - frontend/src/components/TagInput.tsx - New tag input component with checkboxes for ID-based selection
+  - frontend/src/pages/admin/Editor.tsx - Complete editor form with validation, API integration, toasts
+
+- Learnings for future iterations:
+  - TypeScript doesn't narrow types into nested async functions - capture non-null value in const before inner function
+  - Tag components for editors should work with IDs (for API) vs names (for search filters)
+  - Form validation can clear errors on field change using the field name to check if it's in errors object
+  - Radix Select with "none" value can represent null for optional fields like category_id
+  - Lazy loading states: use separate loading flags for initial data vs. submission actions

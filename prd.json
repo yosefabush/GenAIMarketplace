@@ -328,8 +328,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Editor page at /admin/editor and /admin/editor/:id. Form fields: Title, Description (textarea), Type dropdown, Category dropdown (from API), TagInput component for multi-select tags. Inline validation for required fields. Save submits to POST/PUT /api/items. Cancel navigates back to dashboard. Toast notifications on success/error."
     },
     {
       "id": "US-020",
