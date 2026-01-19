@@ -1,5 +1,11 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class TagCreate(BaseModel):
+    """Schema for creating a new tag."""
+
+    name: str = Field(..., min_length=1, max_length=50)
 
 
 class TagResponse(BaseModel):
