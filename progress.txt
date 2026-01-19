@@ -292,3 +292,29 @@
   - Tailwind's line-clamp-N utility works well for truncating text with ellipsis
   - Featured items can use search API with sort=views as proxy for popularity when no dedicated "featured" field exists
   - Create placeholder pages for routes early to avoid broken links
+
+---
+
+## 2026-01-19 - US-011: Search results display
+
+- What was implemented:
+  - SearchResultCard component showing title, type badge, description preview, category, tags (up to 3 with +N overflow), and view count with Eye icon
+  - Pagination component with smart page number display (ellipsis for large ranges), prev/next buttons, and responsive text labels
+  - Updated Search page with full API integration to /api/search endpoint
+  - Loading state with animated spinner during search
+  - Error state with styled error message
+  - Empty state with SearchX icon and contextual message based on query/filters
+  - Results count showing "Showing X-Y of Z results" with query context
+  - URL-based pagination state (page param) for shareable/bookmarkable URLs
+  - Smooth scroll to top when changing pages
+
+- Files changed:
+  - frontend/src/components/SearchResultCard.tsx - New card component for search results with full metadata
+  - frontend/src/components/Pagination.tsx - New pagination component with page numbers and navigation
+  - frontend/src/pages/Search.tsx - Updated with API integration, loading/error/empty states, results display
+
+- Learnings for future iterations:
+  - ESLint react-hooks/set-state-in-effect rule: define async function inside useEffect rather than calling external async function
+  - Use cancelled flag pattern in useEffect cleanup to prevent setState on unmounted components
+  - Pagination ellipsis logic: show first, last, and pages around current; use "ellipsis" sentinel value for rendering
+  - Tag overflow pattern: show first N tags plus "+X" indicator for remaining
