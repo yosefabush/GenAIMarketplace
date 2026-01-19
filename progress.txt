@@ -381,3 +381,31 @@
   - Cancelled flag pattern in useEffect for async requests prevents setState on unmounted components
   - Tailwind @tailwindcss/typography plugin provides prose classes for rendered markdown content
   - parseItemId helper with parseInt validation and null fallback handles invalid route params gracefully
+
+---
+
+## 2026-01-20 - US-014: Syntax highlighting and copy buttons
+
+- What was implemented:
+  - CodeBlock component with react-syntax-highlighter using Prism for syntax highlighting
+  - Copy button positioned at top-right of code blocks with hover visibility (opacity transition)
+  - Visual feedback: Check icon and "Copied!" toast appear for 2 seconds after successful copy
+  - Language badge displayed next to copy button showing the code language
+  - InlineCode component for inline code snippets (no highlighting, just styled)
+  - Language alias mapping (js->javascript, py->python, sh->bash, etc.)
+  - Integrated with ReactMarkdown via custom components prop
+  - Supports all required languages via Prism: Python, JavaScript, TypeScript, JSON, Bash, SQL, YAML, Go, Rust, Java
+  - Line numbers shown for code blocks with more than 3 lines
+  - Dark/light mode theme detection using document.documentElement.classList
+
+- Files changed:
+  - frontend/src/components/CodeBlock.tsx - New component with syntax highlighting and copy
+  - frontend/src/pages/ItemDetail.tsx - Updated ReactMarkdown with custom code/pre components
+  - frontend/package.json - Added react-syntax-highlighter and @types/react-syntax-highlighter
+
+- Learnings for future iterations:
+  - react-syntax-highlighter uses esm imports for styles: import from "dist/esm/styles/prism"
+  - ReactMarkdown components prop uses code() function with className containing "language-xxx"
+  - Custom pre component should just render children to avoid double wrapper
+  - Use not-prose class on CodeBlock wrapper to prevent Tailwind typography prose styles from affecting code
+  - navigator.clipboard.writeText() is async and requires try/catch for error handling
