@@ -1,9 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth import verify_admin_token
 from app.core.database import get_db
 from app.models import Item, Tag
+from app.models.item import item_tags
 from app.schemas import (
     APIResponse,
     PaginatedResponse,
@@ -175,4 +179,87 @@ def delete_item(
     return APIResponse(
         success=True,
         data=None,
+    )
+
+
+@router.post("/{item_id}/view", response_model=APIResponse[int])
+def increment_view_count(
+    item_id: int,
+    db: Session = Depends(get_db),
+) -> APIResponse[int]:
+    """Increment the view count for an item."""
+    item = db.query(Item).filter(Item.id == item_id).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item.view_count += 1
+    db.commit()
+    db.refresh(item)
+
+    return APIResponse(
+        success=True,
+        data=item.view_count,
+    )
+
+
+@router.get("/{item_id}/related", response_model=APIResponse[list[ItemListResponse]])
+def get_related_items(
+    item_id: int,
+    limit: int = Query(default=5, ge=1, le=10),
+    db: Session = Depends(get_db),
+) -> APIResponse[list[ItemListResponse]]:
+    """Get related items based on same category or shared tags."""
+    # Get the source item with its relationships
+    source_item = (
+        db.query(Item)
+        .options(joinedload(Item.tags))
+        .filter(Item.id == item_id)
+        .first()
+    )
+
+    if not source_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # Build conditions for related items
+    conditions: list[Any] = []
+
+    # Same category (if item has a category)
+    if source_item.category_id:
+        conditions.append(Item.category_id == source_item.category_id)
+
+    # Shared tags (if item has tags)
+    tag_ids = [tag.id for tag in source_item.tags]
+    if tag_ids:
+        # Find items that share at least one tag
+        items_with_shared_tags = (
+            db.query(item_tags.c.item_id)
+            .filter(item_tags.c.tag_id.in_(tag_ids))
+            .distinct()
+        )
+        conditions.append(Item.id.in_(items_with_shared_tags))
+
+    # If no conditions (no category and no tags), return empty list
+    if not conditions:
+        return APIResponse(
+            success=True,
+            data=[],
+        )
+
+    # Query related items (excluding the source item)
+    related_items = (
+        db.query(Item)
+        .options(joinedload(Item.category), joinedload(Item.tags))
+        .filter(
+            Item.id != item_id,
+            or_(*conditions),
+        )
+        .order_by(Item.view_count.desc())  # Order by popularity
+        .limit(limit)
+        .all()
+    )
+
+    return APIResponse(
+        success=True,
+        data=[ItemListResponse.model_validate(item) for item in related_items],
     )

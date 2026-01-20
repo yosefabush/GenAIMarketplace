@@ -1,7 +1,8 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
-  /* Color palette for GenAI Marketplace */
+  /* Color palette for GenAI Marketplace - Light mode */
   --color-primary: #3b82f6;
   --color-primary-foreground: #ffffff;
   --color-secondary: #f1f5f9;
@@ -31,29 +32,27 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Dark mode theme */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-primary: #60a5fa;
-    --color-primary-foreground: #0f172a;
-    --color-secondary: #1e293b;
-    --color-secondary-foreground: #f8fafc;
-    --color-accent: #a78bfa;
-    --color-accent-foreground: #0f172a;
-    --color-muted: #1e293b;
-    --color-muted-foreground: #94a3b8;
-    --color-destructive: #f87171;
-    --color-destructive-foreground: #0f172a;
-    --color-border: #334155;
-    --color-input: #334155;
-    --color-ring: #60a5fa;
-    --color-background: #0f172a;
-    --color-foreground: #f8fafc;
-    --color-card: #1e293b;
-    --color-card-foreground: #f8fafc;
-    --color-popover: #1e293b;
-    --color-popover-foreground: #f8fafc;
-  }
+/* Dark mode theme - uses .dark class on html element */
+.dark {
+  --color-primary: #60a5fa;
+  --color-primary-foreground: #0f172a;
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #f8fafc;
+  --color-accent: #a78bfa;
+  --color-accent-foreground: #0f172a;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-destructive: #f87171;
+  --color-destructive-foreground: #0f172a;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #60a5fa;
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-card: #1e293b;
+  --color-card-foreground: #f8fafc;
+  --color-popover: #1e293b;
+  --color-popover-foreground: #f8fafc;
 }
 
 /* Base styles */

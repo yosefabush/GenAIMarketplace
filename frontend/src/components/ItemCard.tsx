@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import type { Item } from "@/lib/api"
@@ -24,7 +25,7 @@ function truncateText(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trim() + "..."
 }
 
-export function ItemCard({ item, className }: ItemCardProps) {
+export const ItemCard = memo(function ItemCard({ item, className }: ItemCardProps) {
   return (
     <Link
       to={`/items/${item.id}`}
@@ -51,4 +52,4 @@ export function ItemCard({ item, className }: ItemCardProps) {
       </p>
     </Link>
   )
-}
+})

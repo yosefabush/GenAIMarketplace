@@ -1,3 +1,4 @@
+import { memo, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import type { Item } from "@/lib/api"
@@ -6,6 +7,7 @@ import { Eye } from "lucide-react"
 export interface SearchResultCardProps {
   item: Item
   className?: string
+  isHighlighted?: boolean
 }
 
 const typeColors: Record<string, string> = {
@@ -20,12 +22,26 @@ function getTypeBadgeClass(type: string): string {
   return typeColors[type.toLowerCase()] || typeColors.docs
 }
 
-export function SearchResultCard({ item, className }: SearchResultCardProps) {
+export const SearchResultCard = memo(function SearchResultCard({ item, className, isHighlighted = false }: SearchResultCardProps) {
+  const cardRef = useRef<HTMLAnchorElement>(null)
+
+  // Scroll highlighted card into view
+  useEffect(() => {
+    if (isHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      })
+    }
+  }, [isHighlighted])
+
   return (
     <Link
+      ref={cardRef}
       to={`/items/${item.id}`}
       className={cn(
         "block rounded-lg border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md",
+        isHighlighted && "ring-2 ring-primary border-primary/50 shadow-md",
         className
       )}
     >
@@ -83,4 +99,4 @@ export function SearchResultCard({ item, className }: SearchResultCardProps) {
       </div>
     </Link>
   )
-}
+})

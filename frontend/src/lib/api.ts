@@ -63,6 +63,7 @@ export interface Tag {
   id: number
   name: string
   created_at: string
+  item_count?: number
 }
 
 export interface Category {
@@ -72,6 +73,7 @@ export interface Category {
   parent_id: number | null
   created_at: string
   updated_at: string
+  item_count?: number
 }
 
 export interface Item {
@@ -96,6 +98,44 @@ export interface SearchResult {
   limit: number
 }
 
+// Analytics types
+export interface SearchTotals {
+  last_7_days: number
+  last_30_days: number
+  all_time: number
+}
+
+export interface TopSearchQuery {
+  query: string
+  count: number
+  avg_result_count: number
+}
+
+export interface SearchesBySource {
+  source: string
+  count: number
+}
+
+export interface ItemsByType {
+  type: string
+  count: number
+}
+
+export interface TopViewedItem {
+  id: number
+  title: string
+  type: string
+  view_count: number
+}
+
+export interface AnalyticsOverview {
+  search_totals: SearchTotals
+  top_searches: TopSearchQuery[]
+  searches_by_source: SearchesBySource[]
+  items_by_type: ItemsByType[]
+  top_viewed_items: TopViewedItem[]
+}
+
 // API Methods
 export const api = {
   // Items
@@ -104,6 +144,12 @@ export const api = {
 
   getItem: (id: number) =>
     apiClient.get<APIResponse<Item>>(`/api/items/${id}`),
+
+  incrementViewCount: (id: number) =>
+    apiClient.post<APIResponse<number>>(`/api/items/${id}/view`),
+
+  getRelatedItems: (id: number, limit?: number) =>
+    apiClient.get<APIResponse<Item[]>>(`/api/items/${id}/related`, { params: { limit } }),
 
   // Search
   search: (params: {
@@ -146,11 +192,31 @@ export const api = {
   deleteItem: (id: number) =>
     apiClient.delete<APIResponse<null>>(`/api/items/${id}`),
 
-  createCategory: (data: { name: string; slug: string; parent_id?: number }) =>
+  createCategory: (data: { name: string; slug: string; parent_id?: number | null }) =>
     apiClient.post<APIResponse<Category>>('/api/categories', data),
+
+  updateCategory: (id: number, data: { name?: string; slug?: string; parent_id?: number | null }) =>
+    apiClient.put<APIResponse<Category>>(`/api/categories/${id}`, data),
+
+  deleteCategory: (id: number) =>
+    apiClient.delete<APIResponse<null>>(`/api/categories/${id}`),
 
   createTag: (data: { name: string }) =>
     apiClient.post<APIResponse<Tag>>('/api/tags', data),
+
+  updateTag: (id: number, data: { name: string }) =>
+    apiClient.put<APIResponse<Tag>>(`/api/tags/${id}`, data),
+
+  deleteTag: (id: number) =>
+    apiClient.delete<APIResponse<null>>(`/api/tags/${id}`),
+
+  // Auth
+  validateToken: (token: string) =>
+    apiClient.post<{ success: boolean; valid: boolean; message: string }>('/api/auth/validate', { token }),
+
+  // Analytics
+  getAnalytics: (params?: { start_date?: string; end_date?: string }) =>
+    apiClient.get<APIResponse<AnalyticsOverview>>('/api/analytics/searches', { params }),
 }
 
 export default apiClient

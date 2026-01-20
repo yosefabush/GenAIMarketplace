@@ -1,7 +1,9 @@
 import * as React from "react"
+import { useRef, useEffect, useCallback } from "react"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 
 export interface SearchBarProps {
   value: string
@@ -20,6 +22,27 @@ export function SearchBar({
   className,
   autoFocus = false,
 }: SearchBarProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const { registerSearchInput } = useKeyboardShortcuts()
+
+  // Callback ref to register the input element
+  const setInputRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      // Store in local ref for internal use
+      (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = element
+      // Register with keyboard shortcuts context
+      registerSearchInput(element)
+    },
+    [registerSearchInput]
+  )
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      registerSearchInput(null)
+    }
+  }, [registerSearchInput])
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && onSubmit) {
       onSubmit()
@@ -30,6 +53,7 @@ export function SearchBar({
     <div className={cn("relative w-full", className)}>
       <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
       <Input
+        ref={setInputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

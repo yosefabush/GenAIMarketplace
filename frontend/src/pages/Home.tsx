@@ -4,12 +4,18 @@ import { SearchBar } from "@/components/SearchBar"
 import { TypeFilterChips, type ContentType } from "@/components/TypeFilterChips"
 import { RecentAdditions } from "@/components/RecentAdditions"
 import { FeaturedItems } from "@/components/FeaturedItems"
+import { ThemeToggle } from "@/components/ThemeToggle"
+import { GlobalKeyboardHandler } from "@/components/GlobalKeyboardHandler"
 import { Sparkles } from "lucide-react"
 
 export default function Home() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedType, setSelectedType] = useState<ContentType>("all")
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("")
+  }, [])
 
   const handleSearch = useCallback(() => {
     const params = new URLSearchParams()
@@ -41,6 +47,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <GlobalKeyboardHandler onClearSearch={handleClearSearch} />
+
+      {/* Theme Toggle - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center px-4 pt-16 pb-12 sm:pt-24 sm:pb-16 md:pt-32 md:pb-20">
         {/* Logo/Brand */}

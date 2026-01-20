@@ -318,3 +318,689 @@
   - Use cancelled flag pattern in useEffect cleanup to prevent setState on unmounted components
   - Pagination ellipsis logic: show first, last, and pages around current; use "ellipsis" sentinel value for rendering
   - Tag overflow pattern: show first N tags plus "+X" indicator for remaining
+
+---
+
+## 2026-01-20 - US-012: Search filters and sorting
+
+- What was implemented:
+  - TypeFilterCheckboxes component with checkboxes for agent/prompt/mcp/workflow/docs types
+  - CategoryDropdown component that fetches categories from API and allows single selection
+  - TagMultiSelect component with expandable tag list, checkboxes, and clear button
+  - SortDropdown component with Relevance/Newest/Most Viewed options
+  - FilterSidebar combining all filters with "Clear all" button when filters are active
+  - Updated Search page with sidebar layout (desktop: left sidebar, mobile: slide-out panel with overlay)
+  - Active filter pills showing current filters with X button to remove
+  - URL params for all filters: q, type (comma-separated), category, tags (comma-separated), sort, page
+  - Filters apply immediately when changed and reset to page 1
+  - Mobile-responsive design with filter toggle button showing active filter count
+
+- Files changed:
+  - frontend/src/components/ui/checkbox.tsx - Radix checkbox component
+  - frontend/src/components/ui/label.tsx - Radix label component
+  - frontend/src/components/ui/select.tsx - Radix select/dropdown component
+  - frontend/src/components/TypeFilterCheckboxes.tsx - Type filter with checkboxes
+  - frontend/src/components/CategoryDropdown.tsx - Category dropdown with API integration
+  - frontend/src/components/TagMultiSelect.tsx - Tag multi-select with expandable list
+  - frontend/src/components/SortDropdown.tsx - Sort options dropdown
+  - frontend/src/components/FilterSidebar.tsx - Combined filter sidebar component
+  - frontend/src/pages/Search.tsx - Integrated filters, sidebar layout, URL state management
+  - frontend/package.json - Added @radix-ui/react-checkbox, @radix-ui/react-select, @radix-ui/react-label
+
+- Learnings for future iterations:
+  - Radix Select doesn't support multi-select natively; use checkboxes for multi-select functionality
+  - Parse and build URL params with dedicated functions for cleaner code
+  - Use conditional undefined check (params.category !== undefined) when null is a valid value to distinguish from "not provided"
+  - Mobile slide-out sidebar pattern: fixed position, translate-x transform, overlay div for click-to-close
+  - Active filter pills improve UX by showing what filters are applied and allowing quick removal
+
+---
+
+## 2026-01-20 - US-013: Item detail page with markdown
+
+- What was implemented:
+  - ItemDetail page at /items/:id route with full item display
+  - ReactMarkdown rendering for item.content field with prose styling
+  - Complete metadata display in header: type badge (color-coded), category name, view count, created date, last updated timestamp
+  - Tags displayed as clickable links to search page with tag filter applied
+  - Smart back navigation using location.state.from (preserves search context) with fallback to home
+  - NotFoundPage component for invalid/missing item IDs (404 handling)
+  - LoadingPage with skeleton UI animation during fetch
+  - ErrorPage for generic API errors
+  - parseItemId helper function for safe ID parsing with null fallback
+  - Refactored button.tsx to separate buttonVariants into button-variants.ts to fix react-refresh/only-export-components lint error
+
+- Files changed:
+  - frontend/src/pages/ItemDetail.tsx - Full item detail page with markdown, metadata, navigation, 404
+  - frontend/src/components/ui/button.tsx - Removed buttonVariants re-export
+  - frontend/src/components/ui/button-variants.ts - New file with buttonVariants cva definition
+
+- Learnings for future iterations:
+  - React Refresh requires files to only export components; extract non-component exports (like cva variants) to separate .ts files
+  - Use location.state.from pattern for contextual back navigation (preserves query params from referring page)
+  - Cancelled flag pattern in useEffect for async requests prevents setState on unmounted components
+  - Tailwind @tailwindcss/typography plugin provides prose classes for rendered markdown content
+  - parseItemId helper with parseInt validation and null fallback handles invalid route params gracefully
+
+---
+
+## 2026-01-20 - US-014: Syntax highlighting and copy buttons
+
+- What was implemented:
+  - CodeBlock component with react-syntax-highlighter using Prism for syntax highlighting
+  - Copy button positioned at top-right of code blocks with hover visibility (opacity transition)
+  - Visual feedback: Check icon and "Copied!" toast appear for 2 seconds after successful copy
+  - Language badge displayed next to copy button showing the code language
+  - InlineCode component for inline code snippets (no highlighting, just styled)
+  - Language alias mapping (js->javascript, py->python, sh->bash, etc.)
+  - Integrated with ReactMarkdown via custom components prop
+  - Supports all required languages via Prism: Python, JavaScript, TypeScript, JSON, Bash, SQL, YAML, Go, Rust, Java
+  - Line numbers shown for code blocks with more than 3 lines
+  - Dark/light mode theme detection using document.documentElement.classList
+
+- Files changed:
+  - frontend/src/components/CodeBlock.tsx - New component with syntax highlighting and copy
+  - frontend/src/pages/ItemDetail.tsx - Updated ReactMarkdown with custom code/pre components
+  - frontend/package.json - Added react-syntax-highlighter and @types/react-syntax-highlighter
+
+- Learnings for future iterations:
+  - react-syntax-highlighter uses esm imports for styles: import from "dist/esm/styles/prism"
+  - ReactMarkdown components prop uses code() function with className containing "language-xxx"
+  - Custom pre component should just render children to avoid double wrapper
+  - Use not-prose class on CodeBlock wrapper to prevent Tailwind typography prose styles from affecting code
+  - navigator.clipboard.writeText() is async and requires try/catch for error handling
+
+---
+
+## 2026-01-20 - US-015: Related items and view tracking
+
+- What was implemented:
+  - POST /api/items/{id}/view endpoint to increment view_count for an item
+  - GET /api/items/{id}/related endpoint that finds items with same category_id OR shared tags
+  - Related items sorted by view_count (popularity) and limited to 5 by default
+  - RelatedItems component that fetches and displays related items as clickable cards
+  - View count increment in ItemDetail page using useRef to ensure single increment per mount
+  - Navigation state preserved when clicking related items (for back button context)
+
+- Files changed:
+  - backend/app/routers/items.py - Added view increment and related items endpoints
+  - frontend/src/lib/api.ts - Added incrementViewCount() and getRelatedItems() API methods
+  - frontend/src/components/RelatedItems.tsx - New component for related items section
+  - frontend/src/pages/ItemDetail.tsx - Integrated view tracking and RelatedItems component
+
+- Learnings for future iterations:
+  - Use useRef to track one-time operations (like view increment) that shouldn't repeat on re-render
+  - SQLAlchemy or_(*conditions) for combining multiple filter conditions with OR logic
+  - item_tags join table can be queried directly with db.query(item_tags.c.item_id).filter()
+  - Silent failures for non-critical operations (view count, related items) improve UX
+  - Pass currentPath to RelatedItems so navigation state preserves back context
+
+---
+
+## 2026-01-20 - US-016: Admin authentication
+
+- What was implemented:
+  - POST /api/auth/validate endpoint to validate admin token against ADMIN_TOKEN env var
+  - AuthContext with AuthProvider component for managing auth state
+  - Lazy useState initializer to load token from localStorage without useEffect (avoids ESLint react-hooks/set-state-in-effect)
+  - useAuth hook in separate file (avoids react-refresh/only-export-components lint error)
+  - ProtectedRoute component that redirects to /admin/login if not authenticated
+  - Admin login page at /admin/login with password input, error handling, and loading state
+  - Admin dashboard placeholder at /admin/dashboard with logout button
+  - Axios interceptor for Bearer token already existed in api.ts
+
+- Files changed:
+  - backend/app/routers/auth.py - New auth router with POST /api/auth/validate
+  - backend/app/routers/__init__.py - Export auth_router
+  - backend/app/main.py - Register auth_router
+  - frontend/src/contexts/auth-context.ts - AuthContext and AuthContextType (non-component file)
+  - frontend/src/contexts/AuthContext.tsx - AuthProvider component
+  - frontend/src/hooks/useAuth.ts - useAuth hook
+  - frontend/src/components/ProtectedRoute.tsx - Protected route wrapper component
+  - frontend/src/pages/admin/Login.tsx - Admin login page
+  - frontend/src/pages/admin/Dashboard.tsx - Admin dashboard placeholder
+  - frontend/src/lib/api.ts - Added validateToken API method
+  - frontend/src/main.tsx - Wrapped app with AuthProvider
+  - frontend/src/router.tsx - Added /admin/login and /admin/dashboard routes
+
+- Learnings for future iterations:
+  - ESLint react-hooks/set-state-in-effect prohibits setState in useEffect; use lazy initializer with useState(() => value)
+  - ESLint react-refresh/only-export-components requires React contexts to be in separate .ts files from provider components
+  - Split AuthContext (context + type) into auth-context.ts, AuthProvider into AuthContext.tsx, useAuth into useAuth.ts
+  - Token validation endpoint allows frontend to verify token before storing it locally
+
+---
+
+## 2026-01-20 - US-017: Admin dashboard table view
+
+- What was implemented:
+  - Admin dashboard table view at /admin/dashboard displaying all content items
+  - Shadcn/ui-style Table component (Table, TableHeader, TableBody, TableHead, TableRow, TableCell)
+  - Columns: Title, Type (color-coded badge), Category, Tags (with +N overflow), Views, Updated date, Actions
+  - Pagination component reused from search for large item lists
+  - "Add New Item" button navigating to /admin/editor
+  - Edit icon (Pencil) on each row navigating to /admin/editor/:id
+  - Loading state with spinner, error state with retry button, empty state message
+  - Placeholder Editor page for navigation targets (full implementation in US-019)
+
+- Files changed:
+  - frontend/src/components/ui/table.tsx - New Table UI component following shadcn/ui patterns
+  - frontend/src/pages/admin/Dashboard.tsx - Updated with table view, pagination, and navigation
+  - frontend/src/pages/admin/Editor.tsx - New placeholder editor page
+  - frontend/src/router.tsx - Added /admin/editor and /admin/editor/:id protected routes
+
+- Learnings for future iterations:
+  - Reuse existing Pagination component from search page for admin table pagination
+  - Type badge color mapping pattern (Record<string, string>) with fallback color for unknown types
+  - Tag overflow pattern: show first N items plus "+M" count for remaining
+  - Create placeholder pages early to ensure navigation links work before full implementation
+  - formatDate helper for consistent date formatting across the app
+
+---
+
+## 2026-01-20 - US-018: Admin dashboard search and delete
+
+- What was implemented:
+  - Search input that filters table by item title (client-side filtering with useMemo)
+  - Type filter dropdown using Radix Select with All/Agent/Prompt/MCP/Workflow/Docs options
+  - Sortable columns with clickable headers for Title, Type, Views, and Updated
+  - Sort icons showing current state (ArrowUp/ArrowDown/ArrowUpDown from lucide-react)
+  - Delete button on each row with Trash2 icon and destructive styling
+  - Radix Dialog confirmation modal before deletion with Cancel/Delete buttons
+  - Radix Toast notifications for success/error feedback with success/destructive variants
+  - Toaster provider component added to main.tsx for global toast rendering
+  - useToast hook for toast state management across the app
+  - Client-side filtering/sorting with pagination for responsive UX
+
+- Files changed:
+  - frontend/src/components/ui/dialog.tsx - New Radix Dialog component with shadcn/ui styling
+  - frontend/src/components/ui/toast.tsx - New Radix Toast component with variants
+  - frontend/src/components/ui/toaster.tsx - Toaster provider component
+  - frontend/src/hooks/useToast.ts - Toast state management hook
+  - frontend/src/pages/admin/Dashboard.tsx - Updated with search, filter, sort, delete functionality
+  - frontend/src/main.tsx - Added Toaster provider
+  - frontend/package.json - Added @radix-ui/react-dialog and @radix-ui/react-toast
+
+- Learnings for future iterations:
+  - Client-side filtering with useMemo provides instant feedback vs server roundtrips
+  - Radix Dialog needs DialogPortal for proper z-index stacking
+  - Toast state management uses a reducer pattern with global listeners array
+  - ESLint complains about const objects only used as types - inline the type definition instead
+  - Sort toggle pattern: same field toggles direction, new field uses sensible default (asc for text, desc for dates/numbers)
+  - Delete confirmation should show item name and be clear about irreversibility
+
+---
+
+## 2026-01-20 - US-019: Content editor basic form
+
+- What was implemented:
+  - Editor page at /admin/editor (new item) and /admin/editor/:id (edit existing item)
+  - Form fields: Title (required), Description (textarea, required), Type (dropdown, required)
+  - Category dropdown populated from GET /api/categories with "No category" option
+  - TagInput component with checkbox grid for multi-selecting tags by ID
+  - Inline form validation with error messages for required fields
+  - Save button submits to POST /api/items (new) or PUT /api/items/:id (edit)
+  - Cancel button navigates back to /admin/dashboard
+  - Toast notifications for success/error feedback on save
+  - Loading states for item fetch (edit mode) and form submission
+  - Content textarea with basic Markdown support (full editor in US-020)
+
+- Files changed:
+  - frontend/src/components/ui/textarea.tsx - New Textarea UI component following shadcn/ui patterns
+  - frontend/src/components/TagInput.tsx - New tag input component with checkboxes for ID-based selection
+  - frontend/src/pages/admin/Editor.tsx - Complete editor form with validation, API integration, toasts
+
+- Learnings for future iterations:
+  - TypeScript doesn't narrow types into nested async functions - capture non-null value in const before inner function
+  - Tag components for editors should work with IDs (for API) vs names (for search filters)
+  - Form validation can clear errors on field change using the field name to check if it's in errors object
+  - Radix Select with "none" value can represent null for optional fields like category_id
+  - Lazy loading states: use separate loading flags for initial data vs. submission actions
+
+---
+
+## 2026-01-20 - US-020: Content editor markdown editor
+
+- What was implemented:
+  - MarkdownEditor component with split-pane layout (markdown source left, preview right)
+  - Resizable split panes via drag handle with min/max constraints (20-80%)
+  - View mode toggle buttons: Edit only, Split view, Preview only
+  - Markdown toolbar with 11 formatting buttons: Bold, Italic, Code, H1, H2, H3, Bullet List, Numbered List, Link, Blockquote, Horizontal Rule
+  - Line numbers in editor pane with synchronized scrolling
+  - Monospace font for editing (ui-monospace, SFMono-Regular, etc.)
+  - Auto-save draft to localStorage every 30 seconds using draftKey
+  - Draft restoration on page mount if draft is less than 24 hours old
+  - Clear draft on successful form save
+  - Keyboard shortcuts: Ctrl+B (bold), Ctrl+I (italic), Tab (2-space indent)
+  - Preview renders with same ReactMarkdown + CodeBlock components as ItemDetail page
+  - Syntax highlighting works in preview via react-syntax-highlighter (Prism)
+
+- Files changed:
+  - frontend/src/components/MarkdownEditor.tsx - New split-pane markdown editor component
+  - frontend/src/lib/markdown-draft.ts - Draft storage utilities (clearMarkdownDraft, getMarkdownDraft, saveMarkdownDraft)
+  - frontend/src/pages/admin/Editor.tsx - Integrated MarkdownEditor, added draftKey generation, clear draft on save
+
+- Learnings for future iterations:
+  - ESLint react-hooks/refs rule prohibits reading ref.current during render - use state for values needed in render
+  - ESLint react-refresh/only-export-components requires non-component exports in separate files
+  - Split utility functions (like clearMarkdownDraft) into separate .ts files to avoid lint errors
+  - useRef is fine for tracking values that don't affect render (like lastSavedValue for comparison)
+  - Toolbar button actions should return both new text AND cursor position for seamless editing
+  - Line numbers need matching line-height with textarea (leading-6 = 1.5rem = 24px)
+  - requestAnimationFrame for setting cursor position after onChange to ensure DOM is updated
+
+---
+
+## 2026-01-20 - US-021: Category management page
+
+- What was implemented:
+  - Categories management page at /admin/categories protected route
+  - Table view showing name, slug, parent category, item count, updated date, and actions (edit/delete)
+  - Inline form for adding new categories and editing existing ones
+  - Auto-generated slug from name (lowercase, alphanumeric with hyphens)
+  - Parent category dropdown for creating hierarchical categories
+  - Confirmation modal before deletion with warning if category has items
+  - PUT /api/categories/{id} endpoint for updating categories (admin only)
+  - DELETE /api/categories/{id} endpoint for deleting categories (admin only)
+  - CategoryWithItemCount schema to return item_count in list response
+  - Navigation links between dashboard and categories page
+  - Toast notifications for success/error feedback
+
+- Files changed:
+  - backend/app/routers/categories.py - Added CategoryUpdate and CategoryWithItemCount schemas, PUT and DELETE endpoints, item_count in list response
+  - frontend/src/lib/api.ts - Added updateCategory() and deleteCategory() API methods, item_count to Category interface
+  - frontend/src/pages/admin/Categories.tsx - New category management page with full CRUD functionality
+  - frontend/src/router.tsx - Added /admin/categories protected route
+
+- Learnings for future iterations:
+  - Include item_count in category list response for UI warning when deleting categories with items
+  - Auto-generate slug from name but allow manual editing for flexibility
+  - Filter out current category from parent dropdown to prevent self-reference
+  - Use inline form pattern (show/hide) instead of separate page for simpler CRUD operations
+  - Pydantic pattern for updating fields: check if field is not None before assigning to allow partial updates
+
+---
+
+## 2026-01-20 - US-022: Tag management page
+
+- What was implemented:
+  - Tags management page at /admin/tags protected route
+  - Table view showing name, item count, created date, and delete action
+  - Inline form for adding new tags with name field (unique, max 50 characters)
+  - Confirmation modal before deletion with warning if tag is used by items
+  - PUT /api/tags/{id} endpoint for updating tags (admin only)
+  - DELETE /api/tags/{id} endpoint for deleting tags (admin only)
+  - TagWithItemCount schema returns item_count in list response
+  - TagUpdate schema for update operations
+  - Navigation links between dashboard, categories, and tags pages
+  - Toast notifications for success/error feedback
+
+- Files changed:
+  - backend/app/routers/tags.py - Added PUT and DELETE endpoints, TagWithItemCount in list response
+  - backend/app/schemas/tag.py - Added TagUpdate and TagWithItemCount schemas
+  - frontend/src/lib/api.ts - Added updateTag() and deleteTag() API methods, item_count to Tag interface
+  - frontend/src/pages/admin/Tags.tsx - New tag management page with create/delete functionality
+  - frontend/src/router.tsx - Added /admin/tags protected route
+
+- Learnings for future iterations:
+  - Tags are simpler than categories (no slug, no hierarchy) so edit functionality was omitted per acceptance criteria
+  - Reuse the same patterns from Categories page: inline form, confirmation modal, toast notifications
+  - Use consistent UI between management pages for better admin UX
+  - item_count in list response enables warning when deleting tags that are in use
+
+---
+
+## 2026-01-20 - US-023: Dark mode support
+
+- What was implemented:
+  - ThemeContext with ThemeProvider component managing theme state (light/dark/system)
+  - Theme type supporting "light", "dark", and "system" options with system theme detection
+  - ThemeToggle component with dropdown menu for theme selection (sun/moon/monitor icons)
+  - Theme preference saved to localStorage with key "genai-marketplace-theme"
+  - Dark theme CSS variables defined in index.css using .dark class on html element
+  - Updated CodeBlock component to use useTheme hook for reactive syntax highlighting
+  - ThemeToggle added to all pages (Home, Search, ItemDetail, admin Login, Dashboard, Editor, Categories, Tags)
+  - Header component created for reusable page header with logo, theme toggle, and optional content slot
+
+- Files changed:
+  - frontend/src/contexts/theme-context.ts - ThemeContext and ThemeContextType definitions
+  - frontend/src/contexts/ThemeContext.tsx - ThemeProvider component with localStorage persistence
+  - frontend/src/hooks/useTheme.ts - useTheme hook for accessing theme context
+  - frontend/src/components/ThemeToggle.tsx - Theme toggle dropdown component with icons
+  - frontend/src/components/Header.tsx - Reusable header component with theme toggle
+  - frontend/src/components/CodeBlock.tsx - Updated to use useTheme for reactive theme switching
+  - frontend/src/index.css - Changed dark mode from @media (prefers-color-scheme) to .dark class
+  - frontend/src/main.tsx - Wrapped app with ThemeProvider
+  - frontend/src/pages/Home.tsx - Added ThemeToggle in fixed position
+  - frontend/src/pages/Search.tsx - Added ThemeToggle to header
+  - frontend/src/pages/ItemDetail.tsx - Added ThemeToggle in fixed position
+  - frontend/src/pages/admin/Login.tsx - Added ThemeToggle in fixed position
+  - frontend/src/pages/admin/Dashboard.tsx - Added ThemeToggle to header
+  - frontend/src/pages/admin/Editor.tsx - Added ThemeToggle to header
+  - frontend/src/pages/admin/Categories.tsx - Added ThemeToggle to header
+  - frontend/src/pages/admin/Tags.tsx - Added ThemeToggle to header
+
+- Learnings for future iterations:
+  - Split theme context into theme-context.ts (context + types) and ThemeContext.tsx (provider) per react-refresh rules
+  - Use .dark class on documentElement instead of @media (prefers-color-scheme) for user-controlled theming
+  - useTheme hook must be in separate file from components for ESLint react-refresh compliance
+  - CodeBlock should use context-based theme detection (useTheme) not document.classList for reactive updates
+  - System theme option listens to matchMedia change event to update when OS theme changes
+  - resolvedTheme tracks actual applied theme (light/dark) separate from user preference (light/dark/system)
+
+---
+
+## 2026-01-20 - US-024: Keyboard shortcuts
+
+- What was implemented:
+  - KeyboardShortcutsContext with provider for global keyboard state management
+  - keyboard-shortcuts-context.ts separates context definition from provider component (ESLint compliance)
+  - useKeyboardShortcuts hook for accessing keyboard context
+  - GlobalKeyboardHandler component listens for keydown events and handles all shortcuts
+  - KeyboardShortcutsHelp modal displays all available shortcuts with styled kbd elements
+  - '/' or 'Ctrl+K' focuses search bar from anywhere (unless in input/textarea)
+  - 'Esc' closes help modal, clears search (and blurs), or resets highlighted index
+  - Arrow Up/Down navigate search results with visual highlighting (ring-2 ring-primary)
+  - 'Enter' on highlighted result navigates to item detail page
+  - '?' shows keyboard shortcuts help modal (only when not in input)
+  - SearchResultCard updated with isHighlighted prop for visual feedback
+  - Highlighted card auto-scrolls into view
+
+- Files changed:
+  - frontend/src/contexts/keyboard-shortcuts-context.ts - Context definition with types
+  - frontend/src/contexts/KeyboardShortcutsContext.tsx - Provider component with state
+  - frontend/src/hooks/useKeyboardShortcuts.ts - Hook for accessing context
+  - frontend/src/components/GlobalKeyboardHandler.tsx - Global keyboard event handler
+  - frontend/src/components/KeyboardShortcutsHelp.tsx - Help modal with shortcuts list
+  - frontend/src/components/SearchBar.tsx - Registers input element with context via callback ref
+  - frontend/src/components/SearchResultCard.tsx - Added isHighlighted prop with visual styling
+  - frontend/src/main.tsx - Added KeyboardShortcutsProvider and KeyboardShortcutsHelp
+  - frontend/src/pages/Home.tsx - Added GlobalKeyboardHandler with onClearSearch
+  - frontend/src/pages/Search.tsx - Added GlobalKeyboardHandler with full navigation support
+
+- Learnings for future iterations:
+  - ESLint react-hooks/refs rule prohibits reading ref.current during render - use callback functions instead
+  - Use callback refs to register DOM elements with context rather than passing ref objects
+  - focusSearchInput/blurSearchInput/isSearchInputFocused as callbacks avoid accessing ref during render
+  - Keyboard shortcuts should check if target is input/textarea/contentEditable before processing
+  - Arrow key navigation needs to update highlightedIndex state, not just UI focus
+  - scrollIntoView with block: "nearest" prevents jumping when card is already visible
+  - isSearchInputFocused callback uses document.activeElement comparison (works during event handling)
+
+---
+
+## 2026-01-20 - US-025: Analytics data queries
+
+- What was implemented:
+  - Analytics router at /api/analytics with admin-protected endpoints
+  - GET /api/analytics/searches - Combined analytics overview with all data in one response
+  - GET /api/analytics/searches/totals - Total searches (last 7 days, last 30 days, all time)
+  - GET /api/analytics/searches/top - Top 10 search queries with counts and avg result counts
+  - GET /api/analytics/searches/by-source - Searches grouped by source (web)
+  - GET /api/analytics/items/by-type - Total items grouped by type
+  - GET /api/analytics/items/top-viewed - Top 10 most viewed items
+  - All endpoints support date range filtering via start_date and end_date query params
+  - Database indexes for query optimization in migration 003_analytics_indexes.py
+  - Pydantic schemas for all analytics responses
+
+- Files changed:
+  - backend/app/schemas/analytics.py - New analytics response schemas
+  - backend/app/routers/analytics.py - New analytics router with all endpoints
+  - backend/app/routers/__init__.py - Export analytics_router
+  - backend/app/schemas/__init__.py - Export analytics schemas
+  - backend/app/main.py - Register analytics_router
+  - backend/alembic/versions/003_analytics_indexes.py - Database indexes migration
+
+- Learnings for future iterations:
+  - SQLAlchemy func.count/avg return scalar values with default None - use "or 0" pattern
+  - Date range filtering with optional params allows flexible queries (no date = all time)
+  - Combined overview endpoint reduces frontend round trips for dashboard loading
+  - Individual endpoints allow granular refresh/filtering for specific analytics sections
+  - Indexes on search_logs.created_at, query, source optimize analytics queries
+  - Indexes on items.type, category_id, created_at, view_count improve filtering and sorting
+
+---
+
+## 2026-01-20 - US-026: Analytics dashboard UI
+
+- What was implemented:
+  - Analytics page at /admin/analytics protected route
+  - Search statistics section with 3 stat cards (last 7 days, last 30 days, all time)
+  - Top 10 search queries table with query text, count, and average result count
+  - Searches by source bar chart (simple CSS-based horizontal bars)
+  - Items by type stacked bar chart with color-coded segments and legend
+  - Top 10 most viewed items table with clickable rows navigating to item detail
+  - Date range filter with start_date and end_date inputs and Apply/Clear buttons
+  - CSV export button generating downloadable analytics report with all data sections
+  - Analytics types and getAnalytics API method added to api.ts
+  - Analytics link added to Admin Dashboard header
+
+- Files changed:
+  - frontend/src/lib/api.ts - Added analytics types (AnalyticsOverview, SearchTotals, etc.) and getAnalytics API method
+  - frontend/src/pages/admin/Analytics.tsx - New analytics dashboard page with all charts/tables
+  - frontend/src/pages/admin/Dashboard.tsx - Added Analytics button to header
+  - frontend/src/router.tsx - Added /admin/analytics protected route
+
+- Learnings for future iterations:
+  - Simple CSS-based charts (percentage-width bars) avoid heavy charting library dependencies
+  - Stacked bar chart can be built with flex container and percentage-width divs
+  - CSV export using Blob and URL.createObjectURL with createElement('a').click() pattern
+  - Date inputs need toISOString() conversion for backend datetime parsing
+  - StatCard pattern for consistent metric display with title, value, subtitle
+  - Type casting with "as unknown as Array<Record<string, string | number>>" for generic chart data
+
+---
+
+## 2026-01-20 - US-027: Database performance optimization
+
+- What was implemented:
+  - CacheMiddleware for API response caching with appropriate Cache-Control headers
+    - Static reference data (categories, tags): 5 minutes cache
+    - Search results and item listings: 1 minute cache
+    - Individual items: 30 seconds cache (due to view count updates)
+    - Admin endpoints: No cache (private data)
+  - Optimized categories list query from N+1 to single LEFT JOIN with GROUP BY
+  - Fixed tag filtering in search router to use database-level ILIKE filtering instead of loading all tags into memory
+  - Created scripts/measure_search_latency.py for p95 latency measurement
+  - Database indexes were already created in migration 003 (items.type, items.category_id, items.created_at, items.view_count, search_logs indexes)
+
+- Files changed:
+  - backend/app/core/caching.py - New CacheMiddleware for HTTP caching headers
+  - backend/app/main.py - Added CacheMiddleware to the app
+  - backend/app/routers/categories.py - Optimized list_categories to use single JOIN query
+  - backend/app/routers/search.py - Fixed tag filtering to use database-level ILIKE
+  - backend/scripts/measure_search_latency.py - New latency measurement script
+
+- Performance results:
+  - p95 latency: 29.5ms (target: < 500ms) - PASS
+  - p50 latency: 15.9ms
+  - Min latency: 3.4ms
+  - Avg latency: 36.4ms
+
+- Learnings for future iterations:
+  - N+1 queries can be replaced with LEFT JOIN + GROUP BY + func.count() pattern
+  - SQLAlchemy `outerjoin()` method creates a LEFT JOIN
+  - Avoid loading entire tables into memory for filtering - use database-level filtering with ILIKE
+  - http.client.HTTPConnection provides persistent connections for accurate latency measurement vs urllib which creates new connections
+  - Starlette BaseHTTPMiddleware dispatch method needs specific type: Callable[[Request], Awaitable[Response]]
+  - Cache-Control max-age is in seconds; "must-revalidate" forces revalidation when stale
+
+---
+
+## 2026-01-20 - US-028: Frontend performance optimization
+
+- What was implemented:
+  - React.memo added to expensive rendering components: ItemCard, SearchResultCard, Pagination, CodeBlock
+  - Code splitting for admin routes using React.lazy and Suspense
+  - PageLoader component as fallback for lazy-loaded routes
+  - Vite manualChunks configuration for vendor bundle optimization:
+    - vendor-react (98KB): react, react-dom, react-router-dom
+    - vendor-radix (99KB): all @radix-ui components
+    - vendor-markdown (118KB): react-markdown
+    - vendor-syntax (622KB): react-syntax-highlighter
+  - Main bundle reduced from 1,269KB to 329KB
+  - Search results already use pagination (20 items per page) - no virtual scrolling needed
+  - No images in application requiring lazy loading
+
+- Files changed:
+  - frontend/src/components/ItemCard.tsx - Wrapped with React.memo
+  - frontend/src/components/SearchResultCard.tsx - Wrapped with React.memo
+  - frontend/src/components/Pagination.tsx - Wrapped with React.memo
+  - frontend/src/components/CodeBlock.tsx - Wrapped with React.memo
+  - frontend/src/router.tsx - React.lazy imports for admin routes, Suspense wrappers, PageLoader component
+  - frontend/vite.config.ts - Added manualChunks for vendor bundle splitting
+
+- Learnings for future iterations:
+  - React.memo should wrap exported component function: `export const Foo = memo(function Foo({...}) { ... })`
+  - React.lazy() requires default exports; import("./path") for code splitting
+  - Suspense fallback should be a simple component to avoid loading more code
+  - Vite manualChunks allows splitting large vendor dependencies for better caching
+  - react-syntax-highlighter is 622KB - consider dynamic import only when code blocks are present
+  - Check for existing pagination before implementing virtual scrolling - pagination is often sufficient
+
+---
+
+## 2026-01-20 - US-029: Backend API tests
+
+- What was implemented:
+  - Pytest test suite for backend API with 90 tests covering all endpoints
+  - Test fixtures in conftest.py: db session, test client, admin headers, sample category/tag/item(s)
+  - FTS5 virtual table and triggers created in test database for search functionality
+  - test_items.py: Tests for GET /api/items (pagination, relationships), GET /api/items/{id}, POST/PUT/DELETE with auth, view increment, related items
+  - test_search.py: Tests for GET /api/search with query, filters (type, category, tags), sorting, pagination
+  - test_categories.py: Tests for GET/POST/PUT/DELETE /api/categories with auth
+  - test_tags.py: Tests for GET/POST/PUT/DELETE /api/tags with auth
+  - test_auth.py: Tests for admin token validation middleware and POST /api/auth/validate
+  - test_analytics.py: Tests for all analytics endpoints with admin auth
+  - Fixed tests to use 401 (not 403) for missing auth header (HTTPBearer behavior)
+  - Fixed test_update_item_tags to avoid fixture conflicts by creating tags/items locally
+
+- Files changed:
+  - backend/tests/__init__.py - Test package initialization
+  - backend/tests/conftest.py - Pytest fixtures (db, client, admin_headers, sample data)
+  - backend/tests/test_items.py - 26 tests for items API
+  - backend/tests/test_search.py - 15 tests for search API
+  - backend/tests/test_categories.py - 14 tests for categories API
+  - backend/tests/test_tags.py - 14 tests for tags API
+  - backend/tests/test_auth.py - 9 tests for auth middleware and endpoint
+  - backend/tests/test_analytics.py - 12 tests for analytics API
+
+- Test results:
+  - All 90 tests pass
+  - Test coverage: 92% (exceeds 70% requirement)
+  - Typecheck passes (mypy strict mode)
+
+- Learnings for future iterations:
+  - HTTPBearer security scheme returns 401 (not 403) when Authorization header is missing
+  - Use StaticPool for SQLite in-memory test database to share connection across threads
+  - FTS5 virtual table needs to be created manually in tests (not via Alembic migrations)
+  - Avoid fixture conflicts by using sample_item XOR sample_items (they create conflicting tags)
+  - TestClient with raise_server_exceptions=False shows actual HTTP status codes in tests
+  - pytest-cov provides excellent coverage reports with --cov-report=term-missing
+
+---
+
+## 2026-01-20 - US-030: Frontend component tests
+
+- What was implemented:
+  - Vitest test suite for frontend with 54 tests covering critical user flows
+  - Test setup with jsdom environment, matchMedia/ResizeObserver/localStorage mocks
+  - Mock data for categories, tags, items, search responses, auth responses
+  - Custom render utility with all providers (Theme, Auth, KeyboardShortcuts, Router)
+  - search-flow.test.tsx: 19 tests for search page and item detail flows
+  - admin-flow.test.tsx: 16 tests for login and content editor flows
+  - filter-sort-flow.test.tsx: 19 tests for filtering, sorting, pagination, URL state
+
+- Files changed:
+  - frontend/vitest.config.ts - Vitest configuration with jsdom, coverage, path aliases
+  - frontend/src/test/setup.ts - Test environment setup with DOM mocks
+  - frontend/src/test/mocks.ts - Mock data for all API responses
+  - frontend/src/test/test-utils.tsx - Custom render with providers
+  - frontend/src/test/search-flow.test.tsx - Search and item detail tests
+  - frontend/src/test/admin-flow.test.tsx - Admin login and editor tests
+  - frontend/src/test/filter-sort-flow.test.tsx - Filter and sort tests
+  - frontend/package.json - Added vitest, @testing-library/react, msw devDependencies
+
+- Test results:
+  - All 54 tests pass
+  - Typecheck passes
+
+- Learnings for future iterations:
+  - vi.mock() with vi.importActual() preserves non-mocked exports
+  - useNavigate mock: vi.mock('react-router-dom', ...) with useNavigate: () => mockNavigate
+  - MemoryRouter with initialEntries prop simulates URL navigation in tests
+  - Custom render wrapper needs Routes/Route for route params (e.g., /items/:id)
+  - Radix UI components need ResizeObserver and PointerEvent mocks in jsdom
+  - waitFor() is essential for async API responses in React tests
+  - getAllByText for elements that appear multiple times (e.g., in related items)
+
+---
+
+## 2026-01-20 - US-031: Load testing
+
+- What was implemented:
+  - Load test script at backend/scripts/load_test.py simulating 50 concurrent users
+  - UserSimulator class simulates realistic user behavior with weighted operations
+  - Operations tested: search (60%), pagination (20%), categories (10%), tags (10%)
+  - When items exist: adds view item (25%), view increment (10%), related items (5%)
+  - LoadTestMetrics class with thread-safe metrics collection and percentile calculations
+  - fetch_item_ids function to dynamically get available items for testing
+  - Comprehensive results output with pass/fail checks for acceptance criteria
+  - Results documented in backend/load-test-results.md
+  - Fixed pre-existing type error in measure_search_latency.py (missing dict type params)
+
+- Files changed:
+  - backend/scripts/load_test.py - New load test script with 50 concurrent user simulation
+  - backend/load-test-results.md - Documentation of load test results
+  - backend/scripts/measure_search_latency.py - Fixed type annotation for mypy strict mode
+
+- Load test results:
+  - Total requests: 6,555 (in 30 seconds)
+  - Success rate: 100% (0 errors)
+  - Requests/second: 202.8
+  - p50 latency: 82.6ms
+  - p95 latency: 170.0ms (target: < 1000ms) - PASS
+  - p99 latency: 316.4ms
+  - Max latency: 2,323.1ms
+  - All endpoints functional: /api/search, /api/items, /api/categories, /api/tags
+
+- Learnings for future iterations:
+  - concurrent.futures.ThreadPoolExecutor provides easy concurrent user simulation
+  - Use dataclass with threading.Lock for thread-safe metrics aggregation
+  - http.client.HTTPConnection provides persistent connections for accurate latency measurement
+  - Weight distribution in operations list (extend list with N copies) for weighted random selection
+  - Handle edge cases gracefully: when no items exist, adjust operation mix rather than fail
+  - Always verify API response format before parsing (e.g., data[] vs data.items[])
+  - Python 3.11+ supports dict[str, str] generic syntax without importing Dict from typing
+
+---
+
+## 2026-01-20 - US-032: Documentation
+
+- What was implemented:
+  - README.md with project overview, features list, tech stack, quick start instructions, project structure, API endpoints overview, testing commands, Docker deployment quick start, and keyboard shortcuts
+  - DEPLOYMENT.md with comprehensive Docker deployment guide including docker-compose configuration, manual deployment steps, environment configuration, database management (migrations, backups), nginx reverse proxy setup, SSL/TLS with Let's Encrypt, monitoring/logging, and troubleshooting guide
+  - ADMIN_GUIDE.md with admin panel access instructions, dashboard overview, content management (CRUD for items, categories, tags), markdown editor usage (toolbar, keyboard shortcuts, auto-save drafts), analytics dashboard, and best practices for content quality
+  - docs/architecture.md with ASCII system architecture diagram, component details for frontend and backend, data flow diagrams for search and admin content creation, authentication flow, caching strategy, and security architecture
+  - docs/database-schema.md with ASCII ERD, table definitions with columns/types/constraints, relationships, indexes, migration commands, and SQL query examples
+  - API documentation auto-generated by FastAPI at /docs (Swagger UI) and /redoc
+  - Environment variables documented in README.md and DEPLOYMENT.md
+
+- Files changed:
+  - README.md - New project overview and quick start documentation
+  - DEPLOYMENT.md - New comprehensive deployment guide
+  - ADMIN_GUIDE.md - New content management documentation
+  - docs/architecture.md - New system architecture diagram
+  - docs/database-schema.md - New database schema diagram
+
+- Learnings for future iterations:
+  - ASCII diagrams in markdown render well in most viewers and don't require external tools
+  - Organize documentation by audience: README for developers, DEPLOYMENT for DevOps, ADMIN_GUIDE for content managers
+  - Include both visual diagrams and textual tables for complex structures (schema, architecture)
+  - FastAPI's auto-generated /docs endpoint satisfies API documentation requirements out of the box
+  - Comprehensive troubleshooting sections in deployment docs reduce support burden
+
+  ---
+
+  ## 2026-01-20 - US-033: Seed data
+  - New seed data script
