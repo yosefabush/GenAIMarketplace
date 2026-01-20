@@ -3,6 +3,14 @@ from app.schemas.tag import TagCreate, TagUpdate, TagResponse, TagWithItemCount
 from app.schemas.category import CategoryCreate, CategoryResponse
 from app.schemas.item import ItemCreate, ItemUpdate, ItemResponse, ItemListResponse
 from app.schemas.search import SearchResponse
+from app.schemas.analytics import (
+    AnalyticsOverview,
+    ItemsByType,
+    SearchesBySource,
+    SearchTotals,
+    TopSearchQuery,
+    TopViewedItem,
+)
 
 __all__ = [
     "APIResponse",
@@ -18,4 +26,10 @@ __all__ = [
     "ItemResponse",
     "ItemListResponse",
     "SearchResponse",
+    "AnalyticsOverview",
+    "ItemsByType",
+    "SearchesBySource",
+    "SearchTotals",
+    "TopSearchQuery",
+    "TopViewedItem",
 ]
