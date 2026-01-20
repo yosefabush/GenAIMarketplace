@@ -647,3 +647,43 @@
   - Reuse the same patterns from Categories page: inline form, confirmation modal, toast notifications
   - Use consistent UI between management pages for better admin UX
   - item_count in list response enables warning when deleting tags that are in use
+
+---
+
+## 2026-01-20 - US-023: Dark mode support
+
+- What was implemented:
+  - ThemeContext with ThemeProvider component managing theme state (light/dark/system)
+  - Theme type supporting "light", "dark", and "system" options with system theme detection
+  - ThemeToggle component with dropdown menu for theme selection (sun/moon/monitor icons)
+  - Theme preference saved to localStorage with key "genai-marketplace-theme"
+  - Dark theme CSS variables defined in index.css using .dark class on html element
+  - Updated CodeBlock component to use useTheme hook for reactive syntax highlighting
+  - ThemeToggle added to all pages (Home, Search, ItemDetail, admin Login, Dashboard, Editor, Categories, Tags)
+  - Header component created for reusable page header with logo, theme toggle, and optional content slot
+
+- Files changed:
+  - frontend/src/contexts/theme-context.ts - ThemeContext and ThemeContextType definitions
+  - frontend/src/contexts/ThemeContext.tsx - ThemeProvider component with localStorage persistence
+  - frontend/src/hooks/useTheme.ts - useTheme hook for accessing theme context
+  - frontend/src/components/ThemeToggle.tsx - Theme toggle dropdown component with icons
+  - frontend/src/components/Header.tsx - Reusable header component with theme toggle
+  - frontend/src/components/CodeBlock.tsx - Updated to use useTheme for reactive theme switching
+  - frontend/src/index.css - Changed dark mode from @media (prefers-color-scheme) to .dark class
+  - frontend/src/main.tsx - Wrapped app with ThemeProvider
+  - frontend/src/pages/Home.tsx - Added ThemeToggle in fixed position
+  - frontend/src/pages/Search.tsx - Added ThemeToggle to header
+  - frontend/src/pages/ItemDetail.tsx - Added ThemeToggle in fixed position
+  - frontend/src/pages/admin/Login.tsx - Added ThemeToggle in fixed position
+  - frontend/src/pages/admin/Dashboard.tsx - Added ThemeToggle to header
+  - frontend/src/pages/admin/Editor.tsx - Added ThemeToggle to header
+  - frontend/src/pages/admin/Categories.tsx - Added ThemeToggle to header
+  - frontend/src/pages/admin/Tags.tsx - Added ThemeToggle to header
+
+- Learnings for future iterations:
+  - Split theme context into theme-context.ts (context + types) and ThemeContext.tsx (provider) per react-refresh rules
+  - Use .dark class on documentElement instead of @media (prefers-color-scheme) for user-controlled theming
+  - useTheme hook must be in separate file from components for ESLint react-refresh compliance
+  - CodeBlock should use context-based theme detection (useTheme) not document.classList for reactive updates
+  - System theme option listens to matchMedia change event to update when OS theme changes
+  - resolvedTheme tracks actual applied theme (light/dark) separate from user preference (light/dark/system)
