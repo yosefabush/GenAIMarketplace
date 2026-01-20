@@ -8,6 +8,7 @@ import AdminDashboard from "./pages/admin/Dashboard"
 import AdminEditor from "./pages/admin/Editor"
 import AdminCategories from "./pages/admin/Categories"
 import AdminTags from "./pages/admin/Tags"
+import AdminAnalytics from "./pages/admin/Analytics"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 export const router = createBrowserRouter([
@@ -64,6 +65,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AdminTags />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/analytics",
+    element: (
+      <ProtectedRoute>
+        <AdminAnalytics />
       </ProtectedRoute>
     ),
   },

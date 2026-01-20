@@ -98,6 +98,44 @@ export interface SearchResult {
   limit: number
 }
 
+// Analytics types
+export interface SearchTotals {
+  last_7_days: number
+  last_30_days: number
+  all_time: number
+}
+
+export interface TopSearchQuery {
+  query: string
+  count: number
+  avg_result_count: number
+}
+
+export interface SearchesBySource {
+  source: string
+  count: number
+}
+
+export interface ItemsByType {
+  type: string
+  count: number
+}
+
+export interface TopViewedItem {
+  id: number
+  title: string
+  type: string
+  view_count: number
+}
+
+export interface AnalyticsOverview {
+  search_totals: SearchTotals
+  top_searches: TopSearchQuery[]
+  searches_by_source: SearchesBySource[]
+  items_by_type: ItemsByType[]
+  top_viewed_items: TopViewedItem[]
+}
+
 // API Methods
 export const api = {
   // Items
@@ -175,6 +213,10 @@ export const api = {
   // Auth
   validateToken: (token: string) =>
     apiClient.post<{ success: boolean; valid: boolean; message: string }>('/api/auth/validate', { token }),
+
+  // Analytics
+  getAnalytics: (params?: { start_date?: string; end_date?: string }) =>
+    apiClient.get<APIResponse<AnalyticsOverview>>('/api/analytics/searches', { params }),
 }
 
 export default apiClient
