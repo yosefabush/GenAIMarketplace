@@ -897,3 +897,39 @@
   - Avoid fixture conflicts by using sample_item XOR sample_items (they create conflicting tags)
   - TestClient with raise_server_exceptions=False shows actual HTTP status codes in tests
   - pytest-cov provides excellent coverage reports with --cov-report=term-missing
+
+---
+
+## 2026-01-20 - US-030: Frontend component tests
+
+- What was implemented:
+  - Vitest test suite for frontend with 54 tests covering critical user flows
+  - Test setup with jsdom environment, matchMedia/ResizeObserver/localStorage mocks
+  - Mock data for categories, tags, items, search responses, auth responses
+  - Custom render utility with all providers (Theme, Auth, KeyboardShortcuts, Router)
+  - search-flow.test.tsx: 19 tests for search page and item detail flows
+  - admin-flow.test.tsx: 16 tests for login and content editor flows
+  - filter-sort-flow.test.tsx: 19 tests for filtering, sorting, pagination, URL state
+
+- Files changed:
+  - frontend/vitest.config.ts - Vitest configuration with jsdom, coverage, path aliases
+  - frontend/src/test/setup.ts - Test environment setup with DOM mocks
+  - frontend/src/test/mocks.ts - Mock data for all API responses
+  - frontend/src/test/test-utils.tsx - Custom render with providers
+  - frontend/src/test/search-flow.test.tsx - Search and item detail tests
+  - frontend/src/test/admin-flow.test.tsx - Admin login and editor tests
+  - frontend/src/test/filter-sort-flow.test.tsx - Filter and sort tests
+  - frontend/package.json - Added vitest, @testing-library/react, msw devDependencies
+
+- Test results:
+  - All 54 tests pass
+  - Typecheck passes
+
+- Learnings for future iterations:
+  - vi.mock() with vi.importActual() preserves non-mocked exports
+  - useNavigate mock: vi.mock('react-router-dom', ...) with useNavigate: () => mockNavigate
+  - MemoryRouter with initialEntries prop simulates URL navigation in tests
+  - Custom render wrapper needs Routes/Route for route params (e.g., /items/:id)
+  - Radix UI components need ResizeObserver and PointerEvent mocks in jsdom
+  - waitFor() is essential for async API responses in React tests
+  - getAllByText for elements that appear multiple times (e.g., in related items)
