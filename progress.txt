@@ -788,3 +788,39 @@
   - Date inputs need toISOString() conversion for backend datetime parsing
   - StatCard pattern for consistent metric display with title, value, subtitle
   - Type casting with "as unknown as Array<Record<string, string | number>>" for generic chart data
+
+---
+
+## 2026-01-20 - US-027: Database performance optimization
+
+- What was implemented:
+  - CacheMiddleware for API response caching with appropriate Cache-Control headers
+    - Static reference data (categories, tags): 5 minutes cache
+    - Search results and item listings: 1 minute cache
+    - Individual items: 30 seconds cache (due to view count updates)
+    - Admin endpoints: No cache (private data)
+  - Optimized categories list query from N+1 to single LEFT JOIN with GROUP BY
+  - Fixed tag filtering in search router to use database-level ILIKE filtering instead of loading all tags into memory
+  - Created scripts/measure_search_latency.py for p95 latency measurement
+  - Database indexes were already created in migration 003 (items.type, items.category_id, items.created_at, items.view_count, search_logs indexes)
+
+- Files changed:
+  - backend/app/core/caching.py - New CacheMiddleware for HTTP caching headers
+  - backend/app/main.py - Added CacheMiddleware to the app
+  - backend/app/routers/categories.py - Optimized list_categories to use single JOIN query
+  - backend/app/routers/search.py - Fixed tag filtering to use database-level ILIKE
+  - backend/scripts/measure_search_latency.py - New latency measurement script
+
+- Performance results:
+  - p95 latency: 29.5ms (target: < 500ms) - PASS
+  - p50 latency: 15.9ms
+  - Min latency: 3.4ms
+  - Avg latency: 36.4ms
+
+- Learnings for future iterations:
+  - N+1 queries can be replaced with LEFT JOIN + GROUP BY + func.count() pattern
+  - SQLAlchemy `outerjoin()` method creates a LEFT JOIN
+  - Avoid loading entire tables into memory for filtering - use database-level filtering with ILIKE
+  - http.client.HTTPConnection provides persistent connections for accurate latency measurement vs urllib which creates new connections
+  - Starlette BaseHTTPMiddleware dispatch method needs specific type: Callable[[Request], Awaitable[Response]]
+  - Cache-Control max-age is in seconds; "must-revalidate" forces revalidation when stale
