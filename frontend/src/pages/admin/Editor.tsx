@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { TagInput } from '@/components/TagInput'
 import { MarkdownEditor } from '@/components/MarkdownEditor'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { clearMarkdownDraft } from '@/lib/markdown-draft'
 import { api, type Category, type Item } from '@/lib/api'
 import { useToast } from '@/hooks/useToast'
@@ -267,6 +268,7 @@ export default function AdminEditor() {
                 {isEditing ? 'Edit Item' : 'New Item'}
               </h1>
             </div>
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={handleCancel}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard

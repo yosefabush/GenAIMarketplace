@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Pagination } from '@/components/Pagination'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { api, type Item } from '@/lib/api'
 import {
   LogOut,
@@ -265,6 +266,7 @@ export default function AdminDashboard() {
                 <Tags className="w-4 h-4 mr-2" />
                 Tags
               </Button>
+              <ThemeToggle />
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout

@@ -4,6 +4,7 @@ import { SearchResultCard } from "@/components/SearchResultCard"
 import { Pagination } from "@/components/Pagination"
 import { FilterSidebar, type FilterState } from "@/components/FilterSidebar"
 import { SortDropdown, type SortOption } from "@/components/SortDropdown"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import type { ContentTypeValue } from "@/components/TypeFilterCheckboxes"
 import { ArrowLeft, SearchX, Loader2, SlidersHorizontal, X } from "lucide-react"
 import { useState, useCallback, useEffect } from "react"
@@ -247,6 +248,8 @@ function SearchContent({
                 </span>
               )}
             </Button>
+            {/* Theme toggle */}
+            <ThemeToggle />
           </div>
         </div>
       </div>

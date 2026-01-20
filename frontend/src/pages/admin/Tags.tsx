@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { api, type Tag } from '@/lib/api'
 import {
   LogOut,
@@ -198,6 +199,7 @@ export default function AdminTags() {
                 <FolderTree className="w-4 h-4 mr-2" />
                 Categories
               </Button>
+              <ThemeToggle />
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout

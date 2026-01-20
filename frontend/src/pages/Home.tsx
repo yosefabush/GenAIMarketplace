@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/SearchBar"
 import { TypeFilterChips, type ContentType } from "@/components/TypeFilterChips"
 import { RecentAdditions } from "@/components/RecentAdditions"
 import { FeaturedItems } from "@/components/FeaturedItems"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import { Sparkles } from "lucide-react"
 
 export default function Home() {
@@ -41,6 +42,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Theme Toggle - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center px-4 pt-16 pb-12 sm:pt-24 sm:pb-16 md:pt-32 md:pb-20">
         {/* Logo/Brand */}

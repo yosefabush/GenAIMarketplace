@@ -7,6 +7,7 @@ import { api, type Item } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { CodeBlock, InlineCode } from "@/components/CodeBlock"
 import { RelatedItems } from "@/components/RelatedItems"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 const typeColors: Record<string, string> = {
   agent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -225,6 +226,11 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Theme Toggle - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Navigation */}
         <button

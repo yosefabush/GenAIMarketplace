@@ -3,6 +3,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { Copy, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/hooks/useTheme"
 
 interface CodeBlockProps {
   children: string
@@ -32,6 +33,7 @@ function normalizeLanguage(lang: string | undefined): string {
 
 export function CodeBlock({ children, language, className }: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
+  const { resolvedTheme } = useTheme()
 
   const handleCopy = async () => {
     try {
@@ -43,10 +45,7 @@ export function CodeBlock({ children, language, className }: CodeBlockProps) {
     }
   }
 
-  // Detect dark mode from document class
-  const isDark = typeof document !== "undefined"
-    && document.documentElement.classList.contains("dark")
-
+  const isDark = resolvedTheme === "dark"
   const normalizedLanguage = normalizeLanguage(language)
 
   return (
