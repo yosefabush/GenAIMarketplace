@@ -573,7 +573,7 @@
         "Documentation for running seed script"
       ],
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -593,7 +593,7 @@
         "Smoke tests pass in production"
       ],
       "priority": 34,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]

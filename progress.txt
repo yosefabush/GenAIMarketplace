@@ -999,3 +999,8 @@
   - Include both visual diagrams and textual tables for complex structures (schema, architecture)
   - FastAPI's auto-generated /docs endpoint satisfies API documentation requirements out of the box
   - Comprehensive troubleshooting sections in deployment docs reduce support burden
+
+  ---
+
+  ## 2026-01-20 - US-033: Seed data
+  - New seed data script

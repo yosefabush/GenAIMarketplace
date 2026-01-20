@@ -61,9 +61,36 @@ alembic upgrade head
 
 # Start the development server
 uvicorn app.main:app --reload
+
+# (Optional) Seed the database with sample content
+python scripts/seed_data.py
 ```
 
 The API will be available at http://localhost:8000.
+
+### Seeding Sample Data
+
+The marketplace comes with a seed script that populates the database with 55 real-world useful examples:
+
+```bash
+cd backend
+
+# Seed the database (idempotent - safe to run multiple times)
+python scripts/seed_data.py
+
+# Reset and reseed (clears existing data first)
+python scripts/seed_data.py --reset
+```
+
+The seed script creates:
+- **7 Categories**: Development Tools, Code Generation, Documentation, Testing & QA, DevOps & Infrastructure, Data & Analytics, Security
+- **25 Tags**: Programming languages, frameworks, and concepts
+- **55 Items**:
+  - 15 AI Agents (code review, testing, debugging, etc.)
+  - 20 Prompts (code review, bug fix, documentation, etc.)
+  - 10 MCP Servers (GitHub, database, Docker, AWS, etc.)
+  - 5 Workflows (PR review, deployment, incident response, etc.)
+  - 5 Documentation articles (getting started, best practices, etc.)
 
 ### Frontend Setup
 
