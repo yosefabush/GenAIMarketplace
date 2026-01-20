@@ -488,8 +488,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 28,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "React.memo added to ItemCard, SearchResultCard, Pagination, CodeBlock. Code splitting with React.lazy/Suspense for all admin routes (Login, Dashboard, Editor, Categories, Tags, Analytics). Vite manual chunks for vendor bundles (react, radix, markdown, syntax-highlighter). Search uses pagination (not virtual scrolling). No images in app requiring lazy loading. Main bundle reduced from 1,269KB to 329KB with vendor chunks."
     },
     {
       "id": "US-029",

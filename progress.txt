@@ -824,3 +824,36 @@
   - http.client.HTTPConnection provides persistent connections for accurate latency measurement vs urllib which creates new connections
   - Starlette BaseHTTPMiddleware dispatch method needs specific type: Callable[[Request], Awaitable[Response]]
   - Cache-Control max-age is in seconds; "must-revalidate" forces revalidation when stale
+
+---
+
+## 2026-01-20 - US-028: Frontend performance optimization
+
+- What was implemented:
+  - React.memo added to expensive rendering components: ItemCard, SearchResultCard, Pagination, CodeBlock
+  - Code splitting for admin routes using React.lazy and Suspense
+  - PageLoader component as fallback for lazy-loaded routes
+  - Vite manualChunks configuration for vendor bundle optimization:
+    - vendor-react (98KB): react, react-dom, react-router-dom
+    - vendor-radix (99KB): all @radix-ui components
+    - vendor-markdown (118KB): react-markdown
+    - vendor-syntax (622KB): react-syntax-highlighter
+  - Main bundle reduced from 1,269KB to 329KB
+  - Search results already use pagination (20 items per page) - no virtual scrolling needed
+  - No images in application requiring lazy loading
+
+- Files changed:
+  - frontend/src/components/ItemCard.tsx - Wrapped with React.memo
+  - frontend/src/components/SearchResultCard.tsx - Wrapped with React.memo
+  - frontend/src/components/Pagination.tsx - Wrapped with React.memo
+  - frontend/src/components/CodeBlock.tsx - Wrapped with React.memo
+  - frontend/src/router.tsx - React.lazy imports for admin routes, Suspense wrappers, PageLoader component
+  - frontend/vite.config.ts - Added manualChunks for vendor bundle splitting
+
+- Learnings for future iterations:
+  - React.memo should wrap exported component function: `export const Foo = memo(function Foo({...}) { ... })`
+  - React.lazy() requires default exports; import("./path") for code splitting
+  - Suspense fallback should be a simple component to avoid loading more code
+  - Vite manualChunks allows splitting large vendor dependencies for better caching
+  - react-syntax-highlighter is 622KB - consider dynamic import only when code blocks are present
+  - Check for existing pagination before implementing virtual scrolling - pagination is often sufficient
