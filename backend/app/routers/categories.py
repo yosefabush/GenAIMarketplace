@@ -31,12 +31,22 @@ def list_categories(
     db: Session = Depends(get_db),
 ) -> APIResponse[list[CategoryWithItemCount]]:
     """List all categories with item counts."""
-    categories = db.query(Category).order_by(Category.name).all()
+    from sqlalchemy import func, outerjoin
 
-    # Get item counts for each category
+    # Single query with LEFT JOIN and GROUP BY to get item counts
+    # This avoids N+1 queries
+    query = (
+        db.query(
+            Category,
+            func.count(Item.id).label("item_count"),
+        )
+        .outerjoin(Item, Item.category_id == Category.id)
+        .group_by(Category.id)
+        .order_by(Category.name)
+    )
+
     result = []
-    for cat in categories:
-        item_count = db.query(Item).filter(Item.category_id == cat.id).count()
+    for cat, item_count in query.all():
         cat_dict = {
             "id": cat.id,
             "name": cat.name,

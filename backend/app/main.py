@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.core.config import settings
 from app.core.database import engine
+from app.core.caching import CacheMiddleware
 from app.models.base import Base
 from app.routers import items_router, categories_router, tags_router, search_router, auth_router, analytics_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +19,9 @@ app.include_router(tags_router)
 app.include_router(search_router)
 app.include_router(auth_router)
 app.include_router(analytics_router)
+
+# Add caching middleware (must be before CORS middleware to properly modify responses)
+app.add_middleware(CacheMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

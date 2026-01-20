@@ -157,14 +157,13 @@ def search(
             query = query.filter(Item.category_id.in_(category_filters))
 
         if tag_filters:
-            # Find tag IDs by name (case-insensitive using LIKE)
-            tag_objs = db.query(Tag).all()
-            matching_tag_ids = [
-                t.id for t in tag_objs
-                if any(tf in t.name.lower() for tf in tag_filters)
-            ]
-            if matching_tag_ids:
-                query = query.filter(Item.tags.any(Tag.id.in_(matching_tag_ids)))
+            # Find tag IDs by name (case-insensitive using OR with ILIKE)
+            # Use database-level filtering instead of loading all tags into memory
+            tag_conditions = [Tag.name.ilike(f"%{t}%") for t in tag_filters]
+            tag_objs = db.query(Tag).filter(or_(*tag_conditions)).all()
+            if tag_objs:
+                tag_ids = [t.id for t in tag_objs]
+                query = query.filter(Item.tags.any(Tag.id.in_(tag_ids)))
             else:
                 # Log search with 0 results due to tag filter
                 SearchLoggingService.log_search(
