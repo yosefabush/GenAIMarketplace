@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -9,7 +10,7 @@ export interface PaginationProps {
   className?: string
 }
 
-export function Pagination({
+export const Pagination = memo(function Pagination({
   page,
   totalPages,
   onPageChange,
@@ -111,4 +112,4 @@ export function Pagination({
       </Button>
     </nav>
   )
-}
+})

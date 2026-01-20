@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { memo, useState } from "react"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import { Copy, Check } from "lucide-react"
@@ -31,7 +31,7 @@ function normalizeLanguage(lang: string | undefined): string {
   return languageMap[normalized] || normalized
 }
 
-export function CodeBlock({ children, language, className }: CodeBlockProps) {
+export const CodeBlock = memo(function CodeBlock({ children, language, className }: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
   const { resolvedTheme } = useTheme()
 
@@ -107,7 +107,7 @@ export function CodeBlock({ children, language, className }: CodeBlockProps) {
       </SyntaxHighlighter>
     </div>
   )
-}
+})
 
 // Inline code component (no syntax highlighting, just styled)
 interface InlineCodeProps {

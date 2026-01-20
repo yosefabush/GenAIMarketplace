@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { memo, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import type { Item } from "@/lib/api"
@@ -22,7 +22,7 @@ function getTypeBadgeClass(type: string): string {
   return typeColors[type.toLowerCase()] || typeColors.docs
 }
 
-export function SearchResultCard({ item, className, isHighlighted = false }: SearchResultCardProps) {
+export const SearchResultCard = memo(function SearchResultCard({ item, className, isHighlighted = false }: SearchResultCardProps) {
   const cardRef = useRef<HTMLAnchorElement>(null)
 
   // Scroll highlighted card into view
@@ -99,4 +99,4 @@ export function SearchResultCard({ item, className, isHighlighted = false }: Sea
       </div>
     </Link>
   )
-}
+})

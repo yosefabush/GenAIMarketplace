@@ -1,15 +1,30 @@
+import { lazy, Suspense } from "react"
 import { createBrowserRouter } from "react-router-dom"
 import Home from "./pages/Home"
 import Search from "./pages/Search"
 import ItemDetail from "./pages/ItemDetail"
 import NotFound from "./pages/NotFound"
-import AdminLogin from "./pages/admin/Login"
-import AdminDashboard from "./pages/admin/Dashboard"
-import AdminEditor from "./pages/admin/Editor"
-import AdminCategories from "./pages/admin/Categories"
-import AdminTags from "./pages/admin/Tags"
-import AdminAnalytics from "./pages/admin/Analytics"
 import ProtectedRoute from "./components/ProtectedRoute"
+
+// Lazy load admin routes for code splitting
+const AdminLogin = lazy(() => import("./pages/admin/Login"))
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"))
+const AdminEditor = lazy(() => import("./pages/admin/Editor"))
+const AdminCategories = lazy(() => import("./pages/admin/Categories"))
+const AdminTags = lazy(() => import("./pages/admin/Tags"))
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"))
+
+// Loading fallback for lazy-loaded routes
+function PageLoader() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <span className="text-sm text-muted-foreground">Loading...</span>
+      </div>
+    </div>
+  )
+}
 
 export const router = createBrowserRouter([
   {
@@ -26,13 +41,19 @@ export const router = createBrowserRouter([
   },
   {
     path: "/admin/login",
-    element: <AdminLogin />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <AdminLogin />
+      </Suspense>
+    ),
   },
   {
     path: "/admin/dashboard",
     element: (
       <ProtectedRoute>
-        <AdminDashboard />
+        <Suspense fallback={<PageLoader />}>
+          <AdminDashboard />
+        </Suspense>
       </ProtectedRoute>
     ),
   },
@@ -40,7 +61,9 @@ export const router = createBrowserRouter([
     path: "/admin/editor",
     element: (
       <ProtectedRoute>
-        <AdminEditor />
+        <Suspense fallback={<PageLoader />}>
+          <AdminEditor />
+        </Suspense>
       </ProtectedRoute>
     ),
   },
@@ -48,7 +71,9 @@ export const router = createBrowserRouter([
     path: "/admin/editor/:id",
     element: (
       <ProtectedRoute>
-        <AdminEditor />
+        <Suspense fallback={<PageLoader />}>
+          <AdminEditor />
+        </Suspense>
       </ProtectedRoute>
     ),
   },
@@ -56,7 +81,9 @@ export const router = createBrowserRouter([
     path: "/admin/categories",
     element: (
       <ProtectedRoute>
-        <AdminCategories />
+        <Suspense fallback={<PageLoader />}>
+          <AdminCategories />
+        </Suspense>
       </ProtectedRoute>
     ),
   },
@@ -64,7 +91,9 @@ export const router = createBrowserRouter([
     path: "/admin/tags",
     element: (
       <ProtectedRoute>
-        <AdminTags />
+        <Suspense fallback={<PageLoader />}>
+          <AdminTags />
+        </Suspense>
       </ProtectedRoute>
     ),
   },
@@ -72,7 +101,9 @@ export const router = createBrowserRouter([
     path: "/admin/analytics",
     element: (
       <ProtectedRoute>
-        <AdminAnalytics />
+        <Suspense fallback={<PageLoader />}>
+          <AdminAnalytics />
+        </Suspense>
       </ProtectedRoute>
     ),
   },
