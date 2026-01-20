@@ -687,3 +687,42 @@
   - CodeBlock should use context-based theme detection (useTheme) not document.classList for reactive updates
   - System theme option listens to matchMedia change event to update when OS theme changes
   - resolvedTheme tracks actual applied theme (light/dark) separate from user preference (light/dark/system)
+
+---
+
+## 2026-01-20 - US-024: Keyboard shortcuts
+
+- What was implemented:
+  - KeyboardShortcutsContext with provider for global keyboard state management
+  - keyboard-shortcuts-context.ts separates context definition from provider component (ESLint compliance)
+  - useKeyboardShortcuts hook for accessing keyboard context
+  - GlobalKeyboardHandler component listens for keydown events and handles all shortcuts
+  - KeyboardShortcutsHelp modal displays all available shortcuts with styled kbd elements
+  - '/' or 'Ctrl+K' focuses search bar from anywhere (unless in input/textarea)
+  - 'Esc' closes help modal, clears search (and blurs), or resets highlighted index
+  - Arrow Up/Down navigate search results with visual highlighting (ring-2 ring-primary)
+  - 'Enter' on highlighted result navigates to item detail page
+  - '?' shows keyboard shortcuts help modal (only when not in input)
+  - SearchResultCard updated with isHighlighted prop for visual feedback
+  - Highlighted card auto-scrolls into view
+
+- Files changed:
+  - frontend/src/contexts/keyboard-shortcuts-context.ts - Context definition with types
+  - frontend/src/contexts/KeyboardShortcutsContext.tsx - Provider component with state
+  - frontend/src/hooks/useKeyboardShortcuts.ts - Hook for accessing context
+  - frontend/src/components/GlobalKeyboardHandler.tsx - Global keyboard event handler
+  - frontend/src/components/KeyboardShortcutsHelp.tsx - Help modal with shortcuts list
+  - frontend/src/components/SearchBar.tsx - Registers input element with context via callback ref
+  - frontend/src/components/SearchResultCard.tsx - Added isHighlighted prop with visual styling
+  - frontend/src/main.tsx - Added KeyboardShortcutsProvider and KeyboardShortcutsHelp
+  - frontend/src/pages/Home.tsx - Added GlobalKeyboardHandler with onClearSearch
+  - frontend/src/pages/Search.tsx - Added GlobalKeyboardHandler with full navigation support
+
+- Learnings for future iterations:
+  - ESLint react-hooks/refs rule prohibits reading ref.current during render - use callback functions instead
+  - Use callback refs to register DOM elements with context rather than passing ref objects
+  - focusSearchInput/blurSearchInput/isSearchInputFocused as callbacks avoid accessing ref during render
+  - Keyboard shortcuts should check if target is input/textarea/contentEditable before processing
+  - Arrow key navigation needs to update highlightedIndex state, not just UI focus
+  - scrollIntoView with block: "nearest" prevents jumping when card is already visible
+  - isSearchInputFocused callback uses document.activeElement comparison (works during event handling)
