@@ -857,3 +857,43 @@
   - Vite manualChunks allows splitting large vendor dependencies for better caching
   - react-syntax-highlighter is 622KB - consider dynamic import only when code blocks are present
   - Check for existing pagination before implementing virtual scrolling - pagination is often sufficient
+
+---
+
+## 2026-01-20 - US-029: Backend API tests
+
+- What was implemented:
+  - Pytest test suite for backend API with 90 tests covering all endpoints
+  - Test fixtures in conftest.py: db session, test client, admin headers, sample category/tag/item(s)
+  - FTS5 virtual table and triggers created in test database for search functionality
+  - test_items.py: Tests for GET /api/items (pagination, relationships), GET /api/items/{id}, POST/PUT/DELETE with auth, view increment, related items
+  - test_search.py: Tests for GET /api/search with query, filters (type, category, tags), sorting, pagination
+  - test_categories.py: Tests for GET/POST/PUT/DELETE /api/categories with auth
+  - test_tags.py: Tests for GET/POST/PUT/DELETE /api/tags with auth
+  - test_auth.py: Tests for admin token validation middleware and POST /api/auth/validate
+  - test_analytics.py: Tests for all analytics endpoints with admin auth
+  - Fixed tests to use 401 (not 403) for missing auth header (HTTPBearer behavior)
+  - Fixed test_update_item_tags to avoid fixture conflicts by creating tags/items locally
+
+- Files changed:
+  - backend/tests/__init__.py - Test package initialization
+  - backend/tests/conftest.py - Pytest fixtures (db, client, admin_headers, sample data)
+  - backend/tests/test_items.py - 26 tests for items API
+  - backend/tests/test_search.py - 15 tests for search API
+  - backend/tests/test_categories.py - 14 tests for categories API
+  - backend/tests/test_tags.py - 14 tests for tags API
+  - backend/tests/test_auth.py - 9 tests for auth middleware and endpoint
+  - backend/tests/test_analytics.py - 12 tests for analytics API
+
+- Test results:
+  - All 90 tests pass
+  - Test coverage: 92% (exceeds 70% requirement)
+  - Typecheck passes (mypy strict mode)
+
+- Learnings for future iterations:
+  - HTTPBearer security scheme returns 401 (not 403) when Authorization header is missing
+  - Use StaticPool for SQLite in-memory test database to share connection across threads
+  - FTS5 virtual table needs to be created manually in tests (not via Alembic migrations)
+  - Avoid fixture conflicts by using sample_item XOR sample_items (they create conflicting tags)
+  - TestClient with raise_server_exceptions=False shows actual HTTP status codes in tests
+  - pytest-cov provides excellent coverage reports with --cov-report=term-missing
