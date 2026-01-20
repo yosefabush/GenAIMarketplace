@@ -758,3 +758,33 @@
   - Individual endpoints allow granular refresh/filtering for specific analytics sections
   - Indexes on search_logs.created_at, query, source optimize analytics queries
   - Indexes on items.type, category_id, created_at, view_count improve filtering and sorting
+
+---
+
+## 2026-01-20 - US-026: Analytics dashboard UI
+
+- What was implemented:
+  - Analytics page at /admin/analytics protected route
+  - Search statistics section with 3 stat cards (last 7 days, last 30 days, all time)
+  - Top 10 search queries table with query text, count, and average result count
+  - Searches by source bar chart (simple CSS-based horizontal bars)
+  - Items by type stacked bar chart with color-coded segments and legend
+  - Top 10 most viewed items table with clickable rows navigating to item detail
+  - Date range filter with start_date and end_date inputs and Apply/Clear buttons
+  - CSV export button generating downloadable analytics report with all data sections
+  - Analytics types and getAnalytics API method added to api.ts
+  - Analytics link added to Admin Dashboard header
+
+- Files changed:
+  - frontend/src/lib/api.ts - Added analytics types (AnalyticsOverview, SearchTotals, etc.) and getAnalytics API method
+  - frontend/src/pages/admin/Analytics.tsx - New analytics dashboard page with all charts/tables
+  - frontend/src/pages/admin/Dashboard.tsx - Added Analytics button to header
+  - frontend/src/router.tsx - Added /admin/analytics protected route
+
+- Learnings for future iterations:
+  - Simple CSS-based charts (percentage-width bars) avoid heavy charting library dependencies
+  - Stacked bar chart can be built with flex container and percentage-width divs
+  - CSV export using Blob and URL.createObjectURL with createElement('a').click() pattern
+  - Date inputs need toISOString() conversion for backend datetime parsing
+  - StatCard pattern for consistent metric display with title, value, subtitle
+  - Type casting with "as unknown as Array<Record<string, string | number>>" for generic chart data
