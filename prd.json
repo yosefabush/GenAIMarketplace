@@ -436,8 +436,8 @@
         "Typecheck passes"
       ],
       "priority": 25,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Analytics router at /api/analytics with combined overview endpoint and individual endpoints for search totals, top searches, searches by source, items by type, and top viewed items. All endpoints admin-protected with date range filtering. Database indexes added for search_logs (created_at, query, source) and items (type, category_id, created_at, view_count)."
     },
     {
       "id": "US-026",

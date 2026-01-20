@@ -726,3 +726,35 @@
   - Arrow key navigation needs to update highlightedIndex state, not just UI focus
   - scrollIntoView with block: "nearest" prevents jumping when card is already visible
   - isSearchInputFocused callback uses document.activeElement comparison (works during event handling)
+
+---
+
+## 2026-01-20 - US-025: Analytics data queries
+
+- What was implemented:
+  - Analytics router at /api/analytics with admin-protected endpoints
+  - GET /api/analytics/searches - Combined analytics overview with all data in one response
+  - GET /api/analytics/searches/totals - Total searches (last 7 days, last 30 days, all time)
+  - GET /api/analytics/searches/top - Top 10 search queries with counts and avg result counts
+  - GET /api/analytics/searches/by-source - Searches grouped by source (web)
+  - GET /api/analytics/items/by-type - Total items grouped by type
+  - GET /api/analytics/items/top-viewed - Top 10 most viewed items
+  - All endpoints support date range filtering via start_date and end_date query params
+  - Database indexes for query optimization in migration 003_analytics_indexes.py
+  - Pydantic schemas for all analytics responses
+
+- Files changed:
+  - backend/app/schemas/analytics.py - New analytics response schemas
+  - backend/app/routers/analytics.py - New analytics router with all endpoints
+  - backend/app/routers/__init__.py - Export analytics_router
+  - backend/app/schemas/__init__.py - Export analytics schemas
+  - backend/app/main.py - Register analytics_router
+  - backend/alembic/versions/003_analytics_indexes.py - Database indexes migration
+
+- Learnings for future iterations:
+  - SQLAlchemy func.count/avg return scalar values with default None - use "or 0" pattern
+  - Date range filtering with optional params allows flexible queries (no date = all time)
+  - Combined overview endpoint reduces frontend round trips for dashboard loading
+  - Individual endpoints allow granular refresh/filtering for specific analytics sections
+  - Indexes on search_logs.created_at, query, source optimize analytics queries
+  - Indexes on items.type, category_id, created_at, view_count improve filtering and sorting
