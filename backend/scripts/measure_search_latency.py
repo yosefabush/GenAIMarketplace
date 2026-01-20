@@ -73,7 +73,7 @@ FILTER_VARIATIONS = [
 ]
 
 
-def measure_query(conn: http.client.HTTPConnection, query: str, filters: dict) -> float | None:
+def measure_query(conn: http.client.HTTPConnection, query: str, filters: dict[str, str]) -> float | None:
     """
     Measure the latency of a single search query using persistent connection.
 
