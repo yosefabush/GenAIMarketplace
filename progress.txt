@@ -933,3 +933,42 @@
   - Radix UI components need ResizeObserver and PointerEvent mocks in jsdom
   - waitFor() is essential for async API responses in React tests
   - getAllByText for elements that appear multiple times (e.g., in related items)
+
+---
+
+## 2026-01-20 - US-031: Load testing
+
+- What was implemented:
+  - Load test script at backend/scripts/load_test.py simulating 50 concurrent users
+  - UserSimulator class simulates realistic user behavior with weighted operations
+  - Operations tested: search (60%), pagination (20%), categories (10%), tags (10%)
+  - When items exist: adds view item (25%), view increment (10%), related items (5%)
+  - LoadTestMetrics class with thread-safe metrics collection and percentile calculations
+  - fetch_item_ids function to dynamically get available items for testing
+  - Comprehensive results output with pass/fail checks for acceptance criteria
+  - Results documented in backend/load-test-results.md
+  - Fixed pre-existing type error in measure_search_latency.py (missing dict type params)
+
+- Files changed:
+  - backend/scripts/load_test.py - New load test script with 50 concurrent user simulation
+  - backend/load-test-results.md - Documentation of load test results
+  - backend/scripts/measure_search_latency.py - Fixed type annotation for mypy strict mode
+
+- Load test results:
+  - Total requests: 6,555 (in 30 seconds)
+  - Success rate: 100% (0 errors)
+  - Requests/second: 202.8
+  - p50 latency: 82.6ms
+  - p95 latency: 170.0ms (target: < 1000ms) - PASS
+  - p99 latency: 316.4ms
+  - Max latency: 2,323.1ms
+  - All endpoints functional: /api/search, /api/items, /api/categories, /api/tags
+
+- Learnings for future iterations:
+  - concurrent.futures.ThreadPoolExecutor provides easy concurrent user simulation
+  - Use dataclass with threading.Lock for thread-safe metrics aggregation
+  - http.client.HTTPConnection provides persistent connections for accurate latency measurement
+  - Weight distribution in operations list (extend list with N copies) for weighted random selection
+  - Handle edge cases gracefully: when no items exist, adjust operation mix rather than fail
+  - Always verify API response format before parsing (e.g., data[] vs data.items[])
+  - Python 3.11+ supports dict[str, str] generic syntax without importing Dict from typing
