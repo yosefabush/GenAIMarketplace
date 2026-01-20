@@ -1,10 +1,12 @@
-import { useSearchParams, Link } from "react-router-dom"
+import { useSearchParams, Link, useNavigate } from "react-router-dom"
 import { SearchBar } from "@/components/SearchBar"
 import { SearchResultCard } from "@/components/SearchResultCard"
 import { Pagination } from "@/components/Pagination"
 import { FilterSidebar, type FilterState } from "@/components/FilterSidebar"
 import { SortDropdown, type SortOption } from "@/components/SortDropdown"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { GlobalKeyboardHandler } from "@/components/GlobalKeyboardHandler"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import type { ContentTypeValue } from "@/components/TypeFilterCheckboxes"
 import { ArrowLeft, SearchX, Loader2, SlidersHorizontal, X } from "lucide-react"
 import { useState, useCallback, useEffect } from "react"
@@ -79,6 +81,7 @@ function SearchContent({
 }: {
   initialParams: SearchParams
 }) {
+  const navigate = useNavigate()
   const [, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(initialParams.query)
   const [filters, setFilters] = useState<FilterState>({
@@ -95,6 +98,26 @@ function SearchContent({
     error: null,
   })
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const { highlightedIndex, setHighlightedIndex } = useKeyboardShortcuts()
+
+  // Reset highlighted index when results change
+  useEffect(() => {
+    setHighlightedIndex(-1)
+  }, [searchState.items, setHighlightedIndex])
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("")
+  }, [])
+
+  const handleNavigateToResult = useCallback(
+    (index: number) => {
+      const item = searchState.items[index]
+      if (item) {
+        navigate(`/items/${item.id}`)
+      }
+    },
+    [searchState.items, navigate]
+  )
 
   const updateUrl = useCallback(
     (params: Partial<SearchParams>) => {
@@ -214,6 +237,12 @@ function SearchContent({
 
   return (
     <div className="min-h-screen bg-background">
+      <GlobalKeyboardHandler
+        totalResults={searchState.items.length}
+        onNavigateToResult={handleNavigateToResult}
+        onClearSearch={handleClearSearch}
+      />
+
       {/* Search Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4">
@@ -420,8 +449,12 @@ function SearchContent({
                 <>
                   {/* Results Grid */}
                   <div className="grid gap-4">
-                    {searchState.items.map((item) => (
-                      <SearchResultCard key={item.id} item={item} />
+                    {searchState.items.map((item, index) => (
+                      <SearchResultCard
+                        key={item.id}
+                        item={item}
+                        isHighlighted={index === highlightedIndex}
+                      />
                     ))}
                   </div>
 
