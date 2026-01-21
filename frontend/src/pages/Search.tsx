@@ -38,7 +38,7 @@ function parseSearchParams(searchParams: URLSearchParams): SearchParams {
   const typeParam = searchParams.get("type") || ""
   const types = typeParam
     ? (typeParam.split(",").filter((t) =>
-        ["agent", "prompt", "mcp", "workflow", "docs"].includes(t)
+        ["agent", "prompt", "mcp", "workflow", "docs", "skill"].includes(t)
       ) as ContentTypeValue[])
     : []
   const category = searchParams.get("category") || null

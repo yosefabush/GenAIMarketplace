@@ -14,6 +14,7 @@ const typeColors: Record<string, string> = {
   mcp: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
   workflow: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
   docs: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+  skill: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
 }
 
 function getTypeBadgeClass(type: string): string {

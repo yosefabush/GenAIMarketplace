@@ -2228,3 +2228,391 @@ else:
 """
     },
 ]
+
+# =============================================================================
+# SKILLS (5 items)
+# =============================================================================
+
+SKILLS = [
+    {
+        "title": "dev-browser-skill",
+        "description": "Browser automation and web scraping tool for developers. Enables element discovery, form interaction, screenshot generation, and page state validation.",
+        "tags": ["automation", "testing", "web", "javascript", "performance"],
+        "category": "Development Tools",
+        "content": """# Dev Browser Skill
+
+A comprehensive browser automation tool built on Playwright for developers.
+
+## Features
+
+- **Element Discovery**: Find and interact with DOM elements reliably
+- **Form Automation**: Fill forms, submit data, handle authentication
+- **Screenshot Generation**: Capture page states for testing and documentation
+- **Page State Validation**: Assert page conditions and element properties
+- **JavaScript Execution**: Run custom scripts in page context
+- **Network Interception**: Monitor and control HTTP requests
+
+## Usage
+
+```typescript
+import { BrowserSkill } from '@anthropic/skills/browser';
+
+const browser = new BrowserSkill();
+const page = await browser.newPage();
+
+// Navigate and find element
+await page.goto('https://example.com');
+const element = await page.locator('button:has-text("Submit")');
+
+// Take screenshot
+await page.screenshot({ path: 'screenshot.png' });
+
+// Fill form and submit
+await page.fill('input[name="email"]', 'user@example.com');
+await page.click('button[type="submit"]');
+
+// Validate state
+const success = await page.locator('.success-message').isVisible();
+console.log('Form submitted:', success);
+```
+
+## Real-World Applications
+
+- **Web Application Testing**: E2E test automation with zero flakiness
+- **Competitive Analysis**: Scrape competitor websites systematically
+- **Screenshot Documentation**: Auto-generate visual docs from live sites
+- **Form Validation**: Comprehensive form interaction testing
+- **Performance Monitoring**: Capture and analyze page load states
+
+## Supported Browsers
+
+- Chromium
+- Firefox
+- WebKit
+"""
+    },
+    {
+        "title": "api-code-generator-skill",
+        "description": "Generate API client code from OpenAPI specifications. Creates type-safe clients in Python, TypeScript, and Go with automatic CRUD operations.",
+        "tags": ["code-generation", "api", "typescript", "python", "automation"],
+        "category": "Development Tools",
+        "content": """# API Code Generator Skill
+
+Automatically generate type-safe API client code from OpenAPI/Swagger specs.
+
+## Features
+
+- **Multi-Language Support**: Generate for Python, TypeScript, Go, Rust
+- **Type Safety**: Full type definitions from OpenAPI schemas
+- **CRUD Operations**: Automatic implementation of common patterns
+- **Error Handling**: Structured error types with proper typing
+- **Documentation**: Auto-generated docstrings and examples
+- **Authentication**: Support for API keys, OAuth, JWT tokens
+
+## Usage
+
+```typescript
+import { APICodeGenerator } from '@anthropic/skills/api-generator';
+
+const generator = new APICodeGenerator();
+
+const result = await generator.generateClient({
+  openApiSpec: 'https://api.github.com/openapi.json',
+  language: 'typescript',
+  packageName: 'github-api-client',
+  outputDir: './generated'
+});
+
+console.log('Generated client at:', result.outputPath);
+```
+
+## Generated Code Example
+
+```typescript
+// Auto-generated from OpenAPI spec
+export class GitHubClient {
+  constructor(private apiKey: string) {}
+
+  async listRepositories(owner: string): Promise<Repository[]> {
+    const response = await this.request('GET', `/users/${owner}/repos`);
+    return response.data;
+  }
+
+  async createIssue(owner: string, repo: string, issue: IssueInput): Promise<Issue> {
+    return this.request('POST', `/repos/${owner}/${repo}/issues`, issue);
+  }
+}
+```
+
+## Real-World Applications
+
+- **SDK Development**: Ship official client libraries faster
+- **Microservices**: Generate clients for internal service communication
+- **Third-Party Integrations**: Quickly scaffold clients for partner APIs
+- **Backend Codegen**: Generate server stubs and route handlers
+
+## Supported Specifications
+
+- OpenAPI 3.0+
+- Swagger 2.0
+- GraphQL schemas (coming soon)
+"""
+    },
+    {
+        "title": "docker-containerizer-skill",
+        "description": "Analyze source code and generate optimized Dockerfiles with multi-stage builds, layer caching strategies, and security best practices.",
+        "tags": ["devops", "docker", "automation", "infrastructure", "python"],
+        "category": "Development Tools",
+        "content": """# Docker Containerizer Skill
+
+Automatically generate production-ready Dockerfiles from source code analysis.
+
+## Features
+
+- **Intelligent Analysis**: Detect runtime requirements, dependencies, entry points
+- **Multi-Stage Builds**: Optimize image size with build/runtime separation
+- **Layer Caching**: Arrange layers for maximum cache efficiency
+- **Security Hardening**: Non-root users, minimal base images
+- **Build Optimization**: Automatic dependency pruning
+- **Docker Compose**: Generate compose files for multi-service apps
+
+## Usage
+
+```typescript
+import { DockerContainerizer } from '@anthropic/skills/docker';
+
+const containerizer = new DockerContainerizer();
+
+const dockerfile = await containerizer.analyze({
+  sourcePath: './my-app',
+  framework: 'auto-detect',
+  targetRegistry: 'ghcr.io/myorg'
+});
+
+console.log('Generated Dockerfile:\\n', dockerfile.content);
+console.log('Estimated image size:', dockerfile.estimatedSize);
+```
+
+## Generated Dockerfile Example
+
+```dockerfile
+# Build stage
+FROM python:3.11-slim as builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Runtime stage
+FROM python:3.11-slim
+RUN useradd -m -u 1000 appuser
+WORKDIR /app
+COPY --from=builder /root/.local /home/appuser/.local
+COPY . .
+USER appuser
+ENV PATH=/home/appuser/.local/bin:$PATH
+EXPOSE 8000
+CMD ["python", "-m", "uvicorn", "main:app"]
+```
+
+## Real-World Applications
+
+- **CI/CD Pipelines**: Automate Docker image generation in GitHub Actions
+- **Microservices**: Generate containers for each service automatically
+- **Development Environments**: Create consistent local dev containers
+- **Legacy Migration**: Containerize existing applications quickly
+
+## Supported Languages
+
+- Python
+- Node.js / TypeScript
+- Go
+- Java
+- Ruby
+- .NET
+"""
+    },
+    {
+        "title": "git-workflow-assistant-skill",
+        "description": "Automate git workflows including intelligent commit messages, PR descriptions, branch strategy recommendations, and release automation.",
+        "tags": ["git", "ci-cd", "automation", "documentation", "workflow"],
+        "category": "Development Tools",
+        "content": """# Git Workflow Assistant Skill
+
+Automate and optimize your git workflows with intelligent assistance.
+
+## Features
+
+- **Smart Commit Messages**: Generate meaningful commits from code changes
+- **PR Descriptions**: Auto-generate comprehensive PR descriptions
+- **Branch Strategies**: Recommend optimal branching patterns
+- **Release Automation**: Generate changelog and version bumps
+- **Conflict Resolution**: Suggest resolutions for merge conflicts
+- **Commit Analysis**: Detect issues and improvements in commit history
+
+## Usage
+
+```typescript
+import { GitWorkflowAssistant } from '@anthropic/skills/git-assistant';
+
+const assistant = new GitWorkflowAssistant();
+
+// Generate commit message
+const commitMsg = await assistant.generateCommitMessage({
+  staged: ['src/api.ts', 'tests/api.test.ts'],
+  style: 'conventional' // conventional, imperative, descriptive
+});
+
+// Generate PR description
+const prDesc = await assistant.generatePRDescription({
+  title: 'Add user authentication',
+  baseCommits: 5,
+  ticketId: 'PROJ-123'
+});
+
+// Get release notes
+const releaseNotes = await assistant.generateReleaseNotes({
+  version: '2.0.0',
+  previousVersion: '1.9.5'
+});
+```
+
+## Generated Outputs
+
+### Commit Messages
+```
+feat(auth): implement JWT-based authentication
+
+- Add JWT token generation and validation
+- Implement refresh token rotation
+- Add token blacklist for logout
+
+Closes #456
+```
+
+### PR Descriptions
+```
+## Description
+Implements JWT-based authentication system with token refresh mechanism.
+
+## Changes
+- 3 new endpoints: /login, /refresh, /logout
+- 120+ test cases added
+- Updated auth middleware
+
+## Testing
+- [ ] Manual testing on staging
+- [x] All tests pass (98% coverage)
+
+## Checklist
+- [x] Documentation updated
+- [x] No breaking changes
+```
+
+## Real-World Applications
+
+- **Team Standards**: Enforce consistent commit conventions
+- **Documentation**: Auto-generate changelogs for releases
+- **Code Review**: Streamline PR creation and review
+- **Release Management**: Automate version and release workflows
+
+## Supported Platforms
+
+- GitHub
+- GitLab
+- Bitbucket
+- Gitea
+"""
+    },
+    {
+        "title": "performance-analyzer-skill",
+        "description": "Profile application code and generate detailed performance reports with optimization suggestions, caching strategies, and bottleneck identification.",
+        "tags": ["performance", "debugging", "python", "javascript", "automation"],
+        "category": "Development Tools",
+        "content": """# Performance Analyzer Skill
+
+Comprehensive performance profiling and optimization analysis for applications.
+
+## Features
+
+- **Code Profiling**: CPU, memory, and I/O profiling across languages
+- **Bottleneck Detection**: Automatically identify performance hotspots
+- **Optimization Suggestions**: AI-powered recommendations with code examples
+- **Caching Strategies**: Suggest appropriate caching layers and TTLs
+- **Load Testing**: Generate load test scenarios and analysis
+- **Comparative Analysis**: Compare performance across versions or implementations
+- **Report Generation**: Beautiful HTML/PDF performance reports
+
+## Usage
+
+```typescript
+import { PerformanceAnalyzer } from '@anthropic/skills/performance';
+
+const analyzer = new PerformanceAnalyzer();
+
+// Profile application
+const report = await analyzer.analyzeApplication({
+  sourcePath: './src',
+  language: 'python',
+  testScenario: 'e-commerce-checkout',
+  iterations: 100
+});
+
+// Get optimization recommendations
+const recommendations = await analyzer.getRecommendations({
+  priority: 'critical', // critical, high, medium, low
+  budget: { cpuTime: 50 } // 50% reduction target
+});
+
+console.log(report.summary);
+recommendations.forEach(rec => {
+  console.log(rec.title, ':', rec.estimatedImprovement);
+});
+```
+
+## Analysis Report Example
+
+```
+Performance Analysis Report
+===========================
+
+Execution Time: 2.3s (baseline)
+Memory Peak: 256MB
+CPU Usage: 78%
+
+Top Bottlenecks:
+1. Database queries (45% of time)
+   - N+1 problem in user loading
+   - Suggestion: Implement batch loading
+
+2. Image processing (30% of time)
+   - Unoptimized resize operations
+   - Suggestion: Use WebP + CDN caching
+
+3. Template rendering (15% of time)
+   - Missing caching layer
+   - Suggestion: Implement Redis cache
+
+Estimated Improvements:
+- With recommendations: 0.8s (65% faster)
+- With aggressive caching: 0.3s (87% faster)
+```
+
+## Real-World Applications
+
+- **Production Optimization**: Identify real-world performance issues
+- **Capacity Planning**: Understand resource requirements at scale
+- **Before/After Comparison**: Measure impact of optimizations
+- **Performance Regression**: Catch performance degradation in CI/CD
+- **Cost Reduction**: Optimize cloud resource usage
+
+## Supported Languages
+
+- Python
+- JavaScript / Node.js
+- TypeScript
+- Go
+- Java
+- Rust
+"""
+    },
+]

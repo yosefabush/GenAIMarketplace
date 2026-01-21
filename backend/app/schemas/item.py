@@ -11,7 +11,7 @@ class ItemCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., min_length=1)
     content: str = Field(..., min_length=1)
-    type: str = Field(..., pattern="^(agent|prompt|mcp|workflow|doc)$")
+    type: str = Field(..., pattern="^(agent|prompt|mcp|workflow|doc|skill)$")
     category_id: int | None = None
     tag_ids: list[int] = Field(default_factory=list)
 
@@ -22,7 +22,7 @@ class ItemUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, min_length=1)
     content: str | None = Field(default=None, min_length=1)
-    type: str | None = Field(default=None, pattern="^(agent|prompt|mcp|workflow|doc)$")
+    type: str | None = Field(default=None, pattern="^(agent|prompt|mcp|workflow|doc|skill)$")
     category_id: int | None = None
     tag_ids: list[int] | None = None
 

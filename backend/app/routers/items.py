@@ -16,13 +16,14 @@ from app.schemas import (
     ItemResponse,
     ItemListResponse,
 )
+from app.services.search import SearchService
 
 router = APIRouter(prefix="/api/items", tags=["items"])
 
 
 @router.get("", response_model=PaginatedResponse[ItemListResponse])
 def list_items(
-    limit: int = Query(default=20, ge=1, le=100),
+    limit: int = Query(default=20, ge=1, le=1000),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[ItemListResponse]:
@@ -98,6 +99,10 @@ def create_item(
     db.commit()
     db.refresh(item)
 
+    # Add to FTS index
+    SearchService.index_item(db, item.id, item.title, item.description, item.content)
+    db.commit()
+
     # Reload with relationships
     reloaded_item = (
         db.query(Item)
@@ -146,6 +151,10 @@ def update_item(
     db.commit()
     db.refresh(item)
 
+    # Update FTS index
+    SearchService.index_item(db, item.id, item.title, item.description, item.content)
+    db.commit()
+
     # Reload with relationships
     reloaded_item = (
         db.query(Item)
@@ -172,6 +181,9 @@ def delete_item(
 
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
+
+    # Remove from FTS index
+    SearchService.remove_from_index(db, item_id)
 
     db.delete(item)
     db.commit()

@@ -383,15 +383,20 @@ export function MarkdownEditor({
       <div
         ref={containerRef}
         className={cn(
-          "flex flex-1 min-h-[400px]",
+          "flex flex-row w-full flex-1 min-h-[400px]",
           isDragging && "select-none cursor-col-resize"
         )}
       >
         {/* Editor Pane */}
         {viewMode !== "preview" && (
           <div
-            className="relative flex-1 min-w-0"
-            style={viewMode === "split" ? { width: `${splitRatio}%`, flexGrow: 0, flexShrink: 0 } : undefined}
+            className={cn(
+              "relative min-w-0",
+              viewMode === "split" ? "" : "flex-1"
+            )}
+            style={viewMode === "split"
+              ? { flexBasis: `calc(${splitRatio}% - 4px)`, flexGrow: 0, flexShrink: 0 }
+              : undefined}
           >
             <LineNumbers content={value} />
             <textarea
@@ -417,7 +422,7 @@ export function MarkdownEditor({
         {viewMode === "split" && (
           <div
             className={cn(
-              "w-2 flex items-center justify-center cursor-col-resize hover:bg-muted/50 border-x border-border",
+              "w-2 flex-shrink-0 flex items-center justify-center cursor-col-resize hover:bg-muted/50 border-x border-border",
               isDragging && "bg-primary/20"
             )}
             onMouseDown={handleMouseDown}
@@ -429,8 +434,13 @@ export function MarkdownEditor({
         {/* Preview Pane */}
         {viewMode !== "edit" && (
           <div
-            className="flex-1 min-w-0 overflow-auto p-6 bg-background"
-            style={viewMode === "split" ? { width: `${100 - splitRatio}%`, flexGrow: 0, flexShrink: 0 } : undefined}
+            className={cn(
+              "min-w-0 overflow-auto p-6 bg-background",
+              viewMode === "split" ? "" : "flex-1"
+            )}
+            style={viewMode === "split"
+              ? { flexBasis: `calc(${100 - splitRatio}% - 4px)`, flexGrow: 0, flexShrink: 0 }
+              : undefined}
           >
             {value ? (
               <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
