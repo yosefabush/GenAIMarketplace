@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import type { Item } from "@/lib/api"
 import { Eye } from "lucide-react"
+import { LikeButton } from "./LikeButton"
 
 export interface SearchResultCardProps {
   item: Item
@@ -91,11 +92,18 @@ export const SearchResultCard = memo(function SearchResultCard({ item, className
           </div>
         )}
 
-        {/* View Count - pushed to the right */}
-        <span className="ml-auto flex items-center gap-1">
-          <Eye className="h-3 w-3" />
-          {item.view_count}
-        </span>
+        {/* View Count and Like Button - pushed to the right */}
+        <div className="ml-auto flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            <Eye className="h-3 w-3" />
+            {item.view_count}
+          </span>
+          <LikeButton
+            itemId={item.id}
+            initialLikeCount={item.like_count || 0}
+            size="sm"
+          />
+        </div>
       </div>
     </Link>
   )

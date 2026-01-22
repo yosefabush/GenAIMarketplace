@@ -84,10 +84,47 @@ export interface Item {
   type: string
   category_id: number | null
   view_count: number
+  like_count: number
   created_at: string
   updated_at: string
   category: Category | null
   tags: Tag[]
+}
+
+// Like related types
+export interface LikeToggleResponse {
+  item_id: number
+  liked: boolean
+  like_count: number
+}
+
+export interface LikeCheckResponse {
+  item_id: number
+  liked: boolean
+}
+
+export interface LikeTotals {
+  total_likes: number
+  last_7_days: number
+  last_30_days: number
+}
+
+export interface TopLikedItem {
+  id: number
+  title: string
+  type: string
+  like_count: number
+}
+
+export interface LikesOverTime {
+  date: string
+  count: number
+}
+
+export interface LikeAnalytics {
+  totals: LikeTotals
+  top_liked_items: TopLikedItem[]
+  likes_over_time: LikesOverTime[]
 }
 
 export interface SearchResult {
@@ -217,6 +254,16 @@ export const api = {
   // Analytics
   getAnalytics: (params?: { start_date?: string; end_date?: string }) =>
     apiClient.get<APIResponse<AnalyticsOverview>>('/api/analytics/searches', { params }),
+
+  getLikeAnalytics: (params?: { start_date?: string; end_date?: string }) =>
+    apiClient.get<APIResponse<LikeAnalytics>>('/api/analytics/likes', { params }),
+
+  // Likes
+  toggleLike: (itemId: number, userIdentifier: string) =>
+    apiClient.post<APIResponse<LikeToggleResponse>>(`/api/items/${itemId}/like`, { user_identifier: userIdentifier }),
+
+  checkLike: (itemId: number, userIdentifier: string) =>
+    apiClient.get<APIResponse<LikeCheckResponse>>(`/api/items/${itemId}/like/${userIdentifier}`),
 }
 
 export default apiClient

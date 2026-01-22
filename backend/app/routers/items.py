@@ -1,12 +1,12 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth import verify_admin_token
 from app.core.database import get_db
-from app.models import Item, Tag
+from app.models import Item, Tag, Like
 from app.models.item import item_tags
 from app.schemas import (
     APIResponse,
@@ -15,7 +15,47 @@ from app.schemas import (
     ItemUpdate,
     ItemResponse,
     ItemListResponse,
+    LikeToggleRequest,
+    LikeToggleResponse,
+    LikeCheckResponse,
 )
+
+
+def _add_like_count(item: Item, db: Session) -> dict[str, Any]:
+    """Convert item to dict and add like_count."""
+    item_dict = {
+        "id": item.id,
+        "title": item.title,
+        "description": item.description,
+        "content": item.content,
+        "type": item.type,
+        "category_id": item.category_id,
+        "category": item.category,
+        "tags": item.tags,
+        "view_count": item.view_count,
+        "like_count": db.query(func.count(Like.id)).filter(Like.item_id == item.id).scalar() or 0,
+        "created_at": item.created_at,
+        "updated_at": item.updated_at,
+    }
+    return item_dict
+
+
+def _add_like_count_list(item: Item, db: Session) -> dict[str, Any]:
+    """Convert item to dict for list response and add like_count."""
+    item_dict = {
+        "id": item.id,
+        "title": item.title,
+        "description": item.description,
+        "type": item.type,
+        "category_id": item.category_id,
+        "category": item.category,
+        "tags": item.tags,
+        "view_count": item.view_count,
+        "like_count": db.query(func.count(Like.id)).filter(Like.item_id == item.id).scalar() or 0,
+        "created_at": item.created_at,
+        "updated_at": item.updated_at,
+    }
+    return item_dict
 
 router = APIRouter(prefix="/api/items", tags=["items"])
 
@@ -42,7 +82,7 @@ def list_items(
 
     return PaginatedResponse(
         success=True,
-        data=[ItemListResponse.model_validate(item) for item in items],
+        data=[ItemListResponse.model_validate(_add_like_count_list(item, db)) for item in items],
         total=total,
         limit=limit,
         offset=offset,
@@ -67,7 +107,7 @@ def get_item(
 
     return APIResponse(
         success=True,
-        data=ItemResponse.model_validate(item),
+        data=ItemResponse.model_validate(_add_like_count(item, db)),
     )
 
 
@@ -109,7 +149,7 @@ def create_item(
 
     return APIResponse(
         success=True,
-        data=ItemResponse.model_validate(reloaded_item),
+        data=ItemResponse.model_validate(_add_like_count(reloaded_item, db)),
     )
 
 
@@ -157,7 +197,7 @@ def update_item(
 
     return APIResponse(
         success=True,
-        data=ItemResponse.model_validate(reloaded_item),
+        data=ItemResponse.model_validate(_add_like_count(reloaded_item, db)),
     )
 
 
@@ -261,5 +301,70 @@ def get_related_items(
 
     return APIResponse(
         success=True,
-        data=[ItemListResponse.model_validate(item) for item in related_items],
+        data=[ItemListResponse.model_validate(_add_like_count_list(item, db)) for item in related_items],
+    )
+
+
+@router.post("/{item_id}/like", response_model=APIResponse[LikeToggleResponse])
+def toggle_like(
+    item_id: int,
+    like_data: LikeToggleRequest,
+    db: Session = Depends(get_db),
+) -> APIResponse[LikeToggleResponse]:
+    """Toggle like for an item. If already liked, removes the like. If not liked, adds a like."""
+    # Check item exists
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # Check if user has already liked this item
+    existing_like = (
+        db.query(Like)
+        .filter(Like.item_id == item_id, Like.user_identifier == like_data.user_identifier)
+        .first()
+    )
+
+    if existing_like:
+        # Unlike - remove the existing like
+        db.delete(existing_like)
+        db.commit()
+        liked = False
+    else:
+        # Like - add a new like
+        new_like = Like(item_id=item_id, user_identifier=like_data.user_identifier)
+        db.add(new_like)
+        db.commit()
+        liked = True
+
+    # Get updated like count
+    like_count = db.query(func.count(Like.id)).filter(Like.item_id == item_id).scalar() or 0
+
+    return APIResponse(
+        success=True,
+        data=LikeToggleResponse(item_id=item_id, liked=liked, like_count=like_count),
+    )
+
+
+@router.get("/{item_id}/like/{user_identifier}", response_model=APIResponse[LikeCheckResponse])
+def check_like(
+    item_id: int,
+    user_identifier: str,
+    db: Session = Depends(get_db),
+) -> APIResponse[LikeCheckResponse]:
+    """Check if a user has liked an item."""
+    # Check item exists
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # Check if user has liked this item
+    existing_like = (
+        db.query(Like)
+        .filter(Like.item_id == item_id, Like.user_identifier == user_identifier)
+        .first()
+    )
+
+    return APIResponse(
+        success=True,
+        data=LikeCheckResponse(item_id=item_id, liked=existing_like is not None),
     )

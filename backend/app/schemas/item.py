@@ -39,6 +39,7 @@ class ItemResponse(BaseModel):
     category: CategoryResponse | None
     tags: list[TagResponse]
     view_count: int
+    like_count: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -56,6 +57,7 @@ class ItemListResponse(BaseModel):
     category: CategoryResponse | None
     tags: list[TagResponse]
     view_count: int
+    like_count: int = 0
     created_at: datetime
     updated_at: datetime
 
