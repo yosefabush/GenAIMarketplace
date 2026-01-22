@@ -44,6 +44,7 @@ import {
   Tags,
   BarChart3,
   Lightbulb,
+  RefreshCw,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -67,7 +68,7 @@ const CONTENT_TYPES = [
   { value: 'docs', label: 'Docs' },
 ]
 
-type SortField = 'title' | 'type' | 'view_count' | 'updated_at'
+type SortField = 'title' | 'type' | 'view_count' | 'like_count' | 'updated_at'
 type SortDirection = 'asc' | 'desc'
 
 export default function AdminDashboard() {
@@ -95,24 +96,44 @@ export default function AdminDashboard() {
   const [deleting, setDeleting] = useState(false)
 
   // Fetch all items (we'll filter/sort client-side for better UX)
+  const fetchItems = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // Fetch a large batch for client-side filtering/sorting
+      const response = await api.getItems({ limit: 1000, offset: 0 })
+      setItems(response.data.data)
+      setTotalItems(response.data.total)
+    } catch (err) {
+      console.error('Failed to fetch items:', err)
+      setError('Failed to load items. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Fetch data on mount
   useEffect(() => {
-    const fetchItems = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        // Fetch a large batch for client-side filtering/sorting
-        const response = await api.getItems({ limit: 1000, offset: 0 })
-        setItems(response.data.data)
-        setTotalItems(response.data.total)
-      } catch (err) {
-        console.error('Failed to fetch items:', err)
-        setError('Failed to load items. Please try again.')
-      } finally {
-        setLoading(false)
+    fetchItems()
+  }, [fetchItems])
+
+  // Refetch when tab/window becomes visible again (user returns from another tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchItems()
       }
     }
-    fetchItems()
-  }, [])
+    const handleWindowFocus = () => {
+      fetchItems()
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleWindowFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleWindowFocus)
+    }
+  }, [fetchItems])
 
   // Filtered and sorted items
   const filteredAndSortedItems = useMemo(() => {
@@ -143,6 +164,9 @@ export default function AdminDashboard() {
           break
         case 'view_count':
           comparison = a.view_count - b.view_count
+          break
+        case 'like_count':
+          comparison = a.like_count - b.like_count
           break
         case 'updated_at':
           comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
@@ -299,10 +323,16 @@ export default function AdminDashboard() {
               </p>
             )}
           </div>
-          <Button onClick={handleAddNew}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Item
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={fetchItems} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button onClick={handleAddNew}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Item
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filter Bar */}
@@ -388,6 +418,15 @@ export default function AdminDashboard() {
                         {getSortIcon('view_count')}
                       </button>
                     </TableHead>
+                    <TableHead className="text-right">
+                      <button
+                        className="flex items-center justify-end font-medium hover:text-[var(--foreground)] transition-colors w-full"
+                        onClick={() => handleSort('like_count')}
+                      >
+                        Likes
+                        {getSortIcon('like_count')}
+                      </button>
+                    </TableHead>
                     <TableHead>
                       <button
                         className="flex items-center font-medium hover:text-[var(--foreground)] transition-colors"
@@ -404,7 +443,7 @@ export default function AdminDashboard() {
                   {paginatedItems.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={8}
                         className="text-center py-12 text-[var(--muted-foreground)]"
                       >
                         {searchQuery || typeFilter !== 'all'
@@ -449,6 +488,9 @@ export default function AdminDashboard() {
                         </TableCell>
                         <TableCell className="text-right text-[var(--muted-foreground)]">
                           {item.view_count.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right text-[var(--muted-foreground)]">
+                          {item.like_count.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-[var(--muted-foreground)]">
                           {formatDate(item.updated_at)}

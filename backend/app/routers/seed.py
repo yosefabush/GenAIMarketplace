@@ -201,6 +201,7 @@ def rebuild_fts_index(db: Session) -> None:
 
 def reset_database(db: Session) -> None:
     """Clear all data from the database."""
+    db.execute(text("DELETE FROM likes"))
     db.execute(text("DELETE FROM item_tags"))
     db.execute(text("DELETE FROM items"))
     db.execute(text("DELETE FROM tags"))

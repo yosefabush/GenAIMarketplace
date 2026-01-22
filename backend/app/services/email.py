@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
 class EmailService:
     """Service for sending email notifications related to recommendations."""
 
@@ -51,6 +50,7 @@ class EmailService:
             return
 
         try:
+            logger.info(f"Sending real email to {to_email}: {subject}")
             msg = MIMEMultipart("alternative")
             msg["Subject"] = subject
             msg["From"] = f"{settings.SMTP_FROM_NAME} <{settings.SMTP_FROM_EMAIL}>"

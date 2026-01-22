@@ -1,6 +1,14 @@
+import logging
+
 from fastapi import FastAPI
 from sqlalchemy import text
 from app.core.config import settings
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 from app.core.database import engine
 from app.core.caching import CacheMiddleware
 from app.models.base import Base
