@@ -173,6 +173,38 @@ export interface AnalyticsOverview {
   top_viewed_items: TopViewedItem[]
 }
 
+// Recommendation types
+export interface Recommendation {
+  id: number
+  title: string
+  description: string
+  type: string
+  category_id: number | null
+  category_name: string | null
+  submitter_email: string
+  reason: string
+  status: 'pending' | 'approved' | 'rejected'
+  admin_notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface RecommendationListResponse {
+  items: Recommendation[]
+  total: number
+  page: number
+  limit: number
+}
+
+export interface RecommendationCreate {
+  title: string
+  description: string
+  type: string
+  category_id?: number
+  submitter_email: string
+  reason: string
+}
+
 // API Methods
 export const api = {
   // Items
@@ -264,6 +296,25 @@ export const api = {
 
   checkLike: (itemId: number, userIdentifier: string) =>
     apiClient.get<APIResponse<LikeCheckResponse>>(`/api/items/${itemId}/like/${userIdentifier}`),
+
+  // Recommendations
+  createRecommendation: (data: RecommendationCreate) =>
+    apiClient.post<APIResponse<Recommendation>>('/api/recommendations', data),
+
+  getRecommendations: (params?: { status?: string; page?: number; limit?: number }) =>
+    apiClient.get<APIResponse<RecommendationListResponse>>('/api/recommendations', { params }),
+
+  getRecommendation: (id: number) =>
+    apiClient.get<APIResponse<Recommendation>>(`/api/recommendations/${id}`),
+
+  updateRecommendation: (id: number, data: { status?: string; admin_notes?: string }) =>
+    apiClient.put<APIResponse<Recommendation>>(`/api/recommendations/${id}`, data),
+
+  approveRecommendation: (id: number, data: { content: string; admin_notes?: string; tag_ids?: number[] }) =>
+    apiClient.post<APIResponse<Item>>(`/api/recommendations/${id}/approve`, data),
+
+  rejectRecommendation: (id: number, data: { admin_notes: string }) =>
+    apiClient.post<APIResponse<Recommendation>>(`/api/recommendations/${id}/reject`, data),
 }
 
 export default apiClient

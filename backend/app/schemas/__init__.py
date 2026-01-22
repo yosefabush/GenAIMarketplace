@@ -20,6 +20,14 @@ from app.schemas.like import (
     LikesOverTime,
     LikeAnalytics,
 )
+from app.schemas.recommendation import (
+    RecommendationCreate,
+    RecommendationUpdate,
+    RecommendationResponse,
+    RecommendationListResponse,
+    RecommendationApprovalRequest,
+    RecommendationRejectionRequest,
+)
 
 __all__ = [
     "APIResponse",
@@ -48,4 +56,10 @@ __all__ = [
     "TopLikedItem",
     "LikesOverTime",
     "LikeAnalytics",
+    "RecommendationCreate",
+    "RecommendationUpdate",
+    "RecommendationResponse",
+    "RecommendationListResponse",
+    "RecommendationApprovalRequest",
+    "RecommendationRejectionRequest",
 ]

@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom"
 import Home from "./pages/Home"
 import Search from "./pages/Search"
 import ItemDetail from "./pages/ItemDetail"
+import RecommendationForm from "./pages/RecommendationForm"
 import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute"
 
@@ -13,6 +14,7 @@ const AdminEditor = lazy(() => import("./pages/admin/Editor"))
 const AdminCategories = lazy(() => import("./pages/admin/Categories"))
 const AdminTags = lazy(() => import("./pages/admin/Tags"))
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"))
+const AdminRecommendations = lazy(() => import("./pages/admin/Recommendations"))
 
 // Loading fallback for lazy-loaded routes
 function PageLoader() {
@@ -38,6 +40,10 @@ export const router = createBrowserRouter([
   {
     path: "/items/:id",
     element: <ItemDetail />,
+  },
+  {
+    path: "/recommend",
+    element: <RecommendationForm />,
   },
   {
     path: "/admin/login",
@@ -103,6 +109,16 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Suspense fallback={<PageLoader />}>
           <AdminAnalytics />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/recommendations",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<PageLoader />}>
+          <AdminRecommendations />
         </Suspense>
       </ProtectedRoute>
     ),

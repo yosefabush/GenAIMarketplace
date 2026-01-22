@@ -43,6 +43,7 @@ import {
   FolderTree,
   Tags,
   BarChart3,
+  Lightbulb,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -270,6 +271,10 @@ export default function AdminDashboard() {
               <Button variant="outline" size="sm" onClick={() => navigate('/admin/analytics')}>
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/recommendations')}>
+                <Lightbulb className="w-4 h-4 mr-2" />
+                Recommendations
               </Button>
               <ThemeToggle />
               <Button variant="outline" size="sm" onClick={handleLogout}>
