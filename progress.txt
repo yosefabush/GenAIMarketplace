@@ -1057,3 +1057,61 @@
   - Test mocks need to include all API methods used by components to prevent runtime errors
   - Helper functions for adding computed fields (like_count) to responses keep router code clean
 
+---
+
+## 2026-01-22 - US-036: Item recommendation submission
+
+- What was implemented:
+  - Database: New recommendations table migration (005_recommendations_table.py) with status workflow (pending/approved/rejected)
+  - Recommendation model with title, description, type, category_id, submitter_email, reason, status, admin_notes, timestamps
+  - Backend API: POST /api/recommendations for users to submit recommendations (no auth required)
+  - Backend API: GET /api/recommendations with status filter for admins to list recommendations
+  - Backend API: GET /api/recommendations/{id} for viewing single recommendation
+  - Backend API: PUT /api/recommendations/{id} for updating status/notes
+  - Backend API: POST /api/recommendations/{id}/approve to approve and create new item from recommendation
+  - Backend API: POST /api/recommendations/{id}/reject with required reason
+  - EmailService class for sending notifications (admin notification, approval, rejection)
+  - Email notifications log to console when SMTP not configured (graceful fallback)
+  - Frontend: RecommendationForm page at /recommend with validation, category dropdown, success state
+  - Frontend: Admin Recommendations page at /admin/recommendations with status filter, view details modal
+  - Admin approve dialog with MarkdownEditor for content, TagInput for tags, optional notes
+  - Admin reject dialog with required reason field
+  - "Recommend an Item" link added to Home page footer
+  - "Recommendations" button added to Admin Dashboard header
+  - Updated requirements.txt with email-validator for Pydantic EmailStr validation
+
+- Files changed:
+  - backend/alembic/versions/005_recommendations_table.py - New migration
+  - backend/app/models/recommendation.py - New Recommendation model
+  - backend/app/models/__init__.py - Export Recommendation
+  - backend/app/schemas/recommendation.py - Recommendation schemas
+  - backend/app/schemas/__init__.py - Export recommendation schemas
+  - backend/app/services/email.py - New EmailService
+  - backend/app/services/__init__.py - Export EmailService
+  - backend/app/routers/recommendations.py - New recommendations router
+  - backend/app/routers/__init__.py - Export recommendations_router
+  - backend/app/core/config.py - SMTP and email settings
+  - backend/app/main.py - Register recommendations_router
+  - backend/requirements.txt - Added email-validator
+  - frontend/src/lib/api.ts - Recommendation types and API methods
+  - frontend/src/pages/RecommendationForm.tsx - New recommendation form page
+  - frontend/src/pages/admin/Recommendations.tsx - New admin recommendations page
+  - frontend/src/pages/Home.tsx - Added "Recommend an Item" link in footer
+  - frontend/src/pages/admin/Dashboard.tsx - Added "Recommendations" button
+  - frontend/src/router.tsx - Added /recommend and /admin/recommendations routes
+
+- Test results:
+  - Backend: All 90 tests pass
+  - Frontend: All 54 tests pass
+  - Typecheck: mypy strict mode passes
+  - TSC: TypeScript compilation passes
+
+- Learnings for future iterations:
+  - Pydantic EmailStr requires email-validator package to be installed
+  - Assigning Optional settings to local variables before null check helps mypy narrow types
+  - EmailService with async threading (daemon=True) allows non-blocking notifications
+  - Graceful fallback (logging instead of sending) when SMTP not configured improves DX
+  - Status workflow pattern (pending -> approved/rejected) with transitions is clean and clear
+  - Approval flow can create items directly from recommendation data with admin-provided content
+  - MarkdownEditor component can be reused in dialogs for approval content entry
+
