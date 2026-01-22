@@ -1004,3 +1004,56 @@
 
   ## 2026-01-20 - US-033: Seed data
   - New seed data script
+
+---
+
+## 2026-01-22 - US-035: Like button for items
+
+- What was implemented:
+  - Database: New likes table migration (004_likes_table.py) with id, item_id, user_identifier, created_at
+  - Like model with unique constraint on item+user to prevent duplicate likes
+  - Backend API: POST /api/items/{id}/like endpoint for toggling likes (add/remove)
+  - Backend API: GET /api/items/{id}/like/{user} endpoint to check like status
+  - Backend API: GET /api/analytics/likes endpoint returning totals, top liked items, likes over time
+  - Updated all item response endpoints to include like_count in response
+  - Frontend: LikeButton component with heart icon (lucide-react Heart), toggle state, and count display
+  - LikeButton uses localStorage-generated user identifier for anonymous like tracking
+  - LikeButton added to ItemCard, SearchResultCard, and ItemDetail pages
+  - Admin Analytics dashboard updated with like statistics section (totals, top liked, likes over time)
+  - CSV export in analytics now includes like data
+  - Updated test mocks with like_count field and mock like API methods
+
+- Files changed:
+  - backend/alembic/versions/004_likes_table.py - New migration for likes table
+  - backend/app/models/like.py - New Like model
+  - backend/app/models/__init__.py - Export Like model
+  - backend/app/models/item.py - Added likes relationship
+  - backend/app/schemas/like.py - Like-related Pydantic schemas
+  - backend/app/schemas/__init__.py - Export like schemas
+  - backend/app/schemas/item.py - Added like_count to responses
+  - backend/app/routers/items.py - Like toggle/check endpoints, like_count in responses
+  - backend/app/routers/analytics.py - Like analytics endpoint
+  - frontend/src/components/LikeButton.tsx - New like button component
+  - frontend/src/components/ItemCard.tsx - Added LikeButton
+  - frontend/src/components/SearchResultCard.tsx - Added LikeButton
+  - frontend/src/pages/ItemDetail.tsx - Added LikeButton
+  - frontend/src/pages/admin/Analytics.tsx - Like analytics section
+  - frontend/src/lib/api.ts - Like types and API methods
+  - frontend/src/test/mocks.ts - Updated mocks with like_count
+  - frontend/src/test/search-flow.test.tsx - Added like API mocks
+  - frontend/src/test/filter-sort-flow.test.tsx - Added like API mocks
+
+- Test results:
+  - Backend: All 90 tests pass
+  - Frontend: All 54 tests pass
+  - Typecheck: mypy strict mode passes
+  - TSC: TypeScript compilation passes
+
+- Learnings for future iterations:
+  - SQLite doesn't support ALTER TABLE for adding constraints; include constraints in CREATE TABLE
+  - Anonymous user tracking via localStorage-generated unique identifier works well for likes
+  - Toggle pattern for likes: check existing like -> delete if exists, create if not
+  - Like count computed via COUNT query rather than stored column to avoid race conditions
+  - Test mocks need to include all API methods used by components to prevent runtime errors
+  - Helper functions for adding computed fields (like_count) to responses keep router code clean
+

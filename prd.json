@@ -595,6 +595,51 @@
       "priority": 34,
       "passes": true,
       "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Like button for items",
+      "description": "As a user, I want to like items so that I can show appreciation and help surface popular content.",
+      "acceptanceCriteria": [
+        "Like button displayed on each item card and item detail page",
+        "Like button toggles between liked/unliked states",
+        "Like count displayed next to the like button",
+        "Likes persisted in database with new likes table (id, item_id, user_identifier, created_at)",
+        "POST /api/items/{id}/like endpoint to toggle like",
+        "GET /api/items/{id} returns like_count in response",
+        "Like state tracked by anonymous user identifier (localStorage)",
+        "Like analytics added to admin analytics dashboard",
+        "GET /api/analytics/likes endpoint returns like statistics",
+        "Analytics shows: total likes, most liked items (top 10), likes over time",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 35,
+      "passes": true,
+      "notes": "Added likes table migration (004_likes_table.py). Created Like model with unique constraint on item+user. LikeButton component with heart icon and toggle state. Like count shown on ItemCard, SearchResultCard, and ItemDetail pages. Analytics dashboard shows like statistics: totals, top liked items, and likes over time. User identifier generated and stored in localStorage for tracking likes without authentication."
+    },
+    {
+      "id": "US-036",
+      "title": "Item recommendation submission",
+      "description": "As a user, I want to submit recommendations for new items so that I can suggest valuable content for the marketplace.",
+      "acceptanceCriteria": [
+        "Recommendation form accessible from header or footer link",
+        "Form fields: title, description, type, category (optional), submitter email, reason for recommendation",
+        "Recommendations stored in new recommendations table (id, title, description, type, category_id, submitter_email, reason, status, admin_notes, created_at, updated_at)",
+        "POST /api/recommendations endpoint to submit new recommendation",
+        "Email notification sent to admin when new recommendation submitted",
+        "Admin recommendations management page at /admin/recommendations",
+        "Admin can view all recommendations with status filter (pending, approved, rejected)",
+        "Admin can approve recommendation (creates new item, sends approval email to submitter)",
+        "Admin can reject recommendation with reason (sends rejection email to submitter)",
+        "PUT /api/recommendations/{id} endpoint for admin to update status",
+        "Email templates for: admin notification, approval notification, rejection notification",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": ""
     }
   ]
 }
