@@ -27,6 +27,7 @@ const CONTENT_TYPES = [
   { value: 'mcp', label: 'MCP' },
   { value: 'workflow', label: 'Workflow' },
   { value: 'docs', label: 'Docs' },
+  { value: 'skill', label: 'Skill' },
 ]
 
 interface FormData {

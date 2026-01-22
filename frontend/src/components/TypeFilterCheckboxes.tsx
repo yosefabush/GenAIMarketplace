@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
-export type ContentTypeValue = "agent" | "prompt" | "mcp" | "workflow" | "docs"
+export type ContentTypeValue = "agent" | "prompt" | "mcp" | "workflow" | "docs" | "skill"
 
 export interface TypeFilterCheckboxesProps {
   selectedTypes: ContentTypeValue[]
@@ -16,6 +16,7 @@ const contentTypes: { value: ContentTypeValue; label: string }[] = [
   { value: "mcp", label: "MCPs" },
   { value: "workflow", label: "Workflows" },
   { value: "docs", label: "Docs" },
+  { value: "skill", label: "Skills" },
 ]
 
 export function TypeFilterCheckboxes({

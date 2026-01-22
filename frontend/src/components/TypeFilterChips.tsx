@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-export type ContentType = "all" | "agent" | "prompt" | "mcp" | "workflow" | "docs"
+export type ContentType = "all" | "agent" | "prompt" | "mcp" | "workflow" | "docs" | "skill"
 
 export interface TypeFilterChipsProps {
   selectedType: ContentType
@@ -15,6 +15,7 @@ const contentTypes: { value: ContentType; label: string }[] = [
   { value: "mcp", label: "MCPs" },
   { value: "workflow", label: "Workflows" },
   { value: "docs", label: "Docs" },
+  { value: "skill", label: "Skills" },
 ]
 
 export function TypeFilterChips({

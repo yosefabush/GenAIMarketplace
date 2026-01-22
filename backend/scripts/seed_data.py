@@ -52,8 +52,8 @@ TAGS = [
 
 
 def get_seed_items() -> list[dict[str, Any]]:
-    """Return all seed items (agents, prompts, MCPs, workflows, docs)."""
-    from scripts.seed_content import AGENTS, PROMPTS, MCPS, WORKFLOWS, DOCS
+    """Return all seed items (agents, prompts, MCPs, workflows, docs, skills)."""
+    from scripts.seed_content import AGENTS, PROMPTS, MCPS, WORKFLOWS, DOCS, SKILLS
 
     items = []
     for agent in AGENTS:
@@ -66,6 +66,8 @@ def get_seed_items() -> list[dict[str, Any]]:
         items.append({**workflow, "type": "workflow"})
     for doc in DOCS:
         items.append({**doc, "type": "doc"})
+    for skill in SKILLS:
+        items.append({**skill, "type": "skill"})
 
     return items
 

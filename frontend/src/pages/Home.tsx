@@ -32,15 +32,15 @@ export default function Home() {
   const handleTypeChange = useCallback(
     (type: ContentType) => {
       setSelectedType(type)
-      // If there's already a search query, navigate immediately with the new type
+      const params = new URLSearchParams()
       if (searchQuery.trim()) {
-        const params = new URLSearchParams()
         params.set("q", searchQuery.trim())
-        if (type !== "all") {
-          params.set("type", type)
-        }
-        navigate(`/search?${params.toString()}`)
       }
+      if (type !== "all") {
+        params.set("type", type)
+      }
+      const queryString = params.toString()
+      navigate(queryString ? `/search?${queryString}` : "/search")
     },
     [searchQuery, navigate]
   )

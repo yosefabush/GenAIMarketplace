@@ -129,3 +129,44 @@ class SearchService:
         """))
 
         db.commit()
+
+    @staticmethod
+    def index_item(db: Session, item_id: int, title: str, description: str, content: str) -> None:
+        """
+        Add or update an item in the FTS index.
+
+        Args:
+            db: Database session
+            item_id: Item ID (used as rowid)
+            title: Item title
+            description: Item description
+            content: Item content
+        """
+        # Delete existing entry if it exists
+        db.execute(
+            text("DELETE FROM items_fts WHERE rowid = :id"),
+            {"id": item_id}
+        )
+
+        # Insert new entry
+        db.execute(
+            text("""
+                INSERT INTO items_fts(rowid, title, description, content)
+                VALUES (:id, :title, :description, :content)
+            """),
+            {"id": item_id, "title": title, "description": description, "content": content}
+        )
+
+    @staticmethod
+    def remove_from_index(db: Session, item_id: int) -> None:
+        """
+        Remove an item from the FTS index.
+
+        Args:
+            db: Database session
+            item_id: Item ID to remove
+        """
+        db.execute(
+            text("DELETE FROM items_fts WHERE rowid = :id"),
+            {"id": item_id}
+        )
