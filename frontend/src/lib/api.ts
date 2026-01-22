@@ -84,10 +84,47 @@ export interface Item {
   type: string
   category_id: number | null
   view_count: number
+  like_count: number
   created_at: string
   updated_at: string
   category: Category | null
   tags: Tag[]
+}
+
+// Like related types
+export interface LikeToggleResponse {
+  item_id: number
+  liked: boolean
+  like_count: number
+}
+
+export interface LikeCheckResponse {
+  item_id: number
+  liked: boolean
+}
+
+export interface LikeTotals {
+  total_likes: number
+  last_7_days: number
+  last_30_days: number
+}
+
+export interface TopLikedItem {
+  id: number
+  title: string
+  type: string
+  like_count: number
+}
+
+export interface LikesOverTime {
+  date: string
+  count: number
+}
+
+export interface LikeAnalytics {
+  totals: LikeTotals
+  top_liked_items: TopLikedItem[]
+  likes_over_time: LikesOverTime[]
 }
 
 export interface SearchResult {
@@ -134,6 +171,38 @@ export interface AnalyticsOverview {
   searches_by_source: SearchesBySource[]
   items_by_type: ItemsByType[]
   top_viewed_items: TopViewedItem[]
+}
+
+// Recommendation types
+export interface Recommendation {
+  id: number
+  title: string
+  description: string
+  type: string
+  category_id: number | null
+  category_name: string | null
+  submitter_email: string
+  reason: string
+  status: 'pending' | 'approved' | 'rejected'
+  admin_notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface RecommendationListResponse {
+  items: Recommendation[]
+  total: number
+  page: number
+  limit: number
+}
+
+export interface RecommendationCreate {
+  title: string
+  description: string
+  type: string
+  category_id?: number
+  submitter_email: string
+  reason: string
 }
 
 // API Methods
@@ -217,6 +286,35 @@ export const api = {
   // Analytics
   getAnalytics: (params?: { start_date?: string; end_date?: string }) =>
     apiClient.get<APIResponse<AnalyticsOverview>>('/api/analytics/searches', { params }),
+
+  getLikeAnalytics: (params?: { start_date?: string; end_date?: string }) =>
+    apiClient.get<APIResponse<LikeAnalytics>>('/api/analytics/likes', { params }),
+
+  // Likes
+  toggleLike: (itemId: number, userIdentifier: string) =>
+    apiClient.post<APIResponse<LikeToggleResponse>>(`/api/items/${itemId}/like`, { user_identifier: userIdentifier }),
+
+  checkLike: (itemId: number, userIdentifier: string) =>
+    apiClient.get<APIResponse<LikeCheckResponse>>(`/api/items/${itemId}/like/${userIdentifier}`),
+
+  // Recommendations
+  createRecommendation: (data: RecommendationCreate) =>
+    apiClient.post<APIResponse<Recommendation>>('/api/recommendations', data),
+
+  getRecommendations: (params?: { status?: string; page?: number; limit?: number }) =>
+    apiClient.get<APIResponse<RecommendationListResponse>>('/api/recommendations', { params }),
+
+  getRecommendation: (id: number) =>
+    apiClient.get<APIResponse<Recommendation>>(`/api/recommendations/${id}`),
+
+  updateRecommendation: (id: number, data: { status?: string; admin_notes?: string }) =>
+    apiClient.put<APIResponse<Recommendation>>(`/api/recommendations/${id}`, data),
+
+  approveRecommendation: (id: number, data: { content: string; admin_notes?: string; tag_ids?: number[] }) =>
+    apiClient.post<APIResponse<Item>>(`/api/recommendations/${id}/approve`, data),
+
+  rejectRecommendation: (id: number, data: { admin_notes: string }) =>
+    apiClient.post<APIResponse<Recommendation>>(`/api/recommendations/${id}/reject`, data),
 }
 
 export default apiClient

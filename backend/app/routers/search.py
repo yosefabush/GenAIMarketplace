@@ -1,16 +1,33 @@
 """Search API router with filtering, sorting, and pagination."""
 
-from typing import Literal
+from typing import Any, Literal
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import case, or_
+from sqlalchemy import case, or_, func
 
 from app.core.database import get_db
-from app.models import Item, Tag
+from app.models import Item, Tag, Like
 from app.schemas import ItemListResponse
 from app.schemas.search import SearchResponse
 from app.services.search import SearchService
 from app.services.search_logging import SearchLoggingService
+
+
+def _add_like_count_list(item: Item, db: Session) -> dict[str, Any]:
+    """Convert item to dict for list response and add like_count."""
+    return {
+        "id": item.id,
+        "title": item.title,
+        "description": item.description,
+        "type": item.type,
+        "category_id": item.category_id,
+        "category": item.category,
+        "tags": item.tags,
+        "view_count": item.view_count,
+        "like_count": db.query(func.count(Like.id)).filter(Like.item_id == item.id).scalar() or 0,
+        "created_at": item.created_at,
+        "updated_at": item.updated_at,
+    }
 
 router = APIRouter(prefix="/api/search", tags=["search"])
 
@@ -201,7 +218,7 @@ def search(
 
     return SearchResponse(
         success=True,
-        data=[ItemListResponse.model_validate(item) for item in items],
+        data=[ItemListResponse.model_validate(_add_like_count_list(item, db)) for item in items],
         total=total,
         page=page,
         limit=limit,

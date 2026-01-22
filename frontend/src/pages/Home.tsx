@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { SearchBar } from "@/components/SearchBar"
 import { TypeFilterChips, type ContentType } from "@/components/TypeFilterChips"
 import { RecentAdditions } from "@/components/RecentAdditions"
 import { FeaturedItems } from "@/components/FeaturedItems"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { GlobalKeyboardHandler } from "@/components/GlobalKeyboardHandler"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Lightbulb } from "lucide-react"
 
 export default function Home() {
   const navigate = useNavigate()
@@ -95,7 +95,23 @@ export default function Home() {
       <FeaturedItems />
 
       {/* Recent Additions Section */}
-      {/* <RecentAdditions /> */}
+      <RecentAdditions />
+
+      {/* Footer with Recommend Link */}
+      <footer className="border-t mt-12 py-8 text-center">
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-muted-foreground">
+            Have a great AI resource to share?
+          </p>
+          <Link
+            to="/recommend"
+            className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+          >
+            <Lightbulb className="h-4 w-4" />
+            Recommend an Item
+          </Link>
+        </div>
+      </footer>
     </div>
   )
 }

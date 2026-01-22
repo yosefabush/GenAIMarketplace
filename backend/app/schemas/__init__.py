@@ -11,6 +11,23 @@ from app.schemas.analytics import (
     TopSearchQuery,
     TopViewedItem,
 )
+from app.schemas.like import (
+    LikeToggleRequest,
+    LikeToggleResponse,
+    LikeCheckResponse,
+    LikeTotals,
+    TopLikedItem,
+    LikesOverTime,
+    LikeAnalytics,
+)
+from app.schemas.recommendation import (
+    RecommendationCreate,
+    RecommendationUpdate,
+    RecommendationResponse,
+    RecommendationListResponse,
+    RecommendationApprovalRequest,
+    RecommendationRejectionRequest,
+)
 
 __all__ = [
     "APIResponse",
@@ -32,4 +49,17 @@ __all__ = [
     "SearchTotals",
     "TopSearchQuery",
     "TopViewedItem",
+    "LikeToggleRequest",
+    "LikeToggleResponse",
+    "LikeCheckResponse",
+    "LikeTotals",
+    "TopLikedItem",
+    "LikesOverTime",
+    "LikeAnalytics",
+    "RecommendationCreate",
+    "RecommendationUpdate",
+    "RecommendationResponse",
+    "RecommendationListResponse",
+    "RecommendationApprovalRequest",
+    "RecommendationRejectionRequest",
 ]

@@ -8,6 +8,7 @@ from app.models.base import Base
 if TYPE_CHECKING:
     from app.models.category import Category
     from app.models.tag import Tag
+    from app.models.like import Like
 
 # Association table for many-to-many relationship between items and tags
 item_tags = Table(
@@ -43,4 +44,7 @@ class Item(Base):
     category: Mapped[Optional["Category"]] = relationship("Category", back_populates="items")
     tags: Mapped[list["Tag"]] = relationship(
         "Tag", secondary=item_tags, back_populates="items"
+    )
+    likes: Mapped[list["Like"]] = relationship(
+        "Like", back_populates="item", cascade="all, delete-orphan"
     )

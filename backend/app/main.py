@@ -1,10 +1,27 @@
+import logging
+
 from fastapi import FastAPI
 from sqlalchemy import text
 from app.core.config import settings
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 from app.core.database import engine
 from app.core.caching import CacheMiddleware
 from app.models.base import Base
-from app.routers import items_router, categories_router, tags_router, search_router, auth_router, analytics_router, seed_router
+from app.routers import (
+    items_router,
+    categories_router,
+    tags_router,
+    search_router,
+    auth_router,
+    analytics_router,
+    recommendations_router,
+    seed_router,
+)
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -20,6 +37,7 @@ app.include_router(tags_router)
 app.include_router(search_router)
 app.include_router(auth_router)
 app.include_router(analytics_router)
+app.include_router(recommendations_router)
 app.include_router(seed_router)
 
 # Add caching middleware (must be before CORS middleware to properly modify responses)

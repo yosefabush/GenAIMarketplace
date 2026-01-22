@@ -17,6 +17,8 @@ import {
   type TopSearchQuery,
   type TopViewedItem,
   type ItemsByType,
+  type LikeAnalytics,
+  type TopLikedItem,
 } from '@/lib/api'
 import {
   BarChart3,
@@ -26,6 +28,7 @@ import {
   Search,
   Eye,
   Calendar,
+  Heart,
 } from 'lucide-react'
 
 // Type badge colors
@@ -154,7 +157,7 @@ function PieChart({ data }: { data: ItemsByType[] }) {
 }
 
 // Generate CSV content from analytics data
-function generateCSV(analytics: AnalyticsOverview): string {
+function generateCSV(analytics: AnalyticsOverview, likeAnalytics: LikeAnalytics | null): string {
   const lines: string[] = []
 
   // Search Totals
@@ -198,6 +201,31 @@ function generateCSV(analytics: AnalyticsOverview): string {
     const escapedTitle = i.title.replace(/"/g, '""')
     lines.push(`"${escapedTitle}",${i.type},${i.view_count}`)
   })
+  lines.push('')
+
+  // Like Analytics (if available)
+  if (likeAnalytics) {
+    lines.push('Like Totals')
+    lines.push('Period,Count')
+    lines.push(`Last 7 Days,${likeAnalytics.totals.last_7_days}`)
+    lines.push(`Last 30 Days,${likeAnalytics.totals.last_30_days}`)
+    lines.push(`Total Likes,${likeAnalytics.totals.total_likes}`)
+    lines.push('')
+
+    lines.push('Top Liked Items')
+    lines.push('Title,Type,Likes')
+    likeAnalytics.top_liked_items.forEach(i => {
+      const escapedTitle = i.title.replace(/"/g, '""')
+      lines.push(`"${escapedTitle}",${i.type},${i.like_count}`)
+    })
+    lines.push('')
+
+    lines.push('Likes Over Time')
+    lines.push('Date,Count')
+    likeAnalytics.likes_over_time.forEach(l => {
+      lines.push(`${l.date},${l.count}`)
+    })
+  }
 
   return lines.join('\n')
 }
@@ -206,6 +234,7 @@ export default function AdminAnalytics() {
   const navigate = useNavigate()
 
   const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null)
+  const [likeAnalytics, setLikeAnalytics] = useState<LikeAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -221,8 +250,13 @@ export default function AdminAnalytics() {
       if (startDate) params.start_date = new Date(startDate).toISOString()
       if (endDate) params.end_date = new Date(endDate).toISOString()
 
-      const response = await api.getAnalytics(params)
-      setAnalytics(response.data.data)
+      // Fetch both analytics and like analytics in parallel
+      const [analyticsResponse, likeAnalyticsResponse] = await Promise.all([
+        api.getAnalytics(params),
+        api.getLikeAnalytics(params),
+      ])
+      setAnalytics(analyticsResponse.data.data)
+      setLikeAnalytics(likeAnalyticsResponse.data.data)
     } catch (err) {
       console.error('Failed to fetch analytics:', err)
       setError('Failed to load analytics data. Please try again.')
@@ -238,7 +272,7 @@ export default function AdminAnalytics() {
   const handleExportCSV = () => {
     if (!analytics) return
 
-    const csv = generateCSV(analytics)
+    const csv = generateCSV(analytics, likeAnalytics)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -483,6 +517,102 @@ export default function AdminAnalytics() {
                 </p>
               )}
             </section>
+
+            {/* Like Analytics Section */}
+            {likeAnalytics && (
+              <>
+                {/* Like Totals */}
+                <section>
+                  <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    Like Statistics
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <StatCard
+                      title="Last 7 Days"
+                      value={likeAnalytics.totals.last_7_days}
+                      subtitle="likes"
+                    />
+                    <StatCard
+                      title="Last 30 Days"
+                      value={likeAnalytics.totals.last_30_days}
+                      subtitle="likes"
+                    />
+                    <StatCard
+                      title="Total Likes"
+                      value={likeAnalytics.totals.total_likes}
+                      subtitle="all time"
+                    />
+                  </div>
+                </section>
+
+                {/* Two-column layout for likes over time and top liked items */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Likes Over Time */}
+                  <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
+                    <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+                      Likes Over Time
+                    </h2>
+                    {likeAnalytics.likes_over_time.length > 0 ? (
+                      <BarChart
+                        data={likeAnalytics.likes_over_time as unknown as Array<Record<string, string | number>>}
+                        labelKey="date"
+                        valueKey="count"
+                      />
+                    ) : (
+                      <p className="text-[var(--muted-foreground)] text-center py-8">
+                        No like data available
+                      </p>
+                    )}
+                  </section>
+
+                  {/* Top Liked Items */}
+                  <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
+                    <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+                      Top 10 Most Liked Items
+                    </h2>
+                    {likeAnalytics.top_liked_items.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Title</TableHead>
+                              <TableHead>Type</TableHead>
+                              <TableHead className="text-right">Likes</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {likeAnalytics.top_liked_items.map((item: TopLikedItem) => (
+                              <TableRow
+                                key={item.id}
+                                className="cursor-pointer hover:bg-[var(--muted)]"
+                                onClick={() => navigate(`/items/${item.id}`)}
+                              >
+                                <TableCell className="font-medium max-w-[200px] truncate">
+                                  {item.title}
+                                </TableCell>
+                                <TableCell>
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${typeBadgeColors[item.type] || 'bg-gray-100 text-gray-800'}`}>
+                                    {item.type}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {item.like_count.toLocaleString()}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <p className="text-[var(--muted-foreground)] text-center py-8">
+                        No liked items yet
+                      </p>
+                    )}
+                  </section>
+                </div>
+              </>
+            )}
           </div>
         )}
       </main>

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { CodeBlock, InlineCode } from "@/components/CodeBlock"
 import { RelatedItems } from "@/components/RelatedItems"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { LikeButton } from "@/components/LikeButton"
 
 const typeColors: Record<string, string> = {
   agent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -277,6 +278,13 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
                 <Eye className="h-4 w-4" />
                 {item.view_count} views
               </span>
+
+              {/* Like Button */}
+              <LikeButton
+                itemId={item.id}
+                initialLikeCount={item.like_count || 0}
+                size="md"
+              />
 
               {/* Created Date */}
               <span className="inline-flex items-center gap-1.5">

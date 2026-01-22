@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from './test-utils'
 import Search from '@/pages/Search'
-import { mockItems, mockSearchResponse, mockCategoriesResponse, mockTagsResponse } from './mocks'
+import { mockItems, mockSearchResponse, mockCategoriesResponse, mockTagsResponse, mockLikeCheckResponse } from './mocks'
 import { api } from '@/lib/api'
 import type { SearchResult } from '@/lib/api'
 
@@ -14,6 +14,8 @@ vi.mock('@/lib/api', async () => {
       search: vi.fn(),
       getCategories: vi.fn(),
       getTags: vi.fn(),
+      checkLike: vi.fn(),
+      toggleLike: vi.fn(),
     },
   }
 })
@@ -25,6 +27,8 @@ describe('Filter and Sort Results Flow', () => {
     vi.mocked(api.search).mockResolvedValue({ data: mockSearchResponse } as never)
     vi.mocked(api.getCategories).mockResolvedValue({ data: mockCategoriesResponse } as never)
     vi.mocked(api.getTags).mockResolvedValue({ data: mockTagsResponse } as never)
+    vi.mocked(api.checkLike).mockResolvedValue({ data: mockLikeCheckResponse(1, false) } as never)
+    vi.mocked(api.toggleLike).mockResolvedValue({ data: { success: true, data: { item_id: 1, liked: true, like_count: 26 } } } as never)
   })
 
   afterEach(() => {

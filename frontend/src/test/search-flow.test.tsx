@@ -3,7 +3,7 @@ import { render, screen, waitFor } from './test-utils'
 import userEvent from '@testing-library/user-event'
 import Search from '@/pages/Search'
 import ItemDetail from '@/pages/ItemDetail'
-import { mockItems, mockSearchResponse, mockEmptySearchResponse, mockCategoriesResponse, mockTagsResponse, mockItemResponse, mockRelatedItemsResponse } from './mocks'
+import { mockItems, mockSearchResponse, mockEmptySearchResponse, mockCategoriesResponse, mockTagsResponse, mockItemResponse, mockRelatedItemsResponse, mockLikeCheckResponse } from './mocks'
 import { api } from '@/lib/api'
 
 // Mock the API module
@@ -18,6 +18,8 @@ vi.mock('@/lib/api', async () => {
       getTags: vi.fn(),
       incrementViewCount: vi.fn(),
       getRelatedItems: vi.fn(),
+      toggleLike: vi.fn(),
+      checkLike: vi.fn(),
     },
   }
 })
@@ -34,6 +36,8 @@ describe('Search and View Item Flow', () => {
     vi.mocked(api.getItem).mockResolvedValue({ data: mockItemResponse(mockItems[0]) } as never)
     vi.mocked(api.incrementViewCount).mockResolvedValue({ data: { success: true, data: 151 } } as never)
     vi.mocked(api.getRelatedItems).mockResolvedValue({ data: mockRelatedItemsResponse } as never)
+    vi.mocked(api.checkLike).mockResolvedValue({ data: mockLikeCheckResponse(1, false) } as never)
+    vi.mocked(api.toggleLike).mockResolvedValue({ data: { success: true, data: { item_id: 1, liked: true, like_count: 26 } } } as never)
   })
 
   afterEach(() => {

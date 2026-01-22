@@ -2,12 +2,12 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import Session
 
 from app.core.auth import verify_admin_token
 from app.core.database import get_db
-from app.models import Item
+from app.models import Item, Like
 from app.models.search_log import SearchLog
 from app.schemas.analytics import (
     AnalyticsOverview,
@@ -16,6 +16,12 @@ from app.schemas.analytics import (
     SearchTotals,
     TopSearchQuery,
     TopViewedItem,
+)
+from app.schemas.like import (
+    LikeTotals,
+    TopLikedItem,
+    LikesOverTime,
+    LikeAnalytics,
 )
 from app.schemas.base import APIResponse
 
@@ -239,3 +245,121 @@ def get_top_viewed_items_endpoint(
 ) -> APIResponse[list[TopViewedItem]]:
     """Get top viewed items."""
     return APIResponse(success=True, data=get_top_viewed_items(db, limit))
+
+
+def get_like_totals(db: Session) -> LikeTotals:
+    """Get total like counts for different time periods."""
+    now = datetime.utcnow()
+    seven_days_ago = now - timedelta(days=7)
+    thirty_days_ago = now - timedelta(days=30)
+
+    # Total likes in last 7 days
+    last_7_days = (
+        db.query(func.count(Like.id))
+        .filter(Like.created_at >= seven_days_ago)
+        .scalar()
+    ) or 0
+
+    # Total likes in last 30 days
+    last_30_days = (
+        db.query(func.count(Like.id))
+        .filter(Like.created_at >= thirty_days_ago)
+        .scalar()
+    ) or 0
+
+    # Total likes all time
+    total_likes = db.query(func.count(Like.id)).scalar() or 0
+
+    return LikeTotals(
+        total_likes=total_likes,
+        last_7_days=last_7_days,
+        last_30_days=last_30_days,
+    )
+
+
+def get_top_liked_items(db: Session, limit: int = 10) -> list[TopLikedItem]:
+    """Get top liked items."""
+    results = (
+        db.query(
+            Item.id,
+            Item.title,
+            Item.type,
+            func.count(Like.id).label("like_count"),
+        )
+        .join(Like, Like.item_id == Item.id)
+        .group_by(Item.id, Item.title, Item.type)
+        .order_by(func.count(Like.id).desc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        TopLikedItem(
+            id=row[0],
+            title=row[1],
+            type=row[2],
+            like_count=row[3],
+        )
+        for row in results
+    ]
+
+
+def get_likes_over_time(
+    db: Session,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+) -> list[LikesOverTime]:
+    """Get likes per day over a time period."""
+    # Default to last 30 days if no date range provided
+    if not end_date:
+        end_date = datetime.utcnow()
+    if not start_date:
+        start_date = end_date - timedelta(days=30)
+
+    # SQLite uses date() function for date extraction
+    results = (
+        db.query(
+            func.date(Like.created_at).label("date"),
+            func.count(Like.id).label("count"),
+        )
+        .filter(Like.created_at >= start_date, Like.created_at <= end_date)
+        .group_by(func.date(Like.created_at))
+        .order_by(func.date(Like.created_at))
+        .all()
+    )
+
+    return [
+        LikesOverTime(
+            date=str(row[0]),
+            count=row[1],
+        )
+        for row in results
+    ]
+
+
+@router.get("/likes", response_model=APIResponse[LikeAnalytics])
+def get_like_analytics(
+    start_date: Optional[datetime] = Query(
+        default=None, description="Start date for filtering (ISO format)"
+    ),
+    end_date: Optional[datetime] = Query(
+        default=None, description="End date for filtering (ISO format)"
+    ),
+    db: Session = Depends(get_db),
+    _: str = Depends(verify_admin_token),
+) -> APIResponse[LikeAnalytics]:
+    """
+    Get comprehensive like analytics data.
+
+    Returns:
+    - Total likes (all time, last 7 days, last 30 days)
+    - Top 10 most liked items
+    - Likes over time
+    """
+    analytics = LikeAnalytics(
+        totals=get_like_totals(db),
+        top_liked_items=get_top_liked_items(db),
+        likes_over_time=get_likes_over_time(db, start_date, end_date),
+    )
+
+    return APIResponse(success=True, data=analytics)

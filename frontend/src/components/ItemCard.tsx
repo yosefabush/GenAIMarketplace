@@ -2,6 +2,7 @@ import { memo } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import type { Item } from "@/lib/api"
+import { LikeButton } from "./LikeButton"
 
 export interface ItemCardProps {
   item: Item
@@ -51,6 +52,13 @@ export const ItemCard = memo(function ItemCard({ item, className }: ItemCardProp
       <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
         {truncateText(item.description, 120)}
       </p>
+      <div className="mt-3 flex items-center justify-end">
+        <LikeButton
+          itemId={item.id}
+          initialLikeCount={item.like_count || 0}
+          size="sm"
+        />
+      </div>
     </Link>
   )
 })

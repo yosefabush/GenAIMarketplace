@@ -1,4 +1,4 @@
-import type { Item, Category, Tag, SearchResult, APIResponse, PaginatedResponse } from '@/lib/api'
+import type { Item, Category, Tag, SearchResult, APIResponse, PaginatedResponse, LikeToggleResponse, LikeCheckResponse } from '@/lib/api'
 
 // Mock categories
 export const mockCategories: Category[] = [
@@ -39,6 +39,7 @@ export const mockItems: Item[] = [
     type: 'agent',
     category_id: 1,
     view_count: 150,
+    like_count: 25,
     created_at: '2025-01-15T10:00:00Z',
     updated_at: '2025-01-15T10:00:00Z',
     category: mockCategories[0],
@@ -52,6 +53,7 @@ export const mockItems: Item[] = [
     type: 'prompt',
     category_id: 2,
     view_count: 75,
+    like_count: 12,
     created_at: '2025-01-14T10:00:00Z',
     updated_at: '2025-01-14T10:00:00Z',
     category: mockCategories[1],
@@ -65,6 +67,7 @@ export const mockItems: Item[] = [
     type: 'mcp',
     category_id: 1,
     view_count: 200,
+    like_count: 45,
     created_at: '2025-01-13T10:00:00Z',
     updated_at: '2025-01-13T10:00:00Z',
     category: mockCategories[0],
@@ -147,9 +150,29 @@ export const mockCreateItemResponse = (item: Partial<Item>): APIResponse<Item> =
     type: item.type || 'agent',
     category_id: item.category_id ?? null,
     view_count: 0,
+    like_count: 0,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     category: item.category_id ? mockCategories[0] : null,
     tags: [],
+  },
+})
+
+// Mock like toggle response
+export const mockLikeToggleResponse = (itemId: number, liked: boolean, likeCount: number): APIResponse<LikeToggleResponse> => ({
+  success: true,
+  data: {
+    item_id: itemId,
+    liked,
+    like_count: likeCount,
+  },
+})
+
+// Mock like check response
+export const mockLikeCheckResponse = (itemId: number, liked: boolean): APIResponse<LikeCheckResponse> => ({
+  success: true,
+  data: {
+    item_id: itemId,
+    liked,
   },
 })
