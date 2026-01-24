@@ -45,7 +45,7 @@ app.add_middleware(CacheMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,29 +56,51 @@ async def startup_event() -> None:
     """Create database tables on startup if they don't exist."""
     Base.metadata.create_all(bind=engine)
 
-    # Create FTS5 virtual table for full-text search
+    # Initialize search index based on database type
     with engine.connect() as conn:
-        # Create the FTS5 virtual table if it doesn't exist
-        conn.execute(text("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
-                title,
-                description,
-                content
-            )
-        """))
-
-        # Check if FTS table is empty and items table has data
-        fts_count = conn.execute(text("SELECT COUNT(*) FROM items_fts")).scalar()
-        items_count = conn.execute(text("SELECT COUNT(*) FROM items")).scalar()
-
-        # Populate FTS table if it's empty but items table has data
-        if fts_count == 0 and items_count > 0:
+        if settings.is_postgres():
+            # PostgreSQL: search_vector is handled via migration 006
+            # Just ensure data is indexed if column exists but is empty
+            try:
+                empty_count = conn.execute(text(
+                    "SELECT COUNT(*) FROM items WHERE search_vector IS NULL"
+                )).scalar()
+                if empty_count and empty_count > 0:
+                    conn.execute(text("""
+                        UPDATE items
+                        SET search_vector = to_tsvector('english',
+                            coalesce(title, '') || ' ' ||
+                            coalesce(description, '') || ' ' ||
+                            coalesce(content, '')
+                        )
+                        WHERE search_vector IS NULL
+                    """))
+                    conn.commit()
+            except Exception:
+                # Column may not exist yet (migrations not run)
+                pass
+        else:
+            # SQLite: Create FTS5 virtual table for full-text search
             conn.execute(text("""
-                INSERT INTO items_fts(rowid, title, description, content)
-                SELECT id, title, description, content FROM items
+                CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
+                    title,
+                    description,
+                    content
+                )
             """))
 
-        conn.commit()
+            # Check if FTS table is empty and items table has data
+            fts_count = conn.execute(text("SELECT COUNT(*) FROM items_fts")).scalar()
+            items_count = conn.execute(text("SELECT COUNT(*) FROM items")).scalar()
+
+            # Populate FTS table if it's empty but items table has data
+            if fts_count == 0 and items_count > 0:
+                conn.execute(text("""
+                    INSERT INTO items_fts(rowid, title, description, content)
+                    SELECT id, title, description, content FROM items
+                """))
+
+            conn.commit()
 
 
 @app.get("/health")

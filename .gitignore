@@ -1,0 +1,10 @@
+# AI/IDE tool configurations
+.agent/
+.agents/
+.cursor/
+.gemini/
+.windsurf/
+
+# OS files
+.DS_Store
+Thumbs.db

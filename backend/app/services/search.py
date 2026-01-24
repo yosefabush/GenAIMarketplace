@@ -1,12 +1,19 @@
-"""Full-text search service using SQLite FTS5."""
+"""Full-text search service supporting SQLite FTS5 and PostgreSQL."""
 
 from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+
 
 class SearchService:
-    """Service for full-text search using SQLite FTS5 with BM25 ranking."""
+    """Service for full-text search supporting SQLite FTS5 and PostgreSQL."""
+
+    @staticmethod
+    def _is_postgres() -> bool:
+        """Check if using PostgreSQL database."""
+        return settings.DATABASE_URL.startswith("postgresql")
 
     @staticmethod
     def search(
@@ -16,7 +23,7 @@ class SearchService:
         offset: int = 0,
     ) -> tuple[list[int], int]:
         """
-        Search items using FTS5 full-text search with BM25 ranking.
+        Search items using full-text search with ranking.
 
         Args:
             db: Database session
@@ -30,16 +37,24 @@ class SearchService:
         if not query or not query.strip():
             return [], 0
 
-        # Clean and prepare the query for FTS5
-        # FTS5 supports multiple keywords separated by spaces (implicit AND)
-        # We'll use MATCH with the query as-is for phrase matching,
-        # or convert to OR for broader results
-        cleaned_query = SearchService._prepare_query(query)
+        if SearchService._is_postgres():
+            return SearchService._search_postgres(db, query, limit, offset)
+        else:
+            return SearchService._search_sqlite(db, query, limit, offset)
+
+    @staticmethod
+    def _search_sqlite(
+        db: Session,
+        query: str,
+        limit: int,
+        offset: int,
+    ) -> tuple[list[int], int]:
+        """Search using SQLite FTS5 with BM25 ranking."""
+        cleaned_query = SearchService._prepare_query_sqlite(query)
 
         if not cleaned_query:
             return [], 0
 
-        # Get total count of matching items
         count_sql = text("""
             SELECT COUNT(*)
             FROM items_fts
@@ -51,9 +66,6 @@ class SearchService:
         if total_count == 0:
             return [], 0
 
-        # Search with BM25 ranking
-        # bm25() returns negative values, so we ORDER BY bm25() ASC
-        # (more negative = better match)
         search_sql = text("""
             SELECT rowid
             FROM items_fts
@@ -68,105 +80,144 @@ class SearchService:
         )
 
         item_ids = [row[0] for row in result.fetchall()]
-
         return item_ids, total_count
 
     @staticmethod
-    def _prepare_query(query: str) -> Optional[str]:
-        """
-        Prepare a search query for FTS5.
+    def _search_postgres(
+        db: Session,
+        query: str,
+        limit: int,
+        offset: int,
+    ) -> tuple[list[int], int]:
+        """Search using PostgreSQL full-text search with ts_rank."""
+        cleaned_query = SearchService._prepare_query_postgres(query)
 
-        Handles multiple keywords by joining them with implicit AND.
-        Escapes special FTS5 characters.
+        if not cleaned_query:
+            return [], 0
 
-        Args:
-            query: Raw search query
+        count_sql = text("""
+            SELECT COUNT(*)
+            FROM items
+            WHERE search_vector @@ to_tsquery('english', :query)
+        """)
+        count_result = db.execute(count_sql, {"query": cleaned_query})
+        total_count = count_result.scalar() or 0
 
-        Returns:
-            Prepared query string for FTS5 MATCH
-        """
-        # Strip whitespace and check if empty
+        if total_count == 0:
+            return [], 0
+
+        search_sql = text("""
+            SELECT id
+            FROM items
+            WHERE search_vector @@ to_tsquery('english', :query)
+            ORDER BY ts_rank(search_vector, to_tsquery('english', :query)) DESC
+            LIMIT :limit OFFSET :offset
+        """)
+
+        result = db.execute(
+            search_sql,
+            {"query": cleaned_query, "limit": limit, "offset": offset}
+        )
+
+        item_ids = [row[0] for row in result.fetchall()]
+        return item_ids, total_count
+
+    @staticmethod
+    def _prepare_query_sqlite(query: str) -> Optional[str]:
+        """Prepare a search query for SQLite FTS5."""
         query = query.strip()
         if not query:
             return None
 
-        # Split into words and filter empty strings
         words = [word.strip() for word in query.split() if word.strip()]
 
         if not words:
             return None
 
-        # Escape special FTS5 characters in each word
-        # FTS5 special characters: " * ^ : ( ) { } -
         escaped_words = []
         for word in words:
-            # Escape quotes by doubling them
             escaped = word.replace('"', '""')
-            # Wrap each word in quotes to treat as a literal term
             escaped_words.append(f'"{escaped}"')
 
-        # Join with space (implicit AND in FTS5)
         return " ".join(escaped_words)
 
     @staticmethod
+    def _prepare_query_postgres(query: str) -> Optional[str]:
+        """Prepare a search query for PostgreSQL tsquery."""
+        query = query.strip()
+        if not query:
+            return None
+
+        words = [word.strip() for word in query.split() if word.strip()]
+
+        if not words:
+            return None
+
+        # Escape special characters and join with AND operator
+        escaped_words = []
+        for word in words:
+            # Remove characters that could break tsquery
+            cleaned = ''.join(c for c in word if c.isalnum())
+            if cleaned:
+                escaped_words.append(cleaned)
+
+        if not escaped_words:
+            return None
+
+        return " & ".join(escaped_words)
+
+    @staticmethod
     def rebuild_index(db: Session) -> None:
-        """
-        Rebuild the FTS5 index from scratch.
-
-        This can be useful after bulk operations or if the index
-        becomes corrupted.
-
-        Args:
-            db: Database session
-        """
-        # Delete all entries from FTS table
-        db.execute(text("DELETE FROM items_fts"))
-
-        # Re-populate from items table
-        db.execute(text("""
-            INSERT INTO items_fts(rowid, title, description, content)
-            SELECT id, title, description, content FROM items
-        """))
+        """Rebuild the search index from scratch."""
+        if SearchService._is_postgres():
+            # PostgreSQL: Update the search_vector column
+            db.execute(text("""
+                UPDATE items
+                SET search_vector = to_tsvector('english',
+                    coalesce(title, '') || ' ' ||
+                    coalesce(description, '') || ' ' ||
+                    coalesce(content, '')
+                )
+            """))
+        else:
+            # SQLite: Rebuild FTS5 index
+            db.execute(text("DELETE FROM items_fts"))
+            db.execute(text("""
+                INSERT INTO items_fts(rowid, title, description, content)
+                SELECT id, title, description, content FROM items
+            """))
 
         db.commit()
 
     @staticmethod
     def index_item(db: Session, item_id: int, title: str, description: str, content: str) -> None:
-        """
-        Add or update an item in the FTS index.
-
-        Args:
-            db: Database session
-            item_id: Item ID (used as rowid)
-            title: Item title
-            description: Item description
-            content: Item content
-        """
-        # Delete existing entry if it exists
-        db.execute(
-            text("DELETE FROM items_fts WHERE rowid = :id"),
-            {"id": item_id}
-        )
-
-        # Insert new entry
-        db.execute(
-            text("""
-                INSERT INTO items_fts(rowid, title, description, content)
-                VALUES (:id, :title, :description, :content)
-            """),
-            {"id": item_id, "title": title, "description": description, "content": content}
-        )
+        """Add or update an item in the search index."""
+        if SearchService._is_postgres():
+            # PostgreSQL: search_vector is updated automatically via trigger
+            pass
+        else:
+            # SQLite: Manual FTS5 update
+            db.execute(
+                text("DELETE FROM items_fts WHERE rowid = :id"),
+                {"id": item_id}
+            )
+            db.execute(
+                text("""
+                    INSERT INTO items_fts(rowid, title, description, content)
+                    VALUES (:id, :title, :description, :content)
+                """),
+                {"id": item_id, "title": title, "description": description, "content": content}
+            )
 
     @staticmethod
     def remove_from_index(db: Session, item_id: int) -> None:
-        """
-        Remove an item from the FTS index.
-
-        Args:
-            db: Database session
-            item_id: Item ID to remove
-        """
-        db.execute(
-            text("DELETE FROM items_fts WHERE rowid = :id"),
-            {"id": item_id}
-        )
+        """Remove an item from the search index."""
+        if SearchService._is_postgres():
+            # PostgreSQL: Row deletion handles it automatically
+            pass
+        else:
+            # SQLite: Manual FTS5 deletion
+            db.execute(
+                text("DELETE FROM items_fts WHERE rowid = :id"),
+                {"id": item_id}
+            )
