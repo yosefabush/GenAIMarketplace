@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Skill(ralph)"
+      "Skill(ralph)",
+      "Bash(docker compose exec:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(py -c:*)",
+      "Bash(sqlite3:*)"
     ]
   }
 }

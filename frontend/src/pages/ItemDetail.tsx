@@ -3,23 +3,50 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Eye, Calendar, Tag, Folder, Clock } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import type { Components } from "react-markdown"
-import { api, type Item } from "@/lib/api"
+import { api, type Item, type ItemType } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { CodeBlock, InlineCode } from "@/components/CodeBlock"
 import { RelatedItems } from "@/components/RelatedItems"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { LikeButton } from "@/components/LikeButton"
+import { useItemTypes } from "@/hooks/useItemTypes"
 
-const typeColors: Record<string, string> = {
-  agent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  prompt: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  mcp: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  workflow: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-  docs: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+// Color mapping from color name to Tailwind classes (light/dark variants)
+const colorClasses: Record<string, string> = {
+  blue: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  green: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  purple: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+  orange: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  gray: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+  red: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  yellow: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  pink: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
+  indigo: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+  cyan: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200",
 }
 
-function getTypeBadgeClass(type: string): string {
-  return typeColors[type.toLowerCase()] || typeColors.docs
+// Fallback colors for legacy type names (when itemTypes not provided)
+const fallbackTypeColors: Record<string, string> = {
+  agent: colorClasses.blue,
+  prompt: colorClasses.green,
+  mcp: colorClasses.purple,
+  workflow: colorClasses.orange,
+  docs: colorClasses.gray,
+  skill: colorClasses.indigo,
+}
+
+function getTypeBadgeClass(type: string, itemTypes?: ItemType[]): string {
+  // If itemTypes provided, look up the color from the matching type
+  if (itemTypes && itemTypes.length > 0) {
+    const itemType = itemTypes.find(
+      (t) => t.slug.toLowerCase() === type.toLowerCase() || t.name.toLowerCase() === type.toLowerCase()
+    )
+    if (itemType?.color) {
+      return colorClasses[itemType.color] || colorClasses.gray
+    }
+  }
+  // Fallback to legacy hardcoded colors
+  return fallbackTypeColors[type.toLowerCase()] || colorClasses.gray
 }
 
 function formatDate(dateString: string): string {
@@ -151,6 +178,7 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
   const [error, setError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
   const viewCountIncrementedRef = useRef(false)
+  const { itemTypes } = useItemTypes()
 
   useEffect(() => {
     let cancelled = false
@@ -253,7 +281,7 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
               <span
                 className={cn(
                   "shrink-0 rounded-full px-3 py-1 text-sm font-medium capitalize",
-                  getTypeBadgeClass(item.type)
+                  getTypeBadgeClass(item.type, itemTypes)
                 )}
               >
                 {item.type}

@@ -7,6 +7,7 @@ import { SortDropdown, type SortOption } from "@/components/SortDropdown"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { GlobalKeyboardHandler } from "@/components/GlobalKeyboardHandler"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
+import { useItemTypes } from "@/hooks/useItemTypes"
 import type { ContentTypeValue } from "@/components/TypeFilterCheckboxes"
 import { ArrowLeft, SearchX, Loader2, SlidersHorizontal, X } from "lucide-react"
 import { useState, useCallback, useEffect } from "react"
@@ -36,10 +37,9 @@ interface SearchParams {
 function parseSearchParams(searchParams: URLSearchParams): SearchParams {
   const query = searchParams.get("q") || ""
   const typeParam = searchParams.get("type") || ""
+  // Accept any type slugs - they are validated dynamically from the database
   const types = typeParam
-    ? (typeParam.split(",").filter((t) =>
-        ["agent", "prompt", "mcp", "workflow", "docs", "skill"].includes(t)
-      ) as ContentTypeValue[])
+    ? (typeParam.split(",").filter(Boolean) as ContentTypeValue[])
     : []
   const category = searchParams.get("category") || null
   const tagsParam = searchParams.get("tags") || ""
@@ -99,6 +99,7 @@ function SearchContent({
   })
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const { highlightedIndex, setHighlightedIndex } = useKeyboardShortcuts()
+  const { itemTypes } = useItemTypes()
 
   // Reset highlighted index when results change
   useEffect(() => {
@@ -454,6 +455,7 @@ function SearchContent({
                         key={item.id}
                         item={item}
                         isHighlighted={index === highlightedIndex}
+                        itemTypes={itemTypes}
                       />
                     ))}
                   </div>

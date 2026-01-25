@@ -1,12 +1,13 @@
 import { memo } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
-import type { Item } from "@/lib/api"
+import type { Item, ItemType } from "@/lib/api"
 import { LikeButton } from "./LikeButton"
 
 export interface ItemCardProps {
   item: Item
   className?: string
+  itemTypes?: ItemType[]
 }
 
 const typeColors: Record<string, string> = {
@@ -18,8 +19,28 @@ const typeColors: Record<string, string> = {
   skill: "bg-[#e6f0fa] text-[#1e40af] dark:bg-[#1e3a5f] dark:text-[#93c5fd]",
 }
 
-function getTypeBadgeClass(type: string): string {
-  return typeColors[type.toLowerCase()] || typeColors.docs
+// Fallback colors for legacy type names (when itemTypes not provided)
+const fallbackTypeColors: Record<string, string> = {
+  agent: colorClasses.blue,
+  prompt: colorClasses.green,
+  mcp: colorClasses.purple,
+  workflow: colorClasses.orange,
+  docs: colorClasses.gray,
+  skill: colorClasses.indigo,
+}
+
+function getTypeBadgeClass(type: string, itemTypes?: ItemType[]): string {
+  // If itemTypes provided, look up the color from the matching type
+  if (itemTypes && itemTypes.length > 0) {
+    const itemType = itemTypes.find(
+      (t) => t.slug.toLowerCase() === type.toLowerCase() || t.name.toLowerCase() === type.toLowerCase()
+    )
+    if (itemType?.color) {
+      return colorClasses[itemType.color] || colorClasses.gray
+    }
+  }
+  // Fallback to legacy hardcoded colors
+  return fallbackTypeColors[type.toLowerCase()] || colorClasses.gray
 }
 
 function truncateText(text: string, maxLength: number): string {
@@ -27,7 +48,7 @@ function truncateText(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trim() + "..."
 }
 
-export const ItemCard = memo(function ItemCard({ item, className }: ItemCardProps) {
+export const ItemCard = memo(function ItemCard({ item, className, itemTypes }: ItemCardProps) {
   return (
     <Link
       to={`/items/${item.id}`}
@@ -43,7 +64,7 @@ export const ItemCard = memo(function ItemCard({ item, className }: ItemCardProp
         <span
           className={cn(
             "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-            getTypeBadgeClass(item.type)
+            getTypeBadgeClass(item.type, itemTypes)
           )}
         >
           {item.type}

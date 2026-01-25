@@ -76,6 +76,18 @@ export interface Category {
   item_count?: number
 }
 
+export interface ItemType {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  icon: string | null
+  color: string | null
+  created_at: string
+  updated_at: string
+  item_count?: number
+}
+
 export interface Item {
   id: number
   title: string
@@ -278,6 +290,32 @@ export const api = {
 
   deleteTag: (id: number) =>
     apiClient.delete<APIResponse<null>>(`/api/tags/${id}`),
+
+  // Item Types
+  getItemTypes: () =>
+    apiClient.get<APIResponse<ItemType[]>>('/api/item-types'),
+
+  getItemType: (id: number) =>
+    apiClient.get<APIResponse<ItemType>>(`/api/item-types/${id}`),
+
+  createItemType: (data: {
+    name: string
+    slug: string
+    description?: string | null
+    icon?: string | null
+    color?: string | null
+  }) => apiClient.post<APIResponse<ItemType>>('/api/item-types', data),
+
+  updateItemType: (id: number, data: {
+    name?: string
+    slug?: string
+    description?: string | null
+    icon?: string | null
+    color?: string | null
+  }) => apiClient.put<APIResponse<ItemType>>(`/api/item-types/${id}`, data),
+
+  deleteItemType: (id: number) =>
+    apiClient.delete<APIResponse<null>>(`/api/item-types/${id}`),
 
   // Auth
   validateToken: (token: string) =>

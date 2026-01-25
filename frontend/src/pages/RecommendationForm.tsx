@@ -14,17 +14,9 @@ import {
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { api, type Category } from '@/lib/api'
 import { useToast } from '@/hooks/useToast'
+import { useItemTypes } from '@/hooks/useItemTypes'
 import { ArrowLeft, Loader2, Send, Sparkles, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-// Content types
-const CONTENT_TYPES = [
-  { value: 'agent', label: 'Agent' },
-  { value: 'prompt', label: 'Prompt' },
-  { value: 'mcp', label: 'MCP' },
-  { value: 'workflow', label: 'Workflow' },
-  { value: 'docs', label: 'Docs' },
-]
 
 interface FormData {
   title: string
@@ -46,6 +38,7 @@ interface FormErrors {
 export default function RecommendationForm() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { itemTypes, isLoading: isLoadingTypes } = useItemTypes()
 
   // Form state
   const [formData, setFormData] = useState<FormData>({
@@ -293,14 +286,15 @@ export default function RecommendationForm() {
             <Select
               value={formData.type}
               onValueChange={(value) => updateField('type', value)}
+              disabled={isLoadingTypes}
             >
               <SelectTrigger className={cn(errors.type && 'border-destructive')}>
-                <SelectValue placeholder="Select a type" />
+                <SelectValue placeholder={isLoadingTypes ? 'Loading...' : 'Select a type'} />
               </SelectTrigger>
               <SelectContent>
-                {CONTENT_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                {itemTypes.map((type) => (
+                  <SelectItem key={type.slug} value={type.slug}>
+                    {type.name}
                   </SelectItem>
                 ))}
               </SelectContent>

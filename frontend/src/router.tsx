@@ -13,6 +13,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"))
 const AdminEditor = lazy(() => import("./pages/admin/Editor"))
 const AdminCategories = lazy(() => import("./pages/admin/Categories"))
 const AdminTags = lazy(() => import("./pages/admin/Tags"))
+const AdminItemTypes = lazy(() => import("./pages/admin/ItemTypes"))
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"))
 const AdminRecommendations = lazy(() => import("./pages/admin/Recommendations"))
 
@@ -99,6 +100,16 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <Suspense fallback={<PageLoader />}>
           <AdminTags />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/item-types",
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<PageLoader />}>
+          <AdminItemTypes />
         </Suspense>
       </ProtectedRoute>
     ),
