@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from app.models.category import Category
     from app.models.tag import Tag
     from app.models.like import Like
+    from app.models.item_type import ItemType
 
 # Association table for many-to-many relationship between items and tags
 item_tags = Table(
@@ -28,7 +29,10 @@ class Item(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)  # Markdown content
-    type: Mapped[str] = mapped_column(String(50), nullable=False)  # agent, prompt, mcp, workflow, doc
+    type: Mapped[str] = mapped_column(String(50), nullable=False)  # Legacy field, kept for backwards compatibility
+    type_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("item_types.id", ondelete="RESTRICT"), nullable=True
+    )
     category_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
     )
@@ -41,6 +45,7 @@ class Item(Base):
     )
 
     # Relationships
+    item_type: Mapped[Optional["ItemType"]] = relationship("ItemType", back_populates="items")
     category: Mapped[Optional["Category"]] = relationship("Category", back_populates="items")
     tags: Mapped[list["Tag"]] = relationship(
         "Tag", secondary=item_tags, back_populates="items"

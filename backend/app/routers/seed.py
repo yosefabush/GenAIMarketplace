@@ -95,7 +95,7 @@ def get_seed_items() -> list[dict]:
     for workflow in WORKFLOWS:
         items.append({**workflow, "type": "workflow"})
     for doc in DOCS:
-        items.append({**doc, "type": "doc"})
+        items.append({**doc, "type": "docs"})
     for skill in SKILLS:
         items.append({**skill, "type": "skill"})
     return items
@@ -249,7 +249,7 @@ async def seed_database(
 
     # Count by type
     items_by_type = {}
-    for item_type in ["agent", "prompt", "mcp", "workflow", "doc", "skill"]:
+    for item_type in ["agent", "prompt", "mcp", "workflow", "docs", "skill"]:
         items_by_type[item_type] = db.query(Item).filter(Item.type == item_type).count()
 
     return SeedSummary(

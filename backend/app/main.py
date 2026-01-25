@@ -11,11 +11,13 @@ logging.basicConfig(
 )
 from app.core.database import engine
 from app.core.caching import CacheMiddleware
-from app.models.base import Base
+# Import all models to ensure they are registered with Base metadata before create_all()
+from app.models import Base, Item, Category, Tag, ItemType, SearchLog, Like, Recommendation
 from app.routers import (
     items_router,
     categories_router,
     tags_router,
+    item_types_router,
     search_router,
     auth_router,
     analytics_router,
@@ -34,6 +36,7 @@ app = FastAPI(
 app.include_router(items_router)
 app.include_router(categories_router)
 app.include_router(tags_router)
+app.include_router(item_types_router)
 app.include_router(search_router)
 app.include_router(auth_router)
 app.include_router(analytics_router)

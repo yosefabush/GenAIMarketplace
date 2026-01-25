@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
+import { useItemTypes } from '@/hooks/useItemTypes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -45,6 +46,7 @@ import {
   BarChart3,
   Lightbulb,
   RefreshCw,
+  Layers,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -59,15 +61,6 @@ const typeBadgeColors: Record<string, string> = {
 
 const ITEMS_PER_PAGE = 20
 
-const CONTENT_TYPES = [
-  { value: 'all', label: 'All Types' },
-  { value: 'agent', label: 'Agent' },
-  { value: 'prompt', label: 'Prompt' },
-  { value: 'mcp', label: 'MCP' },
-  { value: 'workflow', label: 'Workflow' },
-  { value: 'docs', label: 'Docs' },
-]
-
 type SortField = 'title' | 'type' | 'view_count' | 'like_count' | 'updated_at'
 type SortDirection = 'asc' | 'desc'
 
@@ -75,6 +68,16 @@ export default function AdminDashboard() {
   const { logout } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { itemTypes } = useItemTypes()
+
+  // Build content types array: "All Types" first, then dynamic types from API
+  const contentTypes = useMemo(() => [
+    { value: 'all', label: 'All Types' },
+    ...itemTypes.map((type) => ({
+      value: type.slug,
+      label: type.name,
+    })),
+  ], [itemTypes])
 
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
@@ -288,6 +291,10 @@ export default function AdminDashboard() {
                 <FolderTree className="w-4 h-4 mr-2" />
                 Categories
               </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/item-types')}>
+                <Layers className="w-4 h-4 mr-2" />
+                Item Types
+              </Button>
               <Button variant="outline" size="sm" onClick={() => navigate('/admin/tags')}>
                 <Tags className="w-4 h-4 mr-2" />
                 Tags
@@ -352,7 +359,7 @@ export default function AdminDashboard() {
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent>
-              {CONTENT_TYPES.map((type) => (
+              {contentTypes.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
                 </SelectItem>

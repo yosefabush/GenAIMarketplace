@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth import verify_admin_token
 from app.core.database import get_db
-from app.models import Item, Tag, Recommendation
+from app.models import Item, Tag, Recommendation, ItemType
 from app.schemas import (
     APIResponse,
     RecommendationCreate,
@@ -46,12 +46,13 @@ def create_recommendation(
     db: Session = Depends(get_db),
 ) -> APIResponse[RecommendationResponse]:
     """Submit a new item recommendation. No authentication required."""
-    # Validate type
-    valid_types = ["agent", "prompt", "mcp", "workflow", "docs"]
-    if rec_data.type not in valid_types:
+    # Validate type against database
+    valid_types = db.query(ItemType.slug).all()
+    valid_type_slugs = [t[0] for t in valid_types]
+    if rec_data.type not in valid_type_slugs:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid type. Must be one of: {', '.join(valid_types)}",
+            detail=f"Invalid type. Must be one of: {', '.join(valid_type_slugs)}",
         )
 
     # Create recommendation

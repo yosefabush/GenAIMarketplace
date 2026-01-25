@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
+import { useItemTypes } from '@/hooks/useItemTypes'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -31,7 +32,7 @@ import {
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { TagInput } from '@/components/TagInput'
 import { MarkdownEditor } from '@/components/MarkdownEditor'
-import { api, type Recommendation } from '@/lib/api'
+import { api, type Recommendation, type ItemType } from '@/lib/api'
 import {
   LogOut,
   LayoutDashboard,
@@ -53,19 +54,47 @@ const statusColors: Record<string, string> = {
   rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 }
 
-// Type badge colors
-const typeColors: Record<string, string> = {
-  agent: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  prompt: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  mcp: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  workflow: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  docs: 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-400',
+// Color mapping from color name to Tailwind classes
+const colorClasses: Record<string, string> = {
+  blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  green: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  orange: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+  gray: 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-400',
+  red: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  pink: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+  indigo: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+  cyan: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+}
+
+// Fallback type colors for legacy types
+const fallbackTypeColors: Record<string, string> = {
+  agent: colorClasses.blue,
+  prompt: colorClasses.green,
+  mcp: colorClasses.yellow,
+  workflow: colorClasses.purple,
+  docs: colorClasses.gray,
+  skill: colorClasses.indigo,
+}
+
+function getTypeBadgeClass(type: string, itemTypes?: ItemType[]): string {
+  if (itemTypes && itemTypes.length > 0) {
+    const itemType = itemTypes.find(
+      (t) => t.slug.toLowerCase() === type.toLowerCase() || t.name.toLowerCase() === type.toLowerCase()
+    )
+    if (itemType?.color) {
+      return colorClasses[itemType.color] || colorClasses.gray
+    }
+  }
+  return fallbackTypeColors[type.toLowerCase()] || colorClasses.gray
 }
 
 export default function AdminRecommendations() {
   const { logout } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { itemTypes } = useItemTypes()
 
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [loading, setLoading] = useState(true)
@@ -335,7 +364,7 @@ export default function AdminRecommendations() {
                         <TableCell>
                           <span
                             className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                              typeColors[rec.type] || typeColors.docs
+                              getTypeBadgeClass(rec.type, itemTypes)
                             }`}
                           >
                             {rec.type}
@@ -438,7 +467,7 @@ export default function AdminRecommendations() {
                 <div className="flex items-center gap-4">
                   <span
                     className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                      typeColors[selectedRec.type] || typeColors.docs
+                      getTypeBadgeClass(selectedRec.type, itemTypes)
                     }`}
                   >
                     {selectedRec.type}

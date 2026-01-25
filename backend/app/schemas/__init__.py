@@ -2,6 +2,12 @@ from app.schemas.base import APIResponse, PaginatedResponse
 from app.schemas.tag import TagCreate, TagUpdate, TagResponse, TagWithItemCount
 from app.schemas.category import CategoryCreate, CategoryResponse
 from app.schemas.item import ItemCreate, ItemUpdate, ItemResponse, ItemListResponse
+from app.schemas.item_type import (
+    ItemTypeCreate,
+    ItemTypeUpdate,
+    ItemTypeResponse,
+    ItemTypeWithItemCount,
+)
 from app.schemas.search import SearchResponse
 from app.schemas.analytics import (
     AnalyticsOverview,
@@ -42,6 +48,10 @@ __all__ = [
     "ItemUpdate",
     "ItemResponse",
     "ItemListResponse",
+    "ItemTypeCreate",
+    "ItemTypeUpdate",
+    "ItemTypeResponse",
+    "ItemTypeWithItemCount",
     "SearchResponse",
     "AnalyticsOverview",
     "ItemsByType",

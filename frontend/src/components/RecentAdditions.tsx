@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react"
 import { Clock } from "lucide-react"
 import { api, type Item } from "@/lib/api"
+import { useItemTypes } from "@/hooks/useItemTypes"
 import { ItemCard } from "./ItemCard"
 
 export function RecentAdditions() {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { itemTypes } = useItemTypes()
 
   useEffect(() => {
     async function fetchRecentItems() {
@@ -84,7 +86,7 @@ export function RecentAdditions() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} />
+            <ItemCard key={item.id} item={item} itemTypes={itemTypes} />
           ))}
         </div>
       </div>

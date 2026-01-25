@@ -51,7 +51,6 @@ The `docker-compose.yml` provides:
 - **Environment variables**: Configurable via `.env` file or environment
 
 ```yaml
-version: '3.8'
 
 services:
   api:

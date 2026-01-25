@@ -17,18 +17,9 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { clearMarkdownDraft } from '@/lib/markdown-draft'
 import { api, type Category, type Item } from '@/lib/api'
 import { useToast } from '@/hooks/useToast'
+import { useItemTypes } from '@/hooks/useItemTypes'
 import { ArrowLeft, LayoutDashboard, Loader2, Save, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-// Content types
-const CONTENT_TYPES = [
-  { value: 'agent', label: 'Agent' },
-  { value: 'prompt', label: 'Prompt' },
-  { value: 'mcp', label: 'MCP' },
-  { value: 'workflow', label: 'Workflow' },
-  { value: 'docs', label: 'Docs' },
-  { value: 'skill', label: 'Skill' },
-]
 
 interface FormData {
   title: string
@@ -55,6 +46,7 @@ export default function AdminEditor() {
   const { id } = useParams<{ id?: string }>()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { itemTypes, isLoading: isLoadingTypes } = useItemTypes()
 
   const itemId = parseItemId(id)
   const isEditing = itemId !== null
@@ -326,14 +318,15 @@ export default function AdminEditor() {
             <Select
               value={formData.type}
               onValueChange={(value) => updateField('type', value)}
+              disabled={isLoadingTypes}
             >
               <SelectTrigger className={cn(errors.type && 'border-destructive')}>
-                <SelectValue placeholder="Select a type" />
+                <SelectValue placeholder={isLoadingTypes ? 'Loading...' : 'Select a type'} />
               </SelectTrigger>
               <SelectContent>
-                {CONTENT_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                {itemTypes.map((type) => (
+                  <SelectItem key={type.slug} value={type.slug}>
+                    {type.name}
                   </SelectItem>
                 ))}
               </SelectContent>
