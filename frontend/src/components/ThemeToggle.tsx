@@ -1,4 +1,4 @@
-import { Sun, Moon, Monitor } from "lucide-react"
+import { Sun, Moon } from "lucide-react"
 import { useTheme } from "@/hooks/useTheme"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -8,7 +8,6 @@ import type { Theme } from "@/contexts/theme-context"
 const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
   { value: "light", label: "Light", icon: <Sun className="h-4 w-4" /> },
   { value: "dark", label: "Dark", icon: <Moon className="h-4 w-4" /> },
-  { value: "system", label: "System", icon: <Monitor className="h-4 w-4" /> },
 ]
 
 export function ThemeToggle() {
@@ -74,6 +73,10 @@ export function ThemeToggle() {
               onClick={() => {
                 setTheme(option.value)
                 setIsOpen(false)
+                if (option.value === "light") {
+                  alert("Mom come pick me up I'm scared")
+                }else
+                  alert("You are a code animal!")
               }}
             >
               {option.icon}

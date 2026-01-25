@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Sparkles } from "lucide-react"
+import { Cpu } from "lucide-react"
 import { ThemeToggle } from "./ThemeToggle"
 
 interface HeaderProps {
@@ -38,11 +38,11 @@ export function Header({ showBackButton, backTo, children }: HeaderProps) {
               </Link>
             )}
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Sparkles className="h-4 w-4 text-primary" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Cpu className="h-4 w-4" />
               </div>
               <span className="font-semibold text-foreground hidden sm:inline">
-                GenAI Marketplace
+                AudioCodes AI Hub
               </span>
             </Link>
           </div>

@@ -1,0 +1,24 @@
+Tech Stack Summary
+==================
+
+Frontend:
+- React 19 + TypeScript
+- Vite (build tool)
+- Tailwind CSS
+- Radix UI components
+- React Router
+
+Backend:
+- FastAPI (Python 3.11)
+- SQLAlchemy ORM
+- Alembic (migrations)
+- Pydantic (validation)
+
+Database:
+- SQLite (development)
+- PostgreSQL 16 (production)
+- Full-text search (FTS5/tsvector)
+
+Infrastructure:
+- Docker + Docker Compose
+- Uvicorn ASGI server

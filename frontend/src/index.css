@@ -2,57 +2,57 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  /* Color palette for GenAI Marketplace - Light mode */
-  --color-primary: #3b82f6;
+  /* AudioCodes Brand Theme - Light mode */
+  --color-primary: #1e3a5f;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f1f5f9;
-  --color-secondary-foreground: #0f172a;
-  --color-accent: #8b5cf6;
+  --color-secondary: #f0f4f8;
+  --color-secondary-foreground: #1e3a5f;
+  --color-accent: #00a3e0;
   --color-accent-foreground: #ffffff;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-destructive: #ef4444;
+  --color-muted: #e8eef4;
+  --color-muted-foreground: #5a7184;
+  --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #3b82f6;
+  --color-border: #d1dce6;
+  --color-input: #d1dce6;
+  --color-ring: #00a3e0;
   --color-background: #ffffff;
-  --color-foreground: #0f172a;
+  --color-foreground: #1a2b3c;
   --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
+  --color-card-foreground: #1a2b3c;
   --color-popover: #ffffff;
-  --color-popover-foreground: #0f172a;
+  --color-popover-foreground: #1a2b3c;
 
-  /* Border radius */
-  --radius-lg: 0.5rem;
-  --radius-md: calc(0.5rem - 2px);
-  --radius-sm: calc(0.5rem - 4px);
+  /* Border radius - slightly more rounded for modern look */
+  --radius-lg: 0.625rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.375rem;
 
-  /* Font family */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Font family - clean professional sans-serif */
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Dark mode theme - uses .dark class on html element */
+/* Dark mode theme - AudioCodes dark variant */
 .dark {
-  --color-primary: #60a5fa;
-  --color-primary-foreground: #0f172a;
-  --color-secondary: #1e293b;
-  --color-secondary-foreground: #f8fafc;
-  --color-accent: #a78bfa;
-  --color-accent-foreground: #0f172a;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
+  --color-primary: #4da3d4;
+  --color-primary-foreground: #0d1b2a;
+  --color-secondary: #1a2d42;
+  --color-secondary-foreground: #e2e8f0;
+  --color-accent: #00c4ee;
+  --color-accent-foreground: #0d1b2a;
+  --color-muted: #1a2d42;
+  --color-muted-foreground: #8fa3b8;
   --color-destructive: #f87171;
-  --color-destructive-foreground: #0f172a;
-  --color-border: #334155;
-  --color-input: #334155;
-  --color-ring: #60a5fa;
-  --color-background: #0f172a;
-  --color-foreground: #f8fafc;
-  --color-card: #1e293b;
-  --color-card-foreground: #f8fafc;
-  --color-popover: #1e293b;
-  --color-popover-foreground: #f8fafc;
+  --color-destructive-foreground: #0d1b2a;
+  --color-border: #2d4356;
+  --color-input: #2d4356;
+  --color-ring: #00c4ee;
+  --color-background: #0d1b2a;
+  --color-foreground: #e8f1f8;
+  --color-card: #142536;
+  --color-card-foreground: #e8f1f8;
+  --color-popover: #142536;
+  --color-popover-foreground: #e8f1f8;
 }
 
 /* Base styles */

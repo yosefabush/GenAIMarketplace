@@ -6,7 +6,7 @@ import { RecentAdditions } from "@/components/RecentAdditions"
 import { FeaturedItems } from "@/components/FeaturedItems"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { GlobalKeyboardHandler } from "@/components/GlobalKeyboardHandler"
-import { Sparkles, Lightbulb } from "lucide-react"
+import { Cpu, Lightbulb } from "lucide-react"
 
 export default function Home() {
   const navigate = useNavigate()
@@ -58,18 +58,17 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center px-4 pt-16 pb-12 sm:pt-24 sm:pb-16 md:pt-32 md:pb-20">
         {/* Logo/Brand */}
         <div className="mb-6 flex items-center gap-3 sm:mb-8">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 sm:h-14 sm:w-14">
-            <Sparkles className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground sm:h-14 sm:w-14">
+            <Cpu className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            GenAI Marketplace
+            AudioCodes AI Hub
           </h1>
         </div>
 
         {/* Tagline */}
         <p className="mb-8 max-w-lg text-center text-base text-muted-foreground sm:mb-10 sm:text-lg md:text-xl">
-          Discover and share AI agents, prompts, MCPs, and workflows with your
-          team.
+          Your enterprise resource for AI agents, prompts, MCPs, and workflows.
         </p>
 
         {/* Search Bar */}

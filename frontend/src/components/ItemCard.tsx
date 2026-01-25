@@ -10,18 +10,13 @@ export interface ItemCardProps {
   itemTypes?: ItemType[]
 }
 
-// Color mapping from color name to Tailwind classes (light/dark variants)
-const colorClasses: Record<string, string> = {
-  blue: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  green: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  purple: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  orange: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-  gray: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-  red: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  yellow: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  pink: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
-  indigo: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-  cyan: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200",
+const typeColors: Record<string, string> = {
+  agent: "bg-[#e6f4fa] text-[#1e3a5f] dark:bg-[#1a3d5c] dark:text-[#7dd3fc]",
+  prompt: "bg-[#e6f7f2] text-[#0d6e5b] dark:bg-[#134e4a] dark:text-[#5eead4]",
+  mcp: "bg-[#f0e6fa] text-[#5b21b6] dark:bg-[#3b2763] dark:text-[#c4b5fd]",
+  workflow: "bg-[#fff1e6] text-[#c2410c] dark:bg-[#4a2c17] dark:text-[#fdba74]",
+  docs: "bg-[#f0f4f8] text-[#475569] dark:bg-[#1e293b] dark:text-[#94a3b8]",
+  skill: "bg-[#e6f0fa] text-[#1e40af] dark:bg-[#1e3a5f] dark:text-[#93c5fd]",
 }
 
 // Fallback colors for legacy type names (when itemTypes not provided)
