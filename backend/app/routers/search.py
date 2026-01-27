@@ -182,10 +182,11 @@ def search(
                 tag_ids = [t.id for t in tag_objs]
                 query = query.filter(Item.tags.any(Tag.id.in_(tag_ids)))
             else:
-                # Log search with 0 results due to tag filter
-                SearchLoggingService.log_search(
-                    query=q if q else "", result_count=0, source="web"
-                )
+                # Log search with 0 results due to tag filter (only if there's a query)
+                if q and q.strip():
+                    SearchLoggingService.log_search(
+                        query=q.strip(), result_count=0, source="web"
+                    )
                 return SearchResponse(
                     success=True,
                     data=[],
@@ -208,13 +209,13 @@ def search(
 
         items = query.offset(offset).limit(limit).all()
 
-    # Log the search query asynchronously
-    # Log even empty queries to track usage patterns
-    SearchLoggingService.log_search(
-        query=q if q else "",
-        result_count=total,
-        source="web",
-    )
+    # Log the search query asynchronously (only for actual searches, not empty listings)
+    if q and q.strip():
+        SearchLoggingService.log_search(
+            query=q.strip(),
+            result_count=total,
+            source="web",
+        )
 
     return SearchResponse(
         success=True,

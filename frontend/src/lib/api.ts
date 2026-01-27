@@ -217,6 +217,13 @@ export interface RecommendationCreate {
   reason: string
 }
 
+// Reset types
+export interface ResetSummary {
+  tables_cleared: string[]
+  success: boolean
+  message: string
+}
+
 // API Methods
 export const api = {
   // Items
@@ -241,7 +248,7 @@ export const api = {
     sort?: 'relevance' | 'date' | 'views'
     page?: number
     limit?: number
-  }) => apiClient.get<SearchResult>('/api/search', { params }),
+  }, signal?: AbortSignal) => apiClient.get<SearchResult>('/api/search', { params, signal }),
 
   // Categories
   getCategories: () =>
@@ -353,6 +360,10 @@ export const api = {
 
   rejectRecommendation: (id: number, data: { admin_notes: string }) =>
     apiClient.post<APIResponse<Recommendation>>(`/api/recommendations/${id}/reject`, data),
+
+  // Admin - Reset
+  resetAllData: () =>
+    apiClient.post<ResetSummary>('/api/admin/reset'),
 }
 
 export default apiClient

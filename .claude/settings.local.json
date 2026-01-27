@@ -8,7 +8,11 @@
       "Bash(curl:*)",
       "Bash(python:*)",
       "Bash(py -c:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(npm install:*)",
+      "Bash(python3:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build)"
     ]
   }
 }
