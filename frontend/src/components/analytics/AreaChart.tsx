@@ -61,12 +61,12 @@ export function AreaChart({
           />
           <XAxis
             dataKey="displayDate"
-            tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+            tick={{ fill: '#9ca3af', fontSize: 11 }}
             axisLine={{ stroke: 'var(--border)' }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
+            tick={{ fill: '#9ca3af', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />

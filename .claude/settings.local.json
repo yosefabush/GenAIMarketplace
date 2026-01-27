@@ -12,7 +12,10 @@
       "Bash(npm install:*)",
       "Bash(python3:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(findstr:*)",
+      "WebFetch(domain:localhost)"
     ]
   }
 }

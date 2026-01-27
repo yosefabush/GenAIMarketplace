@@ -9,10 +9,24 @@ import {
 } from 'recharts'
 import { getTypeColor } from '@/lib/chartTheme'
 
+const barPalette = [
+  '#3b82f6', // blue
+  '#22c55e', // green
+  '#f97316', // orange
+  '#a855f7', // purple
+  '#ef4444', // red
+  '#14b8a6', // teal
+  '#eab308', // yellow
+  '#ec4899', // pink
+  '#6366f1', // indigo
+  '#06b6d4', // cyan
+]
+
 interface BarChartProps {
   data: Array<{ label: string; value: number; type?: string }>
   height?: number
   color?: string
+  colorful?: boolean
   textColor?: string
   showValues?: boolean
   maxItems?: number
@@ -22,7 +36,8 @@ export function HorizontalBarChart({
   data,
   height = 250,
   color = 'var(--primary)',
-  textColor = 'var(--muted-foreground)',
+  colorful = false,
+  textColor = '#9ca3af',
   showValues = true,
   maxItems = 10,
 }: BarChartProps) {
@@ -37,9 +52,9 @@ export function HorizontalBarChart({
     )
   }
 
-  const chartData = data.slice(0, maxItems).map(item => ({
+  const chartData = data.slice(0, maxItems).map((item, index) => ({
     ...item,
-    fill: item.type ? getTypeColor(item.type) : color,
+    fill: item.type ? getTypeColor(item.type) : colorful ? barPalette[index % barPalette.length] : color,
   }))
 
   // Calculate dynamic height based on number of items

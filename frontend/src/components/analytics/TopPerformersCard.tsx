@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Search, Eye, Heart, ChevronDown, ChevronUp } from 'lucide-react'
 import type { TopSearchQuery, TopViewedItem, TopLikedItem } from '@/lib/api'
 
@@ -41,7 +40,7 @@ interface ListItemProps {
 function ListItem({ rank, title, value, valueLabel, type, onClick }: ListItemProps) {
   return (
     <div
-      className={`flex items-center gap-3 py-2 ${onClick ? 'cursor-pointer hover:bg-[var(--muted)] rounded-md px-2 -mx-2' : ''}`}
+      className={`flex items-center gap-3 py-2 rounded-md px-2 -mx-2 bg-muted/50 ${onClick ? 'cursor-pointer hover:bg-muted' : ''}`}
       onClick={onClick}
     >
       <span className="w-5 text-sm font-medium text-[var(--muted-foreground)]">#{rank}</span>
@@ -56,8 +55,11 @@ function ListItem({ rank, title, value, valueLabel, type, onClick }: ListItemPro
   )
 }
 
+type TabKey = 'searches' | 'viewed' | 'liked'
+
 export function TopPerformersCard({ topSearches, topViewed, topLiked }: TopPerformersCardProps) {
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<TabKey>('searches')
   const [expandedTab, setExpandedTab] = useState<string | null>(null)
 
   const toggleExpanded = (tab: string) => {
@@ -182,28 +184,38 @@ export function TopPerformersCard({ topSearches, topViewed, topLiked }: TopPerfo
     )
   }
 
+  const tabs: { key: TabKey; label: string; icon: typeof Search }[] = [
+    { key: 'searches', label: 'Searches', icon: Search },
+    { key: 'viewed', label: 'Views', icon: Eye },
+    { key: 'liked', label: 'Likes', icon: Heart },
+  ]
+
   return (
     <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-5">
       <h3 className="font-semibold text-[var(--foreground)] mb-4">Top Performers</h3>
-      <Tabs defaultValue="searches" className="w-full">
-        <TabsList className="w-full grid grid-cols-3">
-          <TabsTrigger value="searches" className="flex items-center gap-1.5">
-            <Search className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Searches</span>
-          </TabsTrigger>
-          <TabsTrigger value="viewed" className="flex items-center gap-1.5">
-            <Eye className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Views</span>
-          </TabsTrigger>
-          <TabsTrigger value="liked" className="flex items-center gap-1.5">
-            <Heart className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Likes</span>
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="searches">{renderSearches()}</TabsContent>
-        <TabsContent value="viewed">{renderViewed()}</TabsContent>
-        <TabsContent value="liked">{renderLiked()}</TabsContent>
-      </Tabs>
+      <div className="w-full">
+        <div className="grid grid-cols-3 rounded-lg bg-muted p-1">
+          {tabs.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                activeTab === key
+                  ? 'bg-background text-foreground shadow'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-2">
+          {activeTab === 'searches' && renderSearches()}
+          {activeTab === 'viewed' && renderViewed()}
+          {activeTab === 'liked' && renderLiked()}
+        </div>
+      </div>
     </div>
   )
 }

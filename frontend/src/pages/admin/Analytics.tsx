@@ -282,7 +282,7 @@ export default function AdminAnalytics() {
                   <PieChart className="w-5 h-5 text-[var(--primary)]" />
                   <h3 className="font-semibold text-[var(--foreground)]">Items by Type</h3>
                 </div>
-                <DonutChart data={analytics.items_by_type} height={160} />
+                <DonutChart data={analytics.items_by_type} height={220} />
               </div>
             </div>
 
@@ -317,7 +317,7 @@ export default function AdminAnalytics() {
                 }))}
                 height={220}
                 maxItems={7}
-                color="#3b82f6"
+                colorful
                 textColor="#9ca3af"
               />
             </div>

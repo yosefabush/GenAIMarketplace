@@ -191,7 +191,7 @@ def update_item(
     db.commit()
     db.refresh(item)
 
-    # Update FTS index
+    # Update FTS index (non-blocking: search may be stale on failure)
     SearchService.index_item(db, item.id, item.title, item.description, item.content)
     db.commit()
 

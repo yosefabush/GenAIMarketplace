@@ -29,9 +29,9 @@ export function DonutChart({ data, height = 200 }: DonutChartProps) {
           <Pie
             data={chartData}
             cx="50%"
-            cy="50%"
-            innerRadius={50}
-            outerRadius={70}
+            cy="40%"
+            innerRadius={35}
+            outerRadius={55}
             paddingAngle={2}
             dataKey="value"
           >
@@ -57,8 +57,9 @@ export function DonutChart({ data, height = 200 }: DonutChartProps) {
             }}
           />
           <Legend
+            verticalAlign="bottom"
             content={({ payload }) => (
-              <div className="flex flex-wrap justify-center gap-3 mt-2">
+              <div className="flex flex-wrap justify-center gap-3 mt-1">
                 {payload?.map((entry, index) => (
                   <div key={index} className="flex items-center gap-1.5 text-xs">
                     <div

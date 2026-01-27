@@ -55,6 +55,6 @@ export const gridStyle = {
 
 // Axis style
 export const axisStyle = {
-  tick: { fill: 'var(--muted-foreground)' },
+  tick: { fill: '#9ca3af' },
   axisLine: { stroke: 'var(--border)' },
 }
