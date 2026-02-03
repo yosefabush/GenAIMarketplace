@@ -142,7 +142,7 @@ class SearchService:
             escaped = word.replace('"', '""')
             escaped_words.append(f'"{escaped}"')
 
-        return " ".join(escaped_words)
+        return " OR ".join(escaped_words)
 
     @staticmethod
     def _prepare_query_postgres(query: str) -> Optional[str]:
@@ -167,7 +167,7 @@ class SearchService:
         if not escaped_words:
             return None
 
-        return " & ".join(escaped_words)
+        return " | ".join(escaped_words)
 
     @staticmethod
     def rebuild_index(db: Session) -> None:

@@ -15,7 +15,8 @@
       "Bash(npx vite build)",
       "Bash(timeout 10 bash:*)",
       "Bash(findstr:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "Bash(dir:*)"
     ]
   }
 }
