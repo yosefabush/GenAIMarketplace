@@ -1,6 +1,8 @@
 import logging
+import os
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from app.core.config import settings
 
@@ -23,6 +25,7 @@ from app.routers import (
     analytics_router,
     recommendations_router,
     seed_router,
+    upload_router,
 )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -42,6 +45,12 @@ app.include_router(auth_router)
 app.include_router(analytics_router)
 app.include_router(recommendations_router)
 app.include_router(seed_router)
+app.include_router(upload_router)
+
+# Mount static files for uploaded images
+uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+os.makedirs(os.path.join(uploads_dir, "images"), exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 # Add caching middleware (must be before CORS middleware to properly modify responses)
 app.add_middleware(CacheMiddleware)

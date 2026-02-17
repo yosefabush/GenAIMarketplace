@@ -23,6 +23,7 @@ def _add_like_count_list(item: Item, db: Session) -> dict[str, Any]:
         "category_id": item.category_id,
         "category": item.category,
         "tags": item.tags,
+        "image_url": item.image_url,
         "view_count": item.view_count,
         "like_count": db.query(func.count(Like.id)).filter(Like.item_id == item.id).scalar() or 0,
         "created_at": item.created_at,

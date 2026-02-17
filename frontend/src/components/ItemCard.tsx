@@ -4,6 +4,14 @@ import { cn } from "@/lib/utils"
 import type { Item, ItemType } from "@/lib/api"
 import { LikeButton } from "./LikeButton"
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+
+function getFullImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
+}
+
 export interface ItemCardProps {
   item: Item
   className?: string
@@ -49,36 +57,47 @@ function truncateText(text: string, maxLength: number): string {
 }
 
 export const ItemCard = memo(function ItemCard({ item, className, itemTypes }: ItemCardProps) {
+  const imageUrl = getFullImageUrl(item.image_url)
+
   return (
     <Link
       to={`/items/${item.id}`}
       className={cn(
-        "block rounded-lg border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md",
+        "block rounded-lg border border-border bg-card overflow-hidden transition-all hover:border-primary/50 hover:shadow-md",
         className
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold text-card-foreground line-clamp-1">
-          {item.title}
-        </h3>
-        <span
-          className={cn(
-            "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-            getTypeBadgeClass(item.type, itemTypes)
-          )}
-        >
-          {item.type}
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-        {truncateText(item.description, 120)}
-      </p>
-      <div className="mt-3 flex items-center justify-end">
-        <LikeButton
-          itemId={item.id}
-          initialLikeCount={item.like_count || 0}
-          size="sm"
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={item.title}
+          className="w-full h-36 object-cover"
         />
+      )}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-semibold text-card-foreground line-clamp-1">
+            {item.title}
+          </h3>
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+              getTypeBadgeClass(item.type, itemTypes)
+            )}
+          >
+            {item.type}
+          </span>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+          {truncateText(item.description, 120)}
+        </p>
+        <div className="mt-3 flex items-center justify-end">
+          <LikeButton
+            itemId={item.id}
+            initialLikeCount={item.like_count || 0}
+            size="sm"
+          />
+        </div>
       </div>
     </Link>
   )

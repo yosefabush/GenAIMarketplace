@@ -95,6 +95,7 @@ export interface Item {
   content: string
   type: string
   category_id: number | null
+  image_url: string | null
   view_count: number
   like_count: number
   created_at: string
@@ -259,6 +260,7 @@ export const api = {
     type: string
     category_id?: number
     tag_ids?: number[]
+    image_url?: string | null
   }) => apiClient.post<APIResponse<Item>>('/api/items', data),
 
   updateItem: (id: number, data: Partial<{
@@ -268,6 +270,7 @@ export const api = {
     type: string
     category_id: number
     tag_ids: number[]
+    image_url: string | null
   }>) => apiClient.put<APIResponse<Item>>(`/api/items/${id}`, data),
 
   deleteItem: (id: number) =>
@@ -316,6 +319,15 @@ export const api = {
 
   deleteItemType: (id: number) =>
     apiClient.delete<APIResponse<null>>(`/api/item-types/${id}`),
+
+  // Upload
+  uploadImage: (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return apiClient.post<{ url: string }>('/api/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 
   // Auth
   validateToken: (token: string) =>

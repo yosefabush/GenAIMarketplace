@@ -33,6 +33,7 @@ def _add_like_count(item: Item, db: Session) -> dict[str, Any]:
         "category_id": item.category_id,
         "category": item.category,
         "tags": item.tags,
+        "image_url": item.image_url,
         "view_count": item.view_count,
         "like_count": db.query(func.count(Like.id)).filter(Like.item_id == item.id).scalar() or 0,
         "created_at": item.created_at,
@@ -51,6 +52,7 @@ def _add_like_count_list(item: Item, db: Session) -> dict[str, Any]:
         "category_id": item.category_id,
         "category": item.category,
         "tags": item.tags,
+        "image_url": item.image_url,
         "view_count": item.view_count,
         "like_count": db.query(func.count(Like.id)).filter(Like.item_id == item.id).scalar() or 0,
         "created_at": item.created_at,
@@ -133,6 +135,7 @@ def create_item(
         content=item_data.content,
         type=item_data.type,
         category_id=item_data.category_id,
+        image_url=item_data.image_url,
         tags=tags,
     )
     db.add(item)
@@ -182,6 +185,8 @@ def update_item(
         item.type = item_data.type
     if item_data.category_id is not None:
         item.category_id = item_data.category_id
+    if item_data.image_url is not None:
+        item.image_url = item_data.image_url
     if item_data.tag_ids is not None:
         tags = db.query(Tag).filter(Tag.id.in_(item_data.tag_ids)).all()
         if len(tags) != len(item_data.tag_ids):

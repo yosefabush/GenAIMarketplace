@@ -4,6 +4,14 @@ import { ArrowLeft, Eye, Calendar, Tag, Folder, Clock } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import type { Components } from "react-markdown"
 import { api, type Item, type ItemType } from "@/lib/api"
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+
+function getFullImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
+}
 import { cn } from "@/lib/utils"
 import { CodeBlock, InlineCode } from "@/components/CodeBlock"
 import { RelatedItems } from "@/components/RelatedItems"
@@ -343,6 +351,17 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
               </div>
             )}
           </header>
+
+          {/* Item Image */}
+          {getFullImageUrl(item.image_url) && (
+            <div className="border-b border-border">
+              <img
+                src={getFullImageUrl(item.image_url)!}
+                alt={item.title}
+                className="w-full max-h-96 object-cover"
+              />
+            </div>
+          )}
 
           {/* Markdown Content */}
           <div className="p-6">

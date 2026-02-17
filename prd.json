@@ -640,6 +640,29 @@
       "priority": 36,
       "passes": true,
       "notes": "Recommendations table with status workflow. POST /api/recommendations for users, GET/PUT/approve/reject endpoints for admins. EmailService sends notifications (logs to console when SMTP not configured). RecommendationForm page at /recommend. Admin management page at /admin/recommendations with status filter, view details, approve (with markdown content editor), and reject (with reason) dialogs."
+    },
+    {
+      "id": "US-037",
+      "title": "Add image field to Item",
+      "description": "As an admin, I want to add an image to an item (alongside title, description, content, etc.) so that items have a visual representation in the marketplace.",
+      "acceptanceCriteria": [
+        "New image_url column (nullable string) added to items table via Alembic migration",
+        "POST /api/upload/image endpoint accepts multipart file upload (admin only), returns the image URL",
+        "Upload validates file type (JPEG, PNG, WebP, GIF) and max size (5MB)",
+        "Uploaded images stored in backend/uploads/images/ with UUID filenames",
+        "Static file serving configured in FastAPI for /uploads/ path",
+        "ItemCreate and ItemUpdate schemas include optional image_url field",
+        "ItemResponse schema returns image_url",
+        "Admin Editor form has an image upload field (file picker + drag-and-drop) with preview and remove button",
+        "ItemCard displays the item image when present",
+        "ItemDetail page displays the item image when present",
+        "Upload directory persisted via Docker volume mount",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 37,
+      "passes": true,
+      "notes": "Migration 008 adds image_url column. Upload router at /api/upload/image with file type and size validation. Static file serving via FastAPI StaticFiles mount. ImageUpload component with drag-and-drop, preview, and remove. ItemCard shows image above card content. ItemDetail shows image between header and markdown content. Docker volumes updated for uploads persistence."
     }
   ]
 }

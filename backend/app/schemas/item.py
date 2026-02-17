@@ -14,6 +14,7 @@ class ItemCreate(BaseModel):
     type: str = Field(..., pattern="^(agent|prompt|mcp|workflow|doc|skill)$")
     category_id: int | None = None
     tag_ids: list[int] = Field(default_factory=list)
+    image_url: str | None = None
 
 
 class ItemUpdate(BaseModel):
@@ -25,6 +26,7 @@ class ItemUpdate(BaseModel):
     type: str | None = Field(default=None, pattern="^(agent|prompt|mcp|workflow|doc|skill)$")
     category_id: int | None = None
     tag_ids: list[int] | None = None
+    image_url: str | None = None
 
 
 class ItemResponse(BaseModel):
@@ -38,6 +40,7 @@ class ItemResponse(BaseModel):
     category_id: int | None
     category: CategoryResponse | None
     tags: list[TagResponse]
+    image_url: str | None = None
     view_count: int
     like_count: int = 0
     created_at: datetime
@@ -56,6 +59,7 @@ class ItemListResponse(BaseModel):
     category_id: int | None
     category: CategoryResponse | None
     tags: list[TagResponse]
+    image_url: str | None = None
     view_count: int
     like_count: int = 0
     created_at: datetime
