@@ -143,7 +143,7 @@ def create_item(
     db.refresh(item)
 
     # Add to FTS index
-    SearchService.index_item(db, item.id, item.title, item.description, item.content)
+    SearchService.index_item(db, item.id, item.title, item.description, item.content or "")
     db.commit()
 
     # Reload with relationships
@@ -197,7 +197,7 @@ def update_item(
     db.refresh(item)
 
     # Update FTS index
-    SearchService.index_item(db, item.id, item.title, item.description, item.content)
+    SearchService.index_item(db, item.id, item.title, item.description, item.content or "")
     db.commit()
 
     # Reload with relationships

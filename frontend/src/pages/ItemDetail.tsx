@@ -364,13 +364,15 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
           )}
 
           {/* Markdown Content */}
-          <div className="p-6">
-            <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
-              <ReactMarkdown components={markdownComponents}>
-                {item.content}
-              </ReactMarkdown>
+          {item.content && (
+            <div className="p-6">
+              <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
+                <ReactMarkdown components={markdownComponents}>
+                  {item.content}
+                </ReactMarkdown>
+              </div>
             </div>
-          </div>
+          )}
         </article>
 
         {/* Related Items Section */}

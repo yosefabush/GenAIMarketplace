@@ -18,13 +18,18 @@ export interface ItemCardProps {
   itemTypes?: ItemType[]
 }
 
-const typeColors: Record<string, string> = {
-  agent: "bg-[#e6f4fa] text-[#1e3a5f] dark:bg-[#1a3d5c] dark:text-[#7dd3fc]",
-  prompt: "bg-[#e6f7f2] text-[#0d6e5b] dark:bg-[#134e4a] dark:text-[#5eead4]",
-  mcp: "bg-[#f0e6fa] text-[#5b21b6] dark:bg-[#3b2763] dark:text-[#c4b5fd]",
-  workflow: "bg-[#fff1e6] text-[#c2410c] dark:bg-[#4a2c17] dark:text-[#fdba74]",
-  docs: "bg-[#f0f4f8] text-[#475569] dark:bg-[#1e293b] dark:text-[#94a3b8]",
-  skill: "bg-[#e6f0fa] text-[#1e40af] dark:bg-[#1e3a5f] dark:text-[#93c5fd]",
+const colorClasses: Record<string, string> = {
+  blue: "bg-[#e6f4fa] text-[#1e3a5f] dark:bg-[#1a3d5c] dark:text-[#7dd3fc]",
+  green: "bg-[#e6f7f2] text-[#0d6e5b] dark:bg-[#134e4a] dark:text-[#5eead4]",
+  purple: "bg-[#f0e6fa] text-[#5b21b6] dark:bg-[#3b2763] dark:text-[#c4b5fd]",
+  orange: "bg-[#fff1e6] text-[#c2410c] dark:bg-[#4a2c17] dark:text-[#fdba74]",
+  gray: "bg-[#f0f4f8] text-[#475569] dark:bg-[#1e293b] dark:text-[#94a3b8]",
+  indigo: "bg-[#e6f0fa] text-[#1e40af] dark:bg-[#1e3a5f] dark:text-[#93c5fd]",
+  red: "bg-[#fde8e8] text-[#991b1b] dark:bg-[#4a1d1d] dark:text-[#fca5a5]",
+  yellow: "bg-[#fef9c3] text-[#854d0e] dark:bg-[#422006] dark:text-[#fde047]",
+  pink: "bg-[#fce7f3] text-[#9d174d] dark:bg-[#4a1d34] dark:text-[#f9a8d4]",
+  cyan: "bg-[#e0f7fa] text-[#155e75] dark:bg-[#164e63] dark:text-[#67e8f9]",
+  white: "bg-[#f0f4f8] text-[#475569] dark:bg-[#1e293b] dark:text-[#94a3b8]",
 }
 
 // Fallback colors for legacy type names (when itemTypes not provided)

@@ -1,7 +1,7 @@
 """Add image_url column to items table
 
-Revision ID: 008
-Revises: 007
+Revision ID: 009
+Revises: 008
 Create Date: 2026-02-17
 
 """
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "008"
-down_revision: Union[str, None] = "007"
+revision: str = "009"
+down_revision: Union[str, None] = "008"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

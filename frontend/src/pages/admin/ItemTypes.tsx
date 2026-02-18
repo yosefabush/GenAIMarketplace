@@ -270,7 +270,7 @@ export default function AdminItemTypes() {
     setDeleting(true)
     try {
       const response = await api.deleteItemType(typeToDelete.id)
-      const deletedItemsCount = response.data.data?.deleted_items_count || 0
+      const deletedItemsCount = ((response.data as unknown as { data?: { deleted_items_count?: number } })?.data?.deleted_items_count) || 0
       setItemTypes((prev) => prev.filter((t) => t.id !== typeToDelete.id))
       toast({
         title: 'Item type deleted',

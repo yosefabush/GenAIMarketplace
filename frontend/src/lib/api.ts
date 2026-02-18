@@ -92,7 +92,7 @@ export interface Item {
   id: number
   title: string
   description: string
-  content: string
+  content: string | null
   type: string
   category_id: number | null
   image_url: string | null
@@ -256,7 +256,7 @@ export const api = {
   createItem: (data: {
     title: string
     description: string
-    content: string
+    content?: string
     type: string
     category_id?: number
     tag_ids?: number[]

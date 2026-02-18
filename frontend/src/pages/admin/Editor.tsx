@@ -93,7 +93,7 @@ export default function AdminEditor() {
           setFormData({
             title: item.title,
             description: item.description,
-            content: item.content,
+            content: item.content ?? '',
             type: item.type,
             category_id: item.category_id,
             tag_ids: item.tags.map((tag) => tag.id),
@@ -191,7 +191,7 @@ export default function AdminEditor() {
       const payload = {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        content: formData.content,
+        content: formData.content || undefined,
         type: formData.type,
         category_id: formData.category_id ?? undefined,
         tag_ids: formData.tag_ids,
