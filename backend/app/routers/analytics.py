@@ -131,9 +131,10 @@ def get_items_by_type(db: Session) -> list[ItemsByType]:
 
 
 def get_top_viewed_items(db: Session, limit: int = 10) -> list[TopViewedItem]:
-    """Get top viewed items."""
+    """Get top viewed items (only items with at least 1 view)."""
     results = (
         db.query(Item.id, Item.title, Item.type, Item.view_count)
+        .filter(Item.view_count > 1)
         .order_by(Item.view_count.desc())
         .limit(limit)
         .all()

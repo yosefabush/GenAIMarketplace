@@ -18,7 +18,7 @@ export function SearchBar({
   value,
   onChange,
   onSubmit,
-  placeholder = "Search for AI capabilities...",
+  placeholder = "What do you need AI to do?",
   className,
   autoFocus = false,
 }: SearchBarProps) {

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import verify_admin_token
 from app.core.database import get_db
-from app.models import Category, Tag, Item, item_tags
+from app.models import Category, Tag, Item, ItemType, item_tags
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -55,6 +55,16 @@ TAGS = [
 ]
 
 
+ITEM_TYPES = [
+    {"name": "Agent", "slug": "agent", "description": "AI agents that can perform tasks autonomously", "icon": "Bot", "color": "blue"},
+    {"name": "Prompt", "slug": "prompt", "description": "Reusable prompts for AI models", "icon": "MessageSquare", "color": "green"},
+    {"name": "MCP", "slug": "mcp", "description": "Model Context Protocol servers and tools", "icon": "Plug", "color": "purple"},
+    {"name": "Workflow", "slug": "workflow", "description": "Multi-step AI workflows and pipelines", "icon": "Workflow", "color": "orange"},
+    {"name": "Docs", "slug": "docs", "description": "Documentation and guides", "icon": "FileText", "color": "teal"},
+    {"name": "Skill", "slug": "skill", "description": "Reusable skills for AI assistants", "icon": "Zap", "color": "indigo"},
+]
+
+
 # =============================================================================
 # RESPONSE MODELS
 # =============================================================================
@@ -74,6 +84,14 @@ class SeedSummary(BaseModel):
     total_items: int
     items_by_type: dict[str, int]
     reset_performed: bool
+
+
+class ResetSummary(BaseModel):
+    """Summary of reset operation."""
+
+    tables_cleared: list[str]
+    success: bool
+    message: str
 
 
 # =============================================================================
@@ -145,6 +163,24 @@ def seed_tags(db: Session) -> tuple[dict[str, int], int, int]:
     return tag_map, created, existing
 
 
+def seed_item_types(db: Session) -> tuple[int, int]:
+    """Seed item types and return (created count, existing count)."""
+    created = 0
+    existing = 0
+
+    for type_data in ITEM_TYPES:
+        item_type = db.query(ItemType).filter(ItemType.slug == type_data["slug"]).first()
+        if item_type:
+            existing += 1
+        else:
+            item_type = ItemType(**type_data)
+            db.add(item_type)
+            created += 1
+
+    db.commit()
+    return created, existing
+
+
 def seed_items(
     db: Session, category_map: dict[str, int], tag_map: dict[str, int]
 ) -> tuple[int, int]:
@@ -199,24 +235,73 @@ def rebuild_fts_index(db: Session) -> None:
         db.rollback()
 
 
-def reset_database(db: Session) -> None:
-    """Clear all data from the database."""
+def reset_database(db: Session) -> list[str]:
+    """Clear all data from the database. Returns list of cleared tables."""
+    tables_cleared = []
+
+    # Clear in dependency order (most dependent first)
     db.execute(text("DELETE FROM likes"))
+    tables_cleared.append("likes")
+
     db.execute(text("DELETE FROM item_tags"))
+    tables_cleared.append("item_tags")
+
     db.execute(text("DELETE FROM items"))
+    tables_cleared.append("items")
+
     db.execute(text("DELETE FROM tags"))
+    tables_cleared.append("tags")
+
     db.execute(text("DELETE FROM categories"))
+    tables_cleared.append("categories")
+
     db.execute(text("DELETE FROM search_logs"))
+    tables_cleared.append("search_logs")
+
+    db.execute(text("DELETE FROM recommendations"))
+    tables_cleared.append("recommendations")
+
+    db.execute(text("DELETE FROM item_types"))
+    tables_cleared.append("item_types")
+
     try:
         db.execute(text("DELETE FROM items_fts"))
+        tables_cleared.append("items_fts")
     except Exception:
         pass
+
     db.commit()
+    return tables_cleared
 
 
 # =============================================================================
 # API ENDPOINTS
 # =============================================================================
+
+
+@router.post("/reset", response_model=ResetSummary)
+async def reset_all_data(
+    db: Session = Depends(get_db),
+    _: str = Depends(verify_admin_token),
+) -> ResetSummary:
+    """Reset all data in the database.
+
+    This endpoint clears ALL data including:
+    - Items, categories, tags
+    - Analytics data (search logs, likes, view counts)
+    - Recommendations
+    - Item types
+    - Full-text search index
+
+    Use with caution - this action cannot be undone.
+    """
+    tables_cleared = reset_database(db)
+
+    return ResetSummary(
+        tables_cleared=tables_cleared,
+        success=True,
+        message=f"Successfully cleared {len(tables_cleared)} tables. All data has been reset.",
+    )
 
 
 @router.post("/seed", response_model=SeedSummary)
@@ -239,6 +324,7 @@ async def seed_database(
 
     category_map, cats_created, cats_existing = seed_categories(db)
     tag_map, tags_created, tags_existing = seed_tags(db)
+    seed_item_types(db)
     items_created, items_skipped = seed_items(db, category_map, tag_map)
     rebuild_fts_index(db)
 

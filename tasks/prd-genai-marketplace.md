@@ -141,7 +141,7 @@ The system will be built with FastAPI (Python), React with Shadcn/ui, SQLite dat
 
 **Acceptance Criteria:**
 - [ ] Homepage layout with centered search bar
-- [ ] Search input with placeholder: "Search for AI capabilities..."
+- [ ] Search input with placeholder: "What do you need AI to do?"
 - [ ] Quick filter chips for content types (All, Agents, Prompts, MCPs, Workflows, Docs)
 - [ ] Clicking type chip filters search results
 - [ ] Recent additions section showing 5 most recent items

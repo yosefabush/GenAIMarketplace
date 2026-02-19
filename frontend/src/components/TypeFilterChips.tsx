@@ -52,6 +52,10 @@ const chipColorClasses: Record<string, { selected: string; unselected: string }>
     selected: "bg-cyan-600 text-white shadow-sm",
     unselected: "bg-cyan-100 text-cyan-800 hover:bg-cyan-200 dark:bg-cyan-900 dark:text-cyan-200 dark:hover:bg-cyan-800",
   },
+  teal: {
+    selected: "bg-teal-600 text-white shadow-sm",
+    unselected: "bg-teal-100 text-teal-800 hover:bg-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:hover:bg-teal-800",
+  },
 }
 
 export function TypeFilterChips({

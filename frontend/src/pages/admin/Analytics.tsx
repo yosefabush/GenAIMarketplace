@@ -4,21 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell
-} from '@/components/ui/table'
+  DonutChart,
+  AreaChart,
+  HorizontalBarChart,
+  KPICard,
+  TopPerformersCard,
+} from '@/components/analytics'
 import {
   api,
   type AnalyticsOverview,
-  type TopSearchQuery,
-  type TopViewedItem,
-  type ItemsByType,
   type LikeAnalytics,
-  type TopLikedItem,
 } from '@/lib/api'
 import {
   BarChart3,
@@ -26,135 +21,10 @@ import {
   Loader2,
   Download,
   Search,
-  Eye,
   Calendar,
   Heart,
+  PieChart,
 } from 'lucide-react'
-
-// Type badge colors
-const typeBadgeColors: Record<string, string> = {
-  agent: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  prompt: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  mcp: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  workflow: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-  docs: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-}
-
-// Chart bar colors for types
-const typeBarColors: Record<string, string> = {
-  agent: 'bg-blue-500',
-  prompt: 'bg-green-500',
-  mcp: 'bg-purple-500',
-  workflow: 'bg-orange-500',
-  docs: 'bg-gray-500',
-}
-
-// Card component for analytics sections
-function StatCard({ title, value, subtitle }: { title: string; value: number | string; subtitle?: string }) {
-  return (
-    <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-      <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-2">{title}</h3>
-      <p className="text-3xl font-bold text-[var(--foreground)]">{value.toLocaleString()}</p>
-      {subtitle && (
-        <p className="text-sm text-[var(--muted-foreground)] mt-1">{subtitle}</p>
-      )}
-    </div>
-  )
-}
-
-// Simple bar chart component
-function BarChart({
-  data,
-  labelKey,
-  valueKey,
-  colorKey,
-  maxValue,
-}: {
-  data: Array<Record<string, string | number>>
-  labelKey: string
-  valueKey: string
-  colorKey?: string
-  maxValue?: number
-}) {
-  const max = maxValue || Math.max(...data.map(d => Number(d[valueKey])), 1)
-
-  return (
-    <div className="space-y-3">
-      {data.map((item, index) => {
-        const value = Number(item[valueKey])
-        const percentage = (value / max) * 100
-        const barColor = colorKey && typeBarColors[item[colorKey] as string]
-          ? typeBarColors[item[colorKey] as string]
-          : 'bg-[var(--primary)]'
-
-        return (
-          <div key={index} className="space-y-1">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-[var(--foreground)] truncate max-w-[200px]">
-                {item[labelKey]}
-              </span>
-              <span className="text-[var(--muted-foreground)] font-medium ml-2">
-                {value.toLocaleString()}
-              </span>
-            </div>
-            <div className="h-4 bg-[var(--muted)] rounded-full overflow-hidden">
-              <div
-                className={`h-full ${barColor} rounded-full transition-all duration-500`}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-// Pie chart component (simplified as a horizontal bar)
-function PieChart({ data }: { data: ItemsByType[] }) {
-  const total = data.reduce((sum, item) => sum + item.count, 0)
-
-  if (total === 0) {
-    return (
-      <p className="text-[var(--muted-foreground)] text-center py-8">No data available</p>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Stacked bar */}
-      <div className="h-8 flex rounded-full overflow-hidden">
-        {data.map((item, index) => {
-          const percentage = (item.count / total) * 100
-          const barColor = typeBarColors[item.type] || 'bg-gray-500'
-          return (
-            <div
-              key={index}
-              className={`${barColor} transition-all duration-500`}
-              style={{ width: `${percentage}%` }}
-              title={`${item.type}: ${item.count} (${percentage.toFixed(1)}%)`}
-            />
-          )
-        })}
-      </div>
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4">
-        {data.map((item, index) => {
-          const percentage = ((item.count / total) * 100).toFixed(1)
-          const barColor = typeBarColors[item.type] || 'bg-gray-500'
-          return (
-            <div key={index} className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${barColor}`} />
-              <span className="text-sm text-[var(--foreground)]">
-                {item.type}: {item.count} ({percentage}%)
-              </span>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 // Generate CSV content from analytics data
 function generateCSV(analytics: AnalyticsOverview, likeAnalytics: LikeAnalytics | null): string {
@@ -172,7 +42,6 @@ function generateCSV(analytics: AnalyticsOverview, likeAnalytics: LikeAnalytics 
   lines.push('Top Search Queries')
   lines.push('Query,Count,Avg Results')
   analytics.top_searches.forEach(q => {
-    // Escape quotes in query
     const escapedQuery = q.query.replace(/"/g, '""')
     lines.push(`"${escapedQuery}",${q.count},${q.avg_result_count}`)
   })
@@ -317,9 +186,9 @@ export default function AdminAnalytics() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Date Range Filter and Export */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <form onSubmit={handleDateFilter} className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-[var(--muted-foreground)]" />
@@ -327,7 +196,7 @@ export default function AdminAnalytics() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-40"
+                className="w-36"
                 placeholder="Start date"
               />
               <span className="text-[var(--muted-foreground)]">to</span>
@@ -335,12 +204,12 @@ export default function AdminAnalytics() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-40"
+                className="w-36"
                 placeholder="End date"
               />
             </div>
             <Button type="submit" variant="outline" size="sm">
-              Apply Filter
+              Apply
             </Button>
             {(startDate || endDate) && (
               <Button type="button" variant="ghost" size="sm" onClick={handleClearFilters}>
@@ -349,7 +218,7 @@ export default function AdminAnalytics() {
             )}
           </form>
 
-          <Button onClick={handleExportCSV} disabled={!analytics || loading}>
+          <Button onClick={handleExportCSV} disabled={!analytics || loading} size="sm">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
@@ -378,241 +247,80 @@ export default function AdminAnalytics() {
 
         {/* Analytics Content */}
         {!loading && !error && analytics && (
-          <div className="space-y-8">
-            {/* Search Totals */}
-            <section>
-              <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Search Statistics
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <StatCard
-                  title="Last 7 Days"
-                  value={analytics.search_totals.last_7_days}
-                  subtitle="searches"
-                />
-                <StatCard
-                  title="Last 30 Days"
-                  value={analytics.search_totals.last_30_days}
-                  subtitle="searches"
-                />
-                <StatCard
-                  title="All Time"
-                  value={analytics.search_totals.all_time}
-                  subtitle="total searches"
-                />
+          <div className="space-y-6">
+            {/* ROW 1: KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <KPICard
+                title="Searches"
+                icon={Search}
+                metrics={[
+                  { label: 'Last 7 days', value: analytics.search_totals.last_7_days },
+                  { label: 'Last 30 days', value: analytics.search_totals.last_30_days },
+                  { label: 'All time', value: analytics.search_totals.all_time },
+                ]}
+              />
+              <KPICard
+                title="Likes"
+                icon={Heart}
+                iconColor="text-red-500"
+                metrics={
+                  likeAnalytics
+                    ? [
+                        { label: 'Last 7 days', value: likeAnalytics.totals.last_7_days },
+                        { label: 'Last 30 days', value: likeAnalytics.totals.last_30_days },
+                        { label: 'All time', value: likeAnalytics.totals.total_likes },
+                      ]
+                    : [
+                        { label: 'Last 7 days', value: 0 },
+                        { label: 'Last 30 days', value: 0 },
+                        { label: 'All time', value: 0 },
+                      ]
+                }
+              />
+              <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <PieChart className="w-5 h-5 text-[var(--primary)]" />
+                  <h3 className="font-semibold text-[var(--foreground)]">Items by Type</h3>
+                </div>
+                <DonutChart data={analytics.items_by_type} height={220} />
               </div>
-            </section>
-
-            {/* Two-column layout for charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Top Search Queries */}
-              <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
-                  Top 10 Search Queries
-                </h2>
-                {analytics.top_searches.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Query</TableHead>
-                          <TableHead className="text-right">Count</TableHead>
-                          <TableHead className="text-right">Avg Results</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {analytics.top_searches.map((query: TopSearchQuery, index: number) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium max-w-[200px] truncate">
-                              {query.query || '(empty query)'}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {query.count.toLocaleString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {query.avg_result_count.toFixed(1)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <p className="text-[var(--muted-foreground)] text-center py-8">
-                    No search data available
-                  </p>
-                )}
-              </section>
-
-              {/* Searches by Source */}
-              <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
-                  Searches by Source
-                </h2>
-                {analytics.searches_by_source.length > 0 ? (
-                  <BarChart
-                    data={analytics.searches_by_source as unknown as Array<Record<string, string | number>>}
-                    labelKey="source"
-                    valueKey="count"
-                  />
-                ) : (
-                  <p className="text-[var(--muted-foreground)] text-center py-8">
-                    No source data available
-                  </p>
-                )}
-              </section>
             </div>
 
-            {/* Items by Type */}
-            <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
-                Items by Type
-              </h2>
-              <PieChart data={analytics.items_by_type} />
-            </section>
-
-            {/* Top Viewed Items */}
-            <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                Top 10 Most Viewed Items
-              </h2>
-              {analytics.top_viewed_items.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead className="text-right">Views</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {analytics.top_viewed_items.map((item: TopViewedItem) => (
-                        <TableRow
-                          key={item.id}
-                          className="cursor-pointer hover:bg-[var(--muted)]"
-                          onClick={() => navigate(`/items/${item.id}`)}
-                        >
-                          <TableCell className="font-medium max-w-[300px] truncate">
-                            {item.title}
-                          </TableCell>
-                          <TableCell>
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${typeBadgeColors[item.type] || 'bg-gray-100 text-gray-800'}`}>
-                              {item.type}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {item.view_count.toLocaleString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+            {/* ROW 2: Time Series + Top Performers */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Heart className="w-5 h-5 text-red-500" />
+                  <h3 className="font-semibold text-[var(--foreground)]">Likes Over Time</h3>
                 </div>
-              ) : (
-                <p className="text-[var(--muted-foreground)] text-center py-8">
-                  No items to display
-                </p>
-              )}
-            </section>
+                <AreaChart
+                  data={likeAnalytics?.likes_over_time || []}
+                  height={220}
+                  color="#ef4444"
+                  gradientId="likesGradient"
+                />
+              </div>
+              <TopPerformersCard
+                topSearches={analytics.top_searches}
+                topViewed={analytics.top_viewed_items}
+                topLiked={likeAnalytics?.top_liked_items || []}
+              />
+            </div>
 
-            {/* Like Analytics Section */}
-            {likeAnalytics && (
-              <>
-                {/* Like Totals */}
-                <section>
-                  <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-red-500" />
-                    Like Statistics
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <StatCard
-                      title="Last 7 Days"
-                      value={likeAnalytics.totals.last_7_days}
-                      subtitle="likes"
-                    />
-                    <StatCard
-                      title="Last 30 Days"
-                      value={likeAnalytics.totals.last_30_days}
-                      subtitle="likes"
-                    />
-                    <StatCard
-                      title="Total Likes"
-                      value={likeAnalytics.totals.total_likes}
-                      subtitle="all time"
-                    />
-                  </div>
-                </section>
-
-                {/* Two-column layout for likes over time and top liked items */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Likes Over Time */}
-                  <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-                    <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
-                      Likes Over Time
-                    </h2>
-                    {likeAnalytics.likes_over_time.length > 0 ? (
-                      <BarChart
-                        data={likeAnalytics.likes_over_time as unknown as Array<Record<string, string | number>>}
-                        labelKey="date"
-                        valueKey="count"
-                      />
-                    ) : (
-                      <p className="text-[var(--muted-foreground)] text-center py-8">
-                        No like data available
-                      </p>
-                    )}
-                  </section>
-
-                  {/* Top Liked Items */}
-                  <section className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
-                    <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
-                      Top 10 Most Liked Items
-                    </h2>
-                    {likeAnalytics.top_liked_items.length > 0 ? (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Title</TableHead>
-                              <TableHead>Type</TableHead>
-                              <TableHead className="text-right">Likes</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {likeAnalytics.top_liked_items.map((item: TopLikedItem) => (
-                              <TableRow
-                                key={item.id}
-                                className="cursor-pointer hover:bg-[var(--muted)]"
-                                onClick={() => navigate(`/items/${item.id}`)}
-                              >
-                                <TableCell className="font-medium max-w-[200px] truncate">
-                                  {item.title}
-                                </TableCell>
-                                <TableCell>
-                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${typeBadgeColors[item.type] || 'bg-gray-100 text-gray-800'}`}>
-                                    {item.type}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  {item.like_count.toLocaleString()}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <p className="text-[var(--muted-foreground)] text-center py-8">
-                        No liked items yet
-                      </p>
-                    )}
-                  </section>
-                </div>
-              </>
-            )}
+            {/* ROW 3: Bar Chart */}
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-5">
+              <h3 className="font-semibold text-[var(--foreground)] mb-4">Top Search Queries</h3>
+              <HorizontalBarChart
+                data={analytics.top_searches.map(q => ({
+                  label: q.query || '(empty)',
+                  value: q.count,
+                }))}
+                height={220}
+                maxItems={7}
+                colorful
+                textColor="#9ca3af"
+              />
+            </div>
           </div>
         )}
       </main>

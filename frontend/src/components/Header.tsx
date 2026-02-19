@@ -42,7 +42,7 @@ export function Header({ showBackButton, backTo, children }: HeaderProps) {
                 <Cpu className="h-4 w-4" />
               </div>
               <span className="font-semibold text-foreground hidden sm:inline">
-                AudioCodes AI Hub
+                AudioCodes AI Marketplace
               </span>
             </Link>
           </div>

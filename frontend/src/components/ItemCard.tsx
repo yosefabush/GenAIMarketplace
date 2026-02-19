@@ -38,7 +38,7 @@ const fallbackTypeColors: Record<string, string> = {
   prompt: colorClasses.green,
   mcp: colorClasses.purple,
   workflow: colorClasses.orange,
-  docs: colorClasses.gray,
+  docs: colorClasses.teal,
   skill: colorClasses.indigo,
 }
 

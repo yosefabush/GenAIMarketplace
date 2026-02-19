@@ -118,7 +118,7 @@ def upgrade() -> None:
                     "slug": "doc",
                     "description": "Documentation and guides",
                     "icon": "FileText",
-                    "color": "white",
+                    "color": "gray",
                     "created_at": now,
                     "updated_at": now,
                 },

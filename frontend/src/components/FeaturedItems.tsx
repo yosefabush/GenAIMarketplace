@@ -11,21 +11,37 @@ export function FeaturedItems() {
   const { itemTypes } = useItemTypes()
 
   useEffect(() => {
+    const abortController = new AbortController()
+
     async function fetchFeaturedItems() {
       try {
         setLoading(true)
         setError(null)
         // Get most popular items (sorted by views) as featured
-        const response = await api.search({ sort: "views", limit: 5 })
-        setItems(response.data.data)
+        const response = await api.search({ sort: "views", limit: 5 }, abortController.signal)
+        if (!abortController.signal.aborted) {
+          setItems(response.data.data)
+        }
       } catch (err) {
-        console.error("Failed to fetch featured items:", err)
-        setError("Failed to load featured items")
+        // Ignore aborted requests
+        if (err instanceof Error && err.name === 'CanceledError') {
+          return
+        }
+        if (!abortController.signal.aborted) {
+          console.error("Failed to fetch featured items:", err)
+          setError("Failed to load featured items")
+        }
       } finally {
-        setLoading(false)
+        if (!abortController.signal.aborted) {
+          setLoading(false)
+        }
       }
     }
     fetchFeaturedItems()
+
+    return () => {
+      abortController.abort()
+    }
   }, [])
 
   if (loading) {

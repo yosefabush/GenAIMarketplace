@@ -49,7 +49,7 @@ describe('Search and View Item Flow', () => {
       render(<Search />, { routerProps: { initialEntries: ['/search'] } })
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText('Search for AI capabilities...')).toBeInTheDocument()
+        expect(screen.getByPlaceholderText('What do you need AI to do?')).toBeInTheDocument()
       })
     })
 
@@ -96,10 +96,10 @@ describe('Search and View Item Flow', () => {
       render(<Search />, { routerProps: { initialEntries: ['/search'] } })
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText('Search for AI capabilities...')).toBeInTheDocument()
+        expect(screen.getByPlaceholderText('What do you need AI to do?')).toBeInTheDocument()
       })
 
-      const searchInput = screen.getByPlaceholderText('Search for AI capabilities...')
+      const searchInput = screen.getByPlaceholderText('What do you need AI to do?')
       await user.type(searchInput, 'code review')
       await user.keyboard('{Enter}')
 

@@ -97,20 +97,42 @@ async def startup_event() -> None:
                 CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
                     title,
                     description,
-                    content
+                    content,
+                    content='items',
+                    content_rowid='id'
                 )
             """))
 
-            # Check if FTS table is empty and items table has data
-            fts_count = conn.execute(text("SELECT COUNT(*) FROM items_fts")).scalar()
-            items_count = conn.execute(text("SELECT COUNT(*) FROM items")).scalar()
+            # Recreate FTS sync triggers (may be lost after batch_alter_table operations)
+            conn.execute(text("DROP TRIGGER IF EXISTS items_fts_insert"))
+            conn.execute(text("DROP TRIGGER IF EXISTS items_fts_update"))
+            conn.execute(text("DROP TRIGGER IF EXISTS items_fts_delete"))
 
-            # Populate FTS table if it's empty but items table has data
-            if fts_count == 0 and items_count > 0:
-                conn.execute(text("""
+            conn.execute(text("""
+                CREATE TRIGGER items_fts_insert AFTER INSERT ON items BEGIN
                     INSERT INTO items_fts(rowid, title, description, content)
-                    SELECT id, title, description, content FROM items
-                """))
+                    VALUES (NEW.id, NEW.title, NEW.description, NEW.content);
+                END
+            """))
+            conn.execute(text("""
+                CREATE TRIGGER items_fts_update AFTER UPDATE ON items BEGIN
+                    INSERT INTO items_fts(items_fts, rowid, title, description, content)
+                    VALUES ('delete', OLD.id, OLD.title, OLD.description, OLD.content);
+                    INSERT INTO items_fts(rowid, title, description, content)
+                    VALUES (NEW.id, NEW.title, NEW.description, NEW.content);
+                END
+            """))
+            conn.execute(text("""
+                CREATE TRIGGER items_fts_delete AFTER DELETE ON items BEGIN
+                    INSERT INTO items_fts(items_fts, rowid, title, description, content)
+                    VALUES ('delete', OLD.id, OLD.title, OLD.description, OLD.content);
+                END
+            """))
+
+            # Always rebuild FTS index to ensure it's in sync
+            items_count = conn.execute(text("SELECT COUNT(*) FROM items")).scalar()
+            if items_count and items_count > 0:
+                conn.execute(text("INSERT INTO items_fts(items_fts) VALUES('rebuild')"))
 
             conn.commit()
 

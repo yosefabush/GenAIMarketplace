@@ -31,7 +31,7 @@ def upgrade() -> None:
     op.execute("""
         INSERT INTO item_types (name, slug, description, icon, color, created_at, updated_at)
         SELECT 'Skill', 'skill', 'Reusable skills and capabilities', 'Zap', 'yellow',
-               CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+               datetime('now'), datetime('now')
         WHERE NOT EXISTS (SELECT 1 FROM item_types WHERE slug = 'skill')
     """)
 

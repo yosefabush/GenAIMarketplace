@@ -28,7 +28,7 @@ export default function AdminLogin() {
     try {
       await api.validateToken(token)
       login(token)
-      navigate('/admin/dashboard')
+      navigate('/admin/analytics')
     } catch (err) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status?: number } }

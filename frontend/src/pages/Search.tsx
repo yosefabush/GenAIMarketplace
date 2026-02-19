@@ -137,7 +137,7 @@ function SearchContent({
 
   // Perform search when component mounts (initial values come from props/URL)
   useEffect(() => {
-    let cancelled = false
+    const abortController = new AbortController()
 
     async function performSearch() {
       setSearchState((prev) => ({ ...prev, isLoading: true, error: null }))
@@ -168,8 +168,8 @@ function SearchContent({
           params.sort = initialParams.sort
         }
 
-        const response = await api.search(params)
-        if (!cancelled) {
+        const response = await api.search(params, abortController.signal)
+        if (!abortController.signal.aborted) {
           setSearchState({
             items: response.data.data,
             total: response.data.total,
@@ -178,8 +178,12 @@ function SearchContent({
             error: null,
           })
         }
-      } catch {
-        if (!cancelled) {
+      } catch (err) {
+        // Ignore aborted requests
+        if (err instanceof Error && err.name === 'CanceledError') {
+          return
+        }
+        if (!abortController.signal.aborted) {
           setSearchState((prev) => ({
             ...prev,
             isLoading: false,
@@ -192,7 +196,7 @@ function SearchContent({
     performSearch()
 
     return () => {
-      cancelled = true
+      abortController.abort()
     }
   }, [initialParams])
 

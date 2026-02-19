@@ -1,8 +1,11 @@
 """Full-text search service supporting SQLite FTS5 and PostgreSQL."""
 
+import logging
 from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from app.core.config import settings
 
@@ -139,7 +142,7 @@ class SearchService:
             escaped = word.replace('"', '""')
             escaped_words.append(f'"{escaped}"')
 
-        return " ".join(escaped_words)
+        return " OR ".join(escaped_words)
 
     @staticmethod
     def _prepare_query_postgres(query: str) -> Optional[str]:
@@ -164,7 +167,7 @@ class SearchService:
         if not escaped_words:
             return None
 
-        return " & ".join(escaped_words)
+        return " | ".join(escaped_words)
 
     @staticmethod
     def rebuild_index(db: Session) -> None:
@@ -180,8 +183,18 @@ class SearchService:
                 )
             """))
         else:
-            # SQLite: Rebuild FTS5 index
-            db.execute(text("DELETE FROM items_fts"))
+            # SQLite: Rebuild FTS5 index (drop and recreate to handle corruption)
+            try:
+                db.execute(text("DELETE FROM items_fts"))
+            except Exception:
+                logger.warning("FTS table corrupted, dropping and recreating")
+                db.rollback()
+                db.execute(text("DROP TABLE IF EXISTS items_fts"))
+                db.execute(text("""
+                    CREATE VIRTUAL TABLE items_fts USING fts5(
+                        title, description, content
+                    )
+                """))
             db.execute(text("""
                 INSERT INTO items_fts(rowid, title, description, content)
                 SELECT id, title, description, content FROM items
@@ -197,17 +210,29 @@ class SearchService:
             pass
         else:
             # SQLite: Manual FTS5 update
-            db.execute(
-                text("DELETE FROM items_fts WHERE rowid = :id"),
-                {"id": item_id}
-            )
-            db.execute(
-                text("""
-                    INSERT INTO items_fts(rowid, title, description, content)
-                    VALUES (:id, :title, :description, :content)
-                """),
-                {"id": item_id, "title": title, "description": description, "content": content}
-            )
+            try:
+                db.execute(
+                    text("DELETE FROM items_fts WHERE rowid = :id"),
+                    {"id": item_id}
+                )
+                db.execute(
+                    text("""
+                        INSERT INTO items_fts(rowid, title, description, content)
+                        VALUES (:id, :title, :description, :content)
+                    """),
+                    {"id": item_id, "title": title, "description": description, "content": content}
+                )
+            except Exception:
+                logger.warning(
+                    "FTS index update failed for item %d, attempting rebuild", item_id
+                )
+                db.rollback()
+                try:
+                    SearchService.rebuild_index(db)
+                    db.commit()
+                except Exception:
+                    logger.error("FTS index rebuild failed. Search may be degraded.")
+                    db.rollback()
 
     @staticmethod
     def remove_from_index(db: Session, item_id: int) -> None:
