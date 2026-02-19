@@ -6,6 +6,7 @@ import ItemDetail from "./pages/ItemDetail"
 import RecommendationForm from "./pages/RecommendationForm"
 import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute"
+import PageTransitionLayout from "./components/PageTransitionLayout"
 
 // Lazy load admin routes for code splitting
 const AdminLogin = lazy(() => import("./pages/admin/Login"))
@@ -31,111 +32,116 @@ function PageLoader() {
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/search",
-    element: <Search />,
-  },
-  {
-    path: "/items/:id",
-    element: <ItemDetail />,
-  },
-  {
-    path: "/recommend",
-    element: <RecommendationForm />,
-  },
-  {
-    path: "/admin/login",
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <AdminLogin />
-      </Suspense>
-    ),
-  },
-  {
-    path: "/admin/dashboard",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminDashboard />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/editor",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminEditor />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/editor/:id",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminEditor />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/categories",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminCategories />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/tags",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminTags />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/item-types",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminItemTypes />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/analytics",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminAnalytics />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/recommendations",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<PageLoader />}>
-          <AdminRecommendations />
-        </Suspense>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "*",
-    element: <NotFound />,
+    element: <PageTransitionLayout />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/search",
+        element: <Search />,
+      },
+      {
+        path: "/items/:id",
+        element: <ItemDetail />,
+      },
+      {
+        path: "/recommend",
+        element: <RecommendationForm />,
+      },
+      {
+        path: "/admin/login",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AdminLogin />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/admin/dashboard",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/editor",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminEditor />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/editor/:id",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminEditor />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/categories",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminCategories />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/tags",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminTags />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/item-types",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminItemTypes />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/analytics",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminAnalytics />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/recommendations",
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdminRecommendations />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
+    ],
   },
 ])

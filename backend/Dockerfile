@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
 # Runtime stage
-FROM python:3.11-slim as runtime
+FROM python:3.11-slim AS runtime
 
 # Install PostgreSQL client library for runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -40,9 +40,8 @@ RUN mkdir -p /app/data && chown -R appuser:appgroup /app/data
 # Switch to non-root user
 USER appuser
 
-# Environment variables with defaults
+# Environment variables with defaults (sensitive values should be passed at runtime via env_file or -e)
 ENV DATABASE_URL=sqlite:///./data/marketplace.db
-ENV ADMIN_TOKEN=changeme
 ENV PORT=8000
 
 # Expose the port

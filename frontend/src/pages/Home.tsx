@@ -6,7 +6,7 @@ import { RecentAdditions } from "@/components/RecentAdditions"
 import { FeaturedItems } from "@/components/FeaturedItems"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { GlobalKeyboardHandler } from "@/components/GlobalKeyboardHandler"
-import { Infinity, Cpu, Lightbulb } from "lucide-react"
+import { Infinity, Lightbulb } from "lucide-react"
 
 export default function Home() {
   const navigate = useNavigate()
