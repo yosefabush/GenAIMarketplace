@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TagInput } from '@/components/TagInput'
+import { ImageUpload } from '@/components/ImageUpload'
 import { MarkdownEditor } from '@/components/MarkdownEditor'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { clearMarkdownDraft } from '@/lib/markdown-draft'
@@ -28,6 +29,7 @@ interface FormData {
   type: string
   category_id: number | null
   tag_ids: number[]
+  image_url: string | null
 }
 
 interface FormErrors {
@@ -64,6 +66,7 @@ export default function AdminEditor() {
     type: '',
     category_id: null,
     tag_ids: [],
+    image_url: null,
   })
   const [errors, setErrors] = useState<FormErrors>({})
 
@@ -90,10 +93,11 @@ export default function AdminEditor() {
           setFormData({
             title: item.title,
             description: item.description,
-            content: item.content,
+            content: item.content ?? '',
             type: item.type,
             category_id: item.category_id,
             tag_ids: item.tags.map((tag) => tag.id),
+            image_url: item.image_url ?? null,
           })
         }
       } catch (err) {
@@ -187,10 +191,11 @@ export default function AdminEditor() {
       const payload = {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        content: formData.content,
+        content: formData.content || undefined,
         type: formData.type,
         category_id: formData.category_id ?? undefined,
         tag_ids: formData.tag_ids,
+        image_url: formData.image_url,
       }
 
       if (isEditing && itemId !== null) {
@@ -364,6 +369,12 @@ export default function AdminEditor() {
           <TagInput
             selectedTagIds={formData.tag_ids}
             onTagsChange={(tagIds) => updateField('tag_ids', tagIds)}
+          />
+
+          {/* Image Upload */}
+          <ImageUpload
+            value={formData.image_url}
+            onChange={(url) => updateField('image_url', url)}
           />
 
           {/* Content - Markdown editor with split-pane preview */}

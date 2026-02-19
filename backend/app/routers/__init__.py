@@ -7,6 +7,7 @@ from app.routers.auth import router as auth_router
 from app.routers.analytics import router as analytics_router
 from app.routers.recommendations import router as recommendations_router
 from app.routers.seed import router as seed_router
+from app.routers.upload import router as upload_router
 
 __all__ = [
     "items_router",
@@ -18,4 +19,5 @@ __all__ = [
     "analytics_router",
     "recommendations_router",
     "seed_router",
+    "upload_router",
 ]

@@ -4,6 +4,14 @@ import { ArrowLeft, Eye, Calendar, Tag, Folder, Clock } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import type { Components } from "react-markdown"
 import { api, type Item, type ItemType } from "@/lib/api"
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+
+function getFullImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  return `${API_BASE_URL}${url}`
+}
 import { cn } from "@/lib/utils"
 import { CodeBlock, InlineCode } from "@/components/CodeBlock"
 import { RelatedItems } from "@/components/RelatedItems"
@@ -344,14 +352,27 @@ function ItemDetailContent({ itemId }: ItemDetailContentProps) {
             )}
           </header>
 
-          {/* Markdown Content */}
-          <div className="p-6">
-            <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
-              <ReactMarkdown components={markdownComponents}>
-                {item.content}
-              </ReactMarkdown>
+          {/* Item Image */}
+          {getFullImageUrl(item.image_url) && (
+            <div className="border-b border-border">
+              <img
+                src={getFullImageUrl(item.image_url)!}
+                alt={item.title}
+                className="w-full max-h-96 object-cover"
+              />
             </div>
-          </div>
+          )}
+
+          {/* Markdown Content */}
+          {item.content && (
+            <div className="p-6">
+              <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-primary prose-pre:p-0 prose-pre:bg-transparent prose-pre:border-0">
+                <ReactMarkdown components={markdownComponents}>
+                  {item.content}
+                </ReactMarkdown>
+              </div>
+            </div>
+          )}
         </article>
 
         {/* Related Items Section */}

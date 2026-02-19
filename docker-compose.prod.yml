@@ -1,29 +1,37 @@
 services:
   api:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.production
     ports:
-      - "${PORT:-8000}:${PORT:-8000}"
-    environment:
-      - DATABASE_URL=sqlite:///./data/marketplace.db
-      - ADMIN_TOKEN=${ADMIN_TOKEN:-changeme}
-      - PORT=${PORT:-8000}
+      - "8000:8000"
     volumes:
-      - marketplace_data:/app/data
       - marketplace_uploads:/app/uploads
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ""
+    ports:
+      - "80:80"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    depends_on:
+      api:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  marketplace_data:
-    driver: local
   marketplace_uploads:
     driver: local

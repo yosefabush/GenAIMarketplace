@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose:*)",
+      "Bash(docker builder prune:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(sc query:*)",
+      "Bash(net stop:*)",
+      "Bash(wmic:*)",
+      "Bash(docker compose:*)"
+    ]
+  }
+}

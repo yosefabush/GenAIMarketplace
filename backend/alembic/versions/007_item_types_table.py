@@ -125,6 +125,10 @@ def upgrade() -> None:
             ],
         )
 
+        # Reset PostgreSQL sequence after explicit ID inserts
+        if not is_sqlite(connection):
+            op.execute("SELECT setval('item_types_id_seq', (SELECT MAX(id) FROM item_types))")
+
     # Check if type_id column already exists
     existing_columns = [col['name'] for col in inspector.get_columns('items')]
     if 'type_id' not in existing_columns:

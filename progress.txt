@@ -1115,3 +1115,57 @@
   - Approval flow can create items directly from recommendation data with admin-provided content
   - MarkdownEditor component can be reused in dialogs for approval content entry
 
+---
+
+## 2026-02-17 - US-037: Add image field to Item
+
+- What was implemented:
+  - Database: Alembic migration 008 adds nullable image_url column (String 500) to items table
+  - Item model updated with image_url field (Mapped[Optional[str]])
+  - ItemCreate, ItemUpdate schemas include optional image_url field
+  - ItemResponse and ItemListResponse schemas return image_url
+  - POST /api/upload/image endpoint (admin only) for multipart file upload
+  - Upload validates file type (JPEG, PNG, WebP, GIF) and max size (5MB)
+  - Uploaded images stored in backend/uploads/images/ with UUID filenames
+  - Static file serving configured via FastAPI StaticFiles mount at /uploads/
+  - ImageUpload component with drag-and-drop, file picker, preview, and remove button
+  - Admin Editor form includes ImageUpload between Tags and Content sections
+  - ItemCard displays item image above card content when present
+  - ItemDetail page displays item image between header and markdown content when present
+  - Docker volume mounts added for uploads persistence in both docker-compose files
+  - Updated _add_like_count helpers in items and search routers to include image_url
+  - Test mocks updated with image_url field for all Item objects
+
+- Files changed:
+  - backend/alembic/versions/008_add_image_url_to_items.py - New migration
+  - backend/app/models/item.py - Added image_url field
+  - backend/app/schemas/item.py - Added image_url to create/update/response schemas
+  - backend/app/routers/upload.py - New upload router with file validation
+  - backend/app/routers/__init__.py - Export upload_router
+  - backend/app/routers/items.py - image_url in _add_like_count helpers, create/update
+  - backend/app/routers/search.py - image_url in _add_like_count_list helper
+  - backend/app/main.py - Register upload_router, mount StaticFiles for /uploads/
+  - backend/docker-compose.yml - Added marketplace_uploads volume
+  - backend/docker-compose.prod.yml - Added marketplace_uploads volume
+  - frontend/src/lib/api.ts - Added image_url to Item interface, uploadImage API method
+  - frontend/src/components/ImageUpload.tsx - New image upload component
+  - frontend/src/components/ItemCard.tsx - Display item image
+  - frontend/src/pages/ItemDetail.tsx - Display item image
+  - frontend/src/pages/admin/Editor.tsx - Integrated ImageUpload component
+  - frontend/src/test/mocks.ts - Added image_url to mock items
+  - prd.json - Added US-037, marked as passes: true
+
+- Test results:
+  - Backend: 89/90 tests pass (1 pre-existing failure in test_list_items_invalid_limit)
+  - Frontend: All 54 tests pass
+  - TypeScript typecheck: passes
+  - mypy: 4 pre-existing errors (no new errors introduced)
+
+- **Learnings for future iterations:**
+  - FastAPI StaticFiles mount requires the directory to exist; use os.makedirs with exist_ok=True
+  - For file uploads, use UploadFile with File(...) dependency and read content before size validation
+  - Use uuid.uuid4().hex for unique filenames to avoid conflicts
+  - Image URL should be stored as a relative path (/uploads/images/...) for portability
+  - Frontend needs API_BASE_URL prefix for resolving relative image URLs from the backend
+  - When adding a new field to ORM model, update all dict-conversion helpers that manually build response dicts
+

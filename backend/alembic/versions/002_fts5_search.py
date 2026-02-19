@@ -4,6 +4,7 @@ Revision ID: 002
 Revises: 001
 Create Date: 2026-01-19
 
+This migration only runs on SQLite. PostgreSQL FTS is handled by migration 006.
 """
 from typing import Sequence, Union
 
@@ -18,6 +19,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    connection = op.get_bind()
+    if connection.dialect.name != "sqlite":
+        return
+
     # Create FTS5 virtual table for full-text search
     # Index title, description, and content fields
     # Use content="" for external content table (contentless FTS5)
@@ -66,6 +71,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    connection = op.get_bind()
+    if connection.dialect.name != "sqlite":
+        return
+
     # Drop triggers first
     op.execute("DROP TRIGGER IF EXISTS items_fts_delete")
     op.execute("DROP TRIGGER IF EXISTS items_fts_update")
